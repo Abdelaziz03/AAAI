@@ -2,6 +2,8 @@
 
 ### For Abdelaziz Guelfane
 
+> **Live status:** see [gsoc/STATUS.md](./gsoc/STATUS.md) for what's actually been decided, verified, and drafted so far, versus what's still pending on your side.
+
 ## TL;DR
 
 - You qualify for GSoC 2027 via the "student" route (enrolled PhD student), your prior industry jobs do not disqualify you, and the single best-fit organization is **DBpedia** — its live projects are exactly your thesis toolkit (entity resolution, entity linking, relation extraction over a knowledge graph) and heavily multilingual/transformer-based, and there is currently no active Arabic DBpedia chapter, giving you a rare, truthful differentiator with your native Arabic + AraBERT NER experience.
@@ -21,7 +23,7 @@ This is a scaffold and research dossier, **not** a finished application. The off
 - [ ] Confirm eligibility: 18+, never accepted as a GSoC contributor before, "student or open-source beginner." You qualify on the student criterion.
 - [ ] Work-eligibility check (France): GSoC rules require you to be eligible to work in your country of residence for the program's duration. Verify your own status — do not rely on this document.
 - [ ] Contract check (critical): Read your GE HealthCare employment/research contract for outside-work/moonlighting, stipend-acceptance, and IP/assignment clauses. Get written clearance if needed.
-- [ ] Pick 1 primary + 1 backup org from the shortlist (recommended: DBpedia + ML4SCI).
+- [x] Pick 1 primary + 1 backup org from the shortlist — **decided: DBpedia primary, ML4SCI backup** (see [gsoc/STATUS.md](./gsoc/STATUS.md)).
 - [ ] Create/confirm a public GitHub profile; complete the README; pin relevant repos (e.g., `erc_backbone` if public).
 - [ ] Join each org's community channels; read their CONTRIBUTING and AI policies.
 
