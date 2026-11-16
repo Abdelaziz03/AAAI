@@ -96,19 +96,13 @@ DELAI_CRITIQUE_SEM = 26
 
 
 def risque_supply(reference: str, type_p: str = "") -> dict:
+    """Risque supply = délai d'approvisionnement seul (choix du projet). Score = délai / DELAI_CRITIQUE_SEM, plafonné à 1.
+    Source unique et fin de vie restent dans la table à titre d'information, hors score."""
     s = SUPPLY.get(str(reference), {})
-    sous = {}
-    if s.get("Délai (semaines)") is not None:
-        sous["délai"] = min(s["Délai (semaines)"] / DELAI_CRITIQUE_SEM, 1.0)
-    if s.get("Source unique") is not None:
-        sous["source unique"] = 1.0 if s["Source unique"] else 0.2
-    if s.get("Fin de vie (EOL/LTB)") is not None:
-        sous["fin de vie"] = 1.0 if s["Fin de vie (EOL/LTB)"] else 0.0
-    # Signal faible connu sans donnée achats : semi-conducteurs de puissance = tension de marché 2021-2023.
-    a_priori = 0.6 if type_p in ("IGBT / module de puissance", "Carte électronique") else np.nan
-    score = float(np.mean(list(sous.values()))) if sous else np.nan
-    return {"Score risque supply (0-1)": score, "Couverture supply": f"{len(sous)}/3",
-            "A priori supply (type)": a_priori, "Source supply": s.get("Source", "aucune")}
+    d = s.get("Délai (semaines)")
+    return {"Délai (semaines)": d, "Score risque supply (0-1)": min(d / DELAI_CRITIQUE_SEM, 1.0) if d is not None else np.nan,
+            "A priori supply (type)": 0.6 if type_p in ("IGBT / module de puissance", "Carte électronique") else np.nan,
+            "Source supply": s.get("Source", "aucune")}
 
 
 # ---------------------------------------------------------------------------

@@ -24,13 +24,12 @@ None = inconnu : le type de FRU concerné est signalé « incomplet » et exclu,
 """
 from __future__ import annotations
 
-from itertools import combinations
+from itertools import product
 
 import numpy as np
 import pandas as pd
 
 RNG = np.random.default_rng(2026)
-MAX_PIECES_ENUM = 12                     # au-delà, seules les 12 pièces de plus forte valeur sont combinées
 
 
 # ---------------------------------------------------------------------------
@@ -79,33 +78,103 @@ def _milieu(x):
 # ---------------------------------------------------------------------------
 # 3. Options par type de FRU
 # ---------------------------------------------------------------------------
-CHAMPS_FRU = ["rebut_an", "ouverture_min"]
-CHAMPS_PIECE = ["n_par_fru", "extraction_min", "test_min", "p_reutilisable", "valeur_eur"]
+# Trois options pour chaque pièce de chaque FRU rebutée, valeurs nettes PAR FRU, comparées à l'option 3 :
+#   1 « réemploi »  : démontage soigné + test → pièce réutilisée ; un exemplaire qui échoue au test part au recyclage
+#                     si le recyclage de cette pièce est renseigné, sinon à la benne (sans coût).
+#                     Valeur = n × [p_réut × (valeur + délai évité) + (1 − p_réut) × kg × prix − transport]
+#                              − n × (extraction + test) × taux horaire
+#   2 « recyclage » : tri de la pièce dans le bon flux → vendue au kg.  Valeur = n × kg × prix − n × tri × taux horaire
+#   3 « jeté »      : la pièce reste dans la FRU, qui part en benne sans coût. Valeur 0 (référence).
+# Ouverture de la FRU, payée UNE fois : soignée (ouverture_min) dès qu'une pièce part en réemploi, sinon
+# sommaire (ouverture_tri_min, à défaut ouverture_min) dès qu'une pièce part au recyclage. Option 3 partout = pas d'ouverture.
+# Délai d'approvisionnement : seul critère supply retenu. Chaque pièce réemployée évite delai_semaines d'attente,
+# valorisées à valeur_semaine_eur (= coût d'une semaine d'immobilisation × probabilité de rupture, à fixer).
+OPTIONS = ("réemploi", "recyclage", "jeté")
+CHAMPS_REEMPLOI = ["n_par_fru", "extraction_min", "test_min", "p_reutilisable", "valeur_eur"]
+CHAMPS_RECYCLAGE = ["n_par_fru", "poids_kg", "prix_recycleur_eur_kg", "tri_min"]
+MAX_PIECES_ENUM = 8                      # 3^8 = 6 561 combinaisons par type de FRU
+
+
+def _inconnu(v):
+    return v is None or (isinstance(v, float) and np.isnan(v))
+
+
+def options_disponibles(fru: dict) -> dict:
+    """Pour chaque pièce : options calculables et entrées manquantes des autres."""
+    out = {}
+    ouv_tri = fru.get("ouverture_tri_min", fru.get("ouverture_min"))
+    for p, d in fru.get("pieces", {}).items():
+        m_re = [c for c in CHAMPS_REEMPLOI if _inconnu(d.get(c))] + (["ouverture_min"] if _inconnu(fru.get("ouverture_min")) else [])
+        m_rc = [c for c in CHAMPS_RECYCLAGE if _inconnu(d.get(c))] + (["ouverture_tri_min"] if _inconnu(ouv_tri) else [])
+        out[p] = {"réemploi": m_re, "recyclage": m_rc}
+    return out
 
 
 def manques(fru: dict, taux_defaut) -> list[str]:
-    m = [c for c in CHAMPS_FRU if fru.get(c) is None]
-    if fru.get("taux_horaire_eur", taux_defaut) is None:
+    m = [c for c in ("rebut_an",) if _inconnu(fru.get(c))]
+    if _inconnu(fru.get("taux_horaire_eur", taux_defaut)):
         m.append("taux_horaire_eur")
-    for p, d in fru.get("pieces", {}).items():
-        m += [f"{p}.{c}" for c in CHAMPS_PIECE if d.get(c) is None or (isinstance(d.get(c), float) and np.isnan(d[c]))]
+    dispo = options_disponibles(fru)
+    if not any(not v for o in dispo.values() for v in o.values()):
+        m.append("aucune option calculable : " + "; ".join(f"{p} réemploi[{', '.join(o['réemploi'])}] recyclage[{', '.join(o['recyclage'])}]"
+                                                      for p, o in dispo.items()))
     return m
 
 
-def options_fru(fru: dict, taux_defaut):
-    """Toutes les combinaisons de pièces : (pièces, heures par FRU, marge par FRU). L'option vide vaut 0."""
+def valeurs_options(fru: dict, taux_defaut) -> pd.DataFrame:
+    """Une ligne par pièce : valeur nette par FRU de chaque option, HORS ouverture (partagée, donnée à part)."""
     taux = fru.get("taux_horaire_eur", taux_defaut)
-    pieces = fru.get("pieces", {})
-    val = {p: d["n_par_fru"] * (d["p_reutilisable"] * d["valeur_eur"] - (d.get("transport_eur") or 0))
-           for p, d in pieces.items()}
-    noms = sorted(pieces, key=lambda p: -val[p])[:MAX_PIECES_ENUM]
-    opts = [((), 0.0, 0.0)]
-    for r in range(1, len(noms) + 1):
-        for S in combinations(noms, r):
-            minutes = fru["ouverture_min"] + sum(pieces[p]["n_par_fru"] * (pieces[p]["extraction_min"] + pieces[p]["test_min"]) for p in S)
-            h = minutes / 60
-            opts.append((S, h, sum(val[p] for p in S) - h * taux))
-    return opts
+    dispo, lignes = options_disponibles(fru), []
+    for p, d in fru.get("pieces", {}).items():
+        n = d.get("n_par_fru")
+        kgv = None if dispo[p]["recyclage"] else d["poids_kg"] * d["prix_recycleur_eur_kg"]
+        if dispo[p]["réemploi"]:
+            v_re, h_re = np.nan, np.nan
+        else:
+            bonus = (d.get("delai_semaines") or 0) * (d.get("valeur_semaine_eur") or 0)
+            echec = kgv if kgv is not None else 0.0
+            h_re = n * (d["extraction_min"] + d["test_min"]) / 60
+            v_re = n * (d["p_reutilisable"] * (d["valeur_eur"] + bonus) + (1 - d["p_reutilisable"]) * echec
+                        - (d.get("transport_eur") or 0)) - h_re * taux
+        if dispo[p]["recyclage"]:
+            v_rc, h_rc = np.nan, np.nan
+        else:
+            h_rc = n * d["tri_min"] / 60
+            v_rc = n * kgv - h_rc * taux
+        lignes.append({"Pièce": p, "1 Réemploi (€/FRU)": v_re, "2 Recyclage (€/FRU)": v_rc, "3 Jeté (€/FRU)": 0.0,
+                       "Heures réemploi": h_re, "Heures recyclage": h_rc,
+                       "Manque réemploi": ", ".join(dispo[p]["réemploi"]), "Manque recyclage": ", ".join(dispo[p]["recyclage"])})
+    t = pd.DataFrame(lignes)
+    if len(t):
+        t["Meilleure option seule"] = t[["1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)", "3 Jeté (€/FRU)"]].idxmax(axis=1).str[2:].str.replace(" (€/FRU)", "", regex=False)
+    t.attrs["Ouverture soignée (€/FRU)"] = (fru.get("ouverture_min") or np.nan) / 60 * taux if not _inconnu(taux) else np.nan
+    t.attrs["Ouverture sommaire (€/FRU)"] = (fru.get("ouverture_tri_min", fru.get("ouverture_min")) or np.nan) / 60 * taux if not _inconnu(taux) else np.nan
+    return t
+
+
+def options_fru(fru: dict, taux_defaut):
+    """Toutes les affectations pièce → option. Renvoie (étiquettes, heures/FRU, marge/FRU) en tableaux numpy.
+    L'étiquette est le tuple des (pièce, option) hors « jeté » ; tuple vide = FRU jetée telle quelle."""
+    taux = fru.get("taux_horaire_eur", taux_defaut)
+    t = valeurs_options(fru, taux_defaut).set_index("Pièce")
+    t["meilleur"] = t[["1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)"]].max(axis=1)
+    noms = list(t.sort_values("meilleur", ascending=False).index[:MAX_PIECES_ENUM])
+    choix_p = [[o for o, col in (("réemploi", "1 Réemploi (€/FRU)"), ("recyclage", "2 Recyclage (€/FRU)")) if pd.notna(t.at[p, col])] + ["jeté"]
+               for p in noms]
+    ouv = (fru.get("ouverture_min") or 0) / 60
+    ouv_tri = (fru.get("ouverture_tri_min", fru.get("ouverture_min")) or 0) / 60
+    etiq, H, M = [], [], []
+    for combo in product(*choix_p):
+        h = m = 0.0
+        for p, o in zip(noms, combo):
+            if o == "réemploi":
+                h += t.at[p, "Heures réemploi"]; m += t.at[p, "1 Réemploi (€/FRU)"]
+            elif o == "recyclage":
+                h += t.at[p, "Heures recyclage"]; m += t.at[p, "2 Recyclage (€/FRU)"]
+        o_ = ouv if "réemploi" in combo else ouv_tri if "recyclage" in combo else 0.0
+        etiq.append(tuple((p, o) for p, o in zip(noms, combo) if o != "jeté"))
+        H.append(h + o_); M.append(m - o_ * taux)
+    return etiq, np.array(H), np.array(M)
 
 
 # ---------------------------------------------------------------------------
@@ -121,9 +190,9 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
 
     def choix(mu):
         c = {}
-        for f, os_ in opts.items():
-            S, h, m = max(os_, key=lambda o: o[2] - mu * o[1])
-            c[f] = (S, h, m) if m - mu * h > 1e-12 and S else ((), 0.0, 0.0)
+        for f, (E, H, M) in opts.items():
+            i = int(np.argmax(M - mu * H))
+            c[f] = (E[i], H[i], M[i]) if M[i] - mu * H[i] > 1e-12 and E[i] else ((), 0.0, 0.0)
         return c
 
     def heures(c):
@@ -171,8 +240,9 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
 
 
 def _ligne_res(f, S, n, h, m, d):
-    return {"Type de FRU": f, "Décision": "démonter" if S and n > 0 else "ne pas démonter",
-            "Pièces extraites": ", ".join(S), "FRU démontées / an": n, "FRU rebutées / an": d["rebut_an"],
+    return {"Type de FRU": f, "Décision": "traiter" if S and n > 0 else "jeter telle quelle",
+            "1 Réemploi": ", ".join(p for p, o in S if o == "réemploi"),
+            "2 Recyclage": ", ".join(p for p, o in S if o == "recyclage"), "FRU traitées / an": n, "FRU rebutées / an": d["rebut_an"],
             "Heures par FRU": h, "Marge par FRU (€)": m, "Marge par heure (€)": m / h if h else np.nan,
             "Heures / an": n * h, "Marge variable / an (€)": n * m, "Entrées manquantes": ""}
 
@@ -184,13 +254,13 @@ def _bilan(ligne, detail, mu, cap):
     calc = detail[detail["Décision"].ne("incomplet")] if len(detail) else detail
     marge = float(calc["Marge variable / an (€)"].sum()) if len(calc) else np.nan
     h = float(calc["Heures / an"].sum()) if len(calc) else np.nan
-    n = float(calc["FRU démontées / an"].sum()) if len(calc) else np.nan
+    n = float(calc["FRU traitées / an"].sum()) if len(calc) else np.nan
     moy = marge / n if n else np.nan
     excedent = marge - fix if fix is not None else np.nan
     return {"detail": detail, "resume": {
         "Marge variable / an (€)": marge, "Coûts fixes annualisés (€)": fixes, "Résultat / an (€)": marge - fixes,
         "Heures utilisées / an": h, "Capacité (h/an)": cap, "Taux d'occupation": h / cap if np.isfinite(cap) and cap else np.nan,
-        "FRU démontées / an": n, "Marge moyenne par FRU (€)": moy,
+        "FRU traitées / an": n, "Marge moyenne par FRU (€)": moy,
         "Seuil de rentabilité (FRU / an)": fixes / moy if moy and moy > 0 else np.nan,
         "Retour sur investissement (ans)": inv / excedent if inv is not None and excedent > 0 else np.nan,
         "Valeur d'une heure opérateur en plus (€ net)": mu if len(calc) else np.nan,
@@ -204,13 +274,13 @@ def monte_carlo_ligne(ligne: dict, frus: dict, n=500, rng=RNG) -> dict:
         r = optimiser_ligne(_tirer(ligne, rng), _tirer(frus, rng))
         res.append(r["resume"])
         d = r["detail"]
-        for f in d.loc[d["Décision"].eq("démonter"), "Type de FRU"].unique():
+        for f in d.loc[d["Décision"].eq("traiter"), "Type de FRU"].unique():
             choix[f] = choix.get(f, 0) + 1
     R = pd.DataFrame(res)
     x = R["Résultat / an (€)"].dropna()
     out = {"tirages": R, "P(ligne rentable)": float((x > 0).mean()) if len(x) else np.nan,
            "Résultat P5 / médiane / P95 (€)": tuple(np.quantile(x, [0.05, 0.5, 0.95]).round(0)) if len(x) else (np.nan,) * 3,
-           "Fréquence de démontage par type de FRU": {f: c / n for f, c in choix.items()}}
+           "Fréquence de traitement par type de FRU": {f: c / n for f, c in choix.items()}}
     return out
 
 

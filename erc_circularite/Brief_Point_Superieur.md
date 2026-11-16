@@ -36,7 +36,7 @@ Pour chaque pièce, cinq critères, **sans pondération imposée** :
 | Valeur en jeu | Pièces × MMICV | disponible |
 | Gisement | FRU rebutées contenant la pièce | disponible (nombre par FRU inconnu) |
 | **Risque matière** | Matières critiques / stratégiques UE (CRMA 2024/1252) et métaux précieux présents | codé en dur, présence seulement |
-| **Risque supply** | Délai, source unique, fin de vie (EOL/LTB) | table codée en dur, **à remplir avec les achats** ; a priori de type en attendant |
+| **Risque supply** | Délai d'approvisionnement | table codée en dur, **à remplir avec les achats** ; a priori de type en attendant |
 | **Fiabilité du réemploi** | Taux de défaillance précoce d'une pièce réparée ou récupérée ÷ celui d'une neuve | dès que l'on a le dénominateur (§4) |
 
 Sortie : un **front de Pareto** (les pièces qu'aucune autre ne bat sur tous les critères) = la liste courte à instruire. Puis, par pièce et par voie, une **valeur nette en probabilité** (moyenne, P5–P95, **probabilité d'être rentable**), qui intègre main-d'œuvre hors plan de charge, démontage, test, transport, devis et coût d'une défaillance terrain.
@@ -46,6 +46,8 @@ Exemple de lecture attendue : *« IGBT 1200 V : réemploi rentable dans 80 % des
 ## 3 bis. Raisonner en ligne de tri, pas pièce par pièce
 
 * **La consommation donne la probabilité de défaut.** Pièces consommées ÷ (FRU réparées × pièces par FRU) = probabilité qu'un exemplaire soit défectueux. Dans une FRU rebutée, le reste est potentiellement réutilisable. Deux corrections à calibrer par l'audit : remplacements préventifs (IGBT changés par paire) et état plus dégradé des FRU rebutées.
+* **Trois options pour chaque pièce de chaque FRU rebutée** : (1) démontage et réemploi, (2) tri et recyclage, (3) jeter sans coût, qui est la situation actuelle et sert de référence. Une pièce qui échoue au test part au recyclage. L'ouverture de la FRU est payée une fois : soignée si une pièce part en réemploi, sommaire si on ne fait que trier.
+* **Risque supply = délai d'approvisionnement seul** : chaque pièce réemployée évite N semaines d'attente, ajoutées à sa valeur de réemploi.
 * **Coûts fixes** : installation de la ligne (postes, outillage ESD, banc de test) amortie + coûts annuels (place, encadrement).
 * **Capacité** : heures opérateur disponibles hors plan de charge → nombre de FRU traitables par an.
 * **Coûts variables par type de FRU** : temps d'ouverture (payé une fois par FRU) + extraction et test de chaque pièce retenue, au taux horaire du type de FRU.
