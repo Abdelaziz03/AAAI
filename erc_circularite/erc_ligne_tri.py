@@ -84,7 +84,10 @@ def _milieu(x):
 #                     Valeur = n × [p_réut × (valeur + délai évité) + (1 − p_réut) × kg × prix − transport]
 #                              − n × (extraction + test) × taux horaire
 #   2 « recyclage » : tri de la pièce dans le bon flux → vendue au kg.  Valeur = n × kg × prix − n × tri × taux horaire
-#   3 « jeté »      : la pièce reste dans la FRU, qui part en benne sans coût. Valeur 0 (référence).
+#   3 « jeté »      : la pièce reste dans la FRU, qui part chez le recycleur actuel. Valeur 0 (référence).
+# Référence = situation actuelle : la FRU entière part dans la benne DEEE du recycleur actuel, au coût de traitement
+# ligne["cout_traitement_eur_kg"] (0 si le contrat est gratuit, négatif s'il paie). Chaque kg sorti de cette benne
+# par les options 1 et 2 évite ce coût : il est ajouté à leur valeur (« traitement évité »).
 # Ouverture de la FRU, payée UNE fois : soignée (ouverture_min) dès qu'une pièce part en réemploi, sinon
 # sommaire (ouverture_tri_min, à défaut ouverture_min) dès qu'une pièce part au recyclage. Option 3 partout = pas d'ouverture.
 # Délai d'approvisionnement : seul critère supply retenu. Chaque pièce réemployée évite delai_semaines d'attente,
@@ -124,25 +127,30 @@ def manques(fru: dict, taux_defaut) -> list[str]:
 def valeurs_options(fru: dict, taux_defaut) -> pd.DataFrame:
     """Une ligne par pièce : valeur nette par FRU de chaque option, HORS ouverture (partagée, donnée à part)."""
     taux = fru.get("taux_horaire_eur", taux_defaut)
+    c_trait = fru.get("_c_trait") or 0.0
     dispo, lignes = options_disponibles(fru), []
     for p, d in fru.get("pieces", {}).items():
         n = d.get("n_par_fru")
+        kg = d.get("poids_kg") if not _inconnu(d.get("poids_kg")) else 0.0     # poids inconnu : aucun traitement évité compté
         kgv = None if dispo[p]["recyclage"] else d["poids_kg"] * d["prix_recycleur_eur_kg"]
+        k_re = k_rc = 0.0
         if dispo[p]["réemploi"]:
             v_re, h_re = np.nan, np.nan
         else:
+            k_re = n * kg * (d["p_reutilisable"] + (1 - d["p_reutilisable"]) * (kgv is not None))
             bonus = (d.get("delai_semaines") or 0) * (d.get("valeur_semaine_eur") or 0)
             echec = kgv if kgv is not None else 0.0
             h_re = n * (d["extraction_min"] + d["test_min"]) / 60
             v_re = n * (d["p_reutilisable"] * (d["valeur_eur"] + bonus) + (1 - d["p_reutilisable"]) * echec
-                        - (d.get("transport_eur") or 0)) - h_re * taux
+                        - (d.get("transport_eur") or 0)) - h_re * taux + k_re * c_trait
         if dispo[p]["recyclage"]:
             v_rc, h_rc = np.nan, np.nan
         else:
             h_rc = n * d["tri_min"] / 60
-            v_rc = n * kgv - h_rc * taux
+            k_rc = n * kg
+            v_rc = n * kgv - h_rc * taux + k_rc * c_trait
         lignes.append({"Pièce": p, "1 Réemploi (€/FRU)": v_re, "2 Recyclage (€/FRU)": v_rc, "3 Jeté (€/FRU)": 0.0,
-                       "Heures réemploi": h_re, "Heures recyclage": h_rc,
+                       "Heures réemploi": h_re, "Heures recyclage": h_rc, "Kg détournés réemploi": k_re, "Kg détournés recyclage": k_rc,
                        "Manque réemploi": ", ".join(dispo[p]["réemploi"]), "Manque recyclage": ", ".join(dispo[p]["recyclage"])})
     t = pd.DataFrame(lignes)
     if len(t):
@@ -163,18 +171,18 @@ def options_fru(fru: dict, taux_defaut):
                for p in noms]
     ouv = (fru.get("ouverture_min") or 0) / 60
     ouv_tri = (fru.get("ouverture_tri_min", fru.get("ouverture_min")) or 0) / 60
-    etiq, H, M = [], [], []
+    etiq, H, M, K = [], [], [], {}
     for combo in product(*choix_p):
-        h = m = 0.0
+        h = m = k = 0.0
         for p, o in zip(noms, combo):
             if o == "réemploi":
-                h += t.at[p, "Heures réemploi"]; m += t.at[p, "1 Réemploi (€/FRU)"]
+                h += t.at[p, "Heures réemploi"]; m += t.at[p, "1 Réemploi (€/FRU)"]; k += t.at[p, "Kg détournés réemploi"]
             elif o == "recyclage":
-                h += t.at[p, "Heures recyclage"]; m += t.at[p, "2 Recyclage (€/FRU)"]
+                h += t.at[p, "Heures recyclage"]; m += t.at[p, "2 Recyclage (€/FRU)"]; k += t.at[p, "Kg détournés recyclage"]
         o_ = ouv if "réemploi" in combo else ouv_tri if "recyclage" in combo else 0.0
         etiq.append(tuple((p, o) for p, o in zip(noms, combo) if o != "jeté"))
-        H.append(h + o_); M.append(m - o_ * taux)
-    return etiq, np.array(H), np.array(M)
+        H.append(h + o_); M.append(m - o_ * taux); K[etiq[-1]] = k
+    return etiq, np.array(H), np.array(M), K
 
 
 # ---------------------------------------------------------------------------
@@ -184,8 +192,9 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
     """Choix des FRU à démonter et des pièces à extraire, sous la capacité en heures. Valeurs ponctuelles."""
     taux = ligne.get("taux_horaire_eur")
     incomplets = {f: manques(d, taux) for f, d in frus.items()}
-    ok = {f: d for f, d in frus.items() if not incomplets[f]}
-    opts = {f: options_fru(d, taux) for f, d in ok.items()}
+    ok = {f: dict(d, _c_trait=ligne.get("cout_traitement_eur_kg")) for f, d in frus.items() if not incomplets[f]}
+    opts = {f: options_fru(d, taux)[:3] for f, d in ok.items()}
+    kmap = {f: options_fru(d, taux)[3] for f, d in ok.items()}
     cap = ligne.get("heures_operateur_an") or np.inf
 
     def choix(mu):
@@ -227,28 +236,33 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
             x = v[1]
             S_lo, h_lo, m_lo = c_lo[f]
             n_hi = ok[f]["rebut_an"] - x if S else 0.0
-            lignes.append(_ligne_res(f, S_lo, x, h_lo, m_lo, ok[f]))
+            lignes.append(_ligne_res(f, S_lo, x, h_lo, m_lo, ok[f], kmap[f].get(S_lo, 0.0)))
             if n_hi > 0:
-                lignes.append(_ligne_res(f, S, n_hi, h, m, ok[f]))
+                lignes.append(_ligne_res(f, S, n_hi, h, m, ok[f], kmap[f].get(S, 0.0)))
         else:
-            lignes.append(_ligne_res(f, S, v, h, m, ok[f]))
+            lignes.append(_ligne_res(f, S, v, h, m, ok[f], kmap[f].get(S, 0.0)))
     detail = pd.DataFrame(lignes)
     for f, m in incomplets.items():
         if m:
             detail = pd.concat([detail, pd.DataFrame([{"Type de FRU": f, "Décision": "incomplet", "Entrées manquantes": ", ".join(m)}])])
-    return _bilan(ligne, detail, mu_hi, cap)
+    return _bilan(ligne, detail, mu_hi, cap, frus)
 
 
-def _ligne_res(f, S, n, h, m, d):
+def _ligne_res(f, S, n, h, m, d, k=0.0):
     return {"Type de FRU": f, "Décision": "traiter" if S and n > 0 else "jeter telle quelle",
             "1 Réemploi": ", ".join(p for p, o in S if o == "réemploi"),
             "2 Recyclage": ", ".join(p for p, o in S if o == "recyclage"), "FRU traitées / an": n, "FRU rebutées / an": d["rebut_an"],
             "Heures par FRU": h, "Marge par FRU (€)": m, "Marge par heure (€)": m / h if h else np.nan,
-            "Heures / an": n * h, "Marge variable / an (€)": n * m, "Entrées manquantes": ""}
+            "Heures / an": n * h, "Marge variable / an (€)": n * m, "Kg détournés / an": n * k, "Entrées manquantes": ""}
 
 
-def _bilan(ligne, detail, mu, cap):
+def _bilan(ligne, detail, mu, cap, frus=None):
     """Résultat de la ligne. Coût fixe ou marge inconnus → NaN (jamais 0)."""
+    c = ligne.get("cout_traitement_eur_kg")
+    masses = [d["rebut_an"] * d["poids_fru_kg"] for d in (frus or {}).values()
+              if not _inconnu(d.get("rebut_an")) and not _inconnu(d.get("poids_fru_kg"))]
+    masse = float(sum(masses)) if masses and len(masses) == len(frus) else np.nan
+    cout_actuel = masse * c if c is not None else np.nan
     inv, fix = ligne.get("cout_installation_eur"), ligne.get("couts_fixes_annuels_eur")
     fixes = inv / max(ligne.get("amortissement_ans") or 1, 1) + fix if inv is not None and fix is not None else np.nan
     calc = detail[detail["Décision"].ne("incomplet")] if len(detail) else detail
@@ -264,7 +278,31 @@ def _bilan(ligne, detail, mu, cap):
         "Seuil de rentabilité (FRU / an)": fixes / moy if moy and moy > 0 else np.nan,
         "Retour sur investissement (ans)": inv / excedent if inv is not None and excedent > 0 else np.nan,
         "Valeur d'une heure opérateur en plus (€ net)": mu if len(calc) else np.nan,
-        "Types de FRU incomplets": int(detail["Décision"].eq("incomplet").sum()) if len(detail) else 0}}
+        "Types de FRU incomplets": int(detail["Décision"].eq("incomplet").sum()) if len(detail) else 0,
+        "Masse des FRU rebutées (kg/an)": masse, "Masse détournée de la benne (kg/an)": float(calc["Kg détournés / an"].sum()) if len(calc) else np.nan,
+        "Coût actuel de traitement (€/an)": cout_actuel}}
+
+
+def comparer_scenarios(ligne: dict, frus: dict) -> pd.DataFrame:
+    """Situation actuelle (tout chez le recycleur actuel) contre ligne de démontage + tri. Flux annuels, € ; coût = négatif."""
+    r = point_milieu(ligne, frus)["resume"]
+    c = ligne.get("cout_traitement_eur_kg")
+    c = _milieu(c) if c is not None else np.nan
+    evite = r["Masse détournée de la benne (kg/an)"] * c
+    actuel = -r["Coût actuel de traitement (€/an)"]
+    marge_hors_evite = r["Marge variable / an (€)"] - evite
+    lignes = [
+        ("Traitement des FRU par le recycleur actuel", actuel, actuel + evite),
+        ("Marge de la ligne : réemploi + vente au kg − main-d'œuvre", 0.0, marge_hors_evite),
+        ("Coûts fixes de la ligne (installation amortie + annuels)", 0.0, -r["Coûts fixes annualisés (€)"]),
+    ]
+    t = pd.DataFrame(lignes, columns=["Poste (€/an)", "Actuel", "Avec la ligne"])
+    tot = pd.DataFrame([("TOTAL", t["Actuel"].sum(skipna=False), t["Avec la ligne"].sum(skipna=False))], columns=t.columns)
+    t = pd.concat([t, tot], ignore_index=True)
+    t["Écart"] = t["Avec la ligne"] - t["Actuel"]
+    t.attrs.update({"Masse rebutée (kg/an)": r["Masse des FRU rebutées (kg/an)"], "Masse détournée (kg/an)": r["Masse détournée de la benne (kg/an)"],
+                    "Part détournée": r["Masse détournée de la benne (kg/an)"] / r["Masse des FRU rebutées (kg/an)"] if r["Masse des FRU rebutées (kg/an)"] else np.nan})
+    return t
 
 
 def monte_carlo_ligne(ligne: dict, frus: dict, n=500, rng=RNG) -> dict:
