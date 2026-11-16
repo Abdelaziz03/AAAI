@@ -43,6 +43,14 @@ Sortie : un **front de Pareto** (les pièces qu'aucune autre ne bat sur tous les
 
 Exemple de lecture attendue : *« IGBT 1200 V : réemploi rentable dans 80 % des tirages si le rendement du test dépasse 60 % ; vente recycleur toujours positive mais faible. »*
 
+## 3 bis. Raisonner en ligne de tri, pas pièce par pièce
+
+* **La consommation donne la probabilité de défaut.** Pièces consommées ÷ (FRU réparées × pièces par FRU) = probabilité qu'un exemplaire soit défectueux. Dans une FRU rebutée, le reste est potentiellement réutilisable. Deux corrections à calibrer par l'audit : remplacements préventifs (IGBT changés par paire) et état plus dégradé des FRU rebutées.
+* **Coûts fixes** : installation de la ligne (postes, outillage ESD, banc de test) amortie + coûts annuels (place, encadrement).
+* **Capacité** : heures opérateur disponibles hors plan de charge → nombre de FRU traitables par an.
+* **Coûts variables par type de FRU** : temps d'ouverture (payé une fois par FRU) + extraction et test de chaque pièce retenue, au taux horaire du type de FRU.
+* **Sorties** : quels types de FRU démonter, quelles pièces extraire, résultat annuel, seuil de rentabilité en FRU/an, retour sur investissement, probabilité que la ligne soit rentable, et **valeur nette d'une heure opérateur supplémentaire** (argument chiffré pour demander des heures).
+
 ## 4. Fiabilité opérationnelle et durée de vie : l'approche
 
 Trois niveaux, du disponible au plus exigeant :
