@@ -1,3 +1,3 @@
 ﻿Flux;Semaines comparées;Semaines dans la marge;Écart moyen (%);Écart cumulé final (%);Couverture poids moyenne;Utilisable par le modèle
-DEEE;6;0;0,5553624764835844;0,532652645735417;0,7784154607670267;non : corriger la cause dominante
-DIB;6;3;0,03335317122906828;0,012200632625395372;1,0;oui
+DEEE;6;0;0,5316688648453022;0,5096524013928664;0,7784154607670267;non : corriger la cause dominante
+DIB;6;5;0,00687153673470488;-0,014911884319927623;1,0;oui

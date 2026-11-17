@@ -1,24 +1,24 @@
 ﻿FRU;Description FRU;Atelier du FRU;Référence;Description;Type de déchet;Benne;Pièces sur ce FRU;Jours avec sortie;Ateliers;Poids unitaire (kg);Source poids;Niveau de preuve;Poids connu;Kg sur ce FRU (poids connus)
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;Condensateur;DEEE;277;92;MR;;;démo;False;
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1001;IGBT 400A 1200V;Composant de puissance;DEEE;200;65;MR;0,35;pesée (démo);démo;True;70,0
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1002;IGBT 400A 600V;Composant de puissance;DEEE;170;58;MR;0,35;pesée (démo);démo;True;59,49999999999999
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1006;Bus resistance 33k ohm 10W;Composant standard;DEEE;119;63;MR;0,05;pesée (démo);démo;True;5,95
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1004;Gate Driver Board;Carte B;DEEE;86;64;MR;0,4;pesée (démo);démo;True;34,4
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1007;Protection fuse 100A high speed;Composant standard;DEEE;55;43;MR;0,08;pesée (démo);démo;True;4,4
-FRU-A100-R;Amplificateur de gradient (démo);MR;P-1005;Control board assembly;Carte B;DEEE;31;28;MR;0,45;pesée (démo);démo;True;13,950000000000001
-FRU-A200-R;Alimentation de puissance (démo);MR;P-2002;Cooling fan 120mm;Composant standard;DEEE;76;48;MR;0,25;pesée (démo);démo;True;19,0
-FRU-A200-R;Alimentation de puissance (démo);MR;P-1002;IGBT 400A 600V;Composant de puissance;DEEE;74;31;MR;0,35;pesée (démo);démo;True;25,9
-FRU-A200-R;Alimentation de puissance (démo);MR;P-2001;Power supply board;Carte B;DEEE;52;42;MR;0,6;pesée (démo);démo;True;31,2
-FRU-A200-R;Alimentation de puissance (démo);MR;P-1007;Protection fuse 100A high speed;Composant standard;DEEE;35;28;MR;0,08;pesée (démo);démo;True;2,8000000000000003
-FRU-B300-R;Boîtier de commande (démo);TSUI;P-3003;Soufflet caoutchouc;Plastique;DIB;370;106;TSUI;0,02;pesée (démo);démo;True;7,4
-FRU-B300-R;Boîtier de commande (démo);TSUI;P-3002;Tête de joystick;Plastique;DIB;209;86;TSUI;0,05;pesée (démo);démo;True;10,450000000000001
-FRU-B300-R;Boîtier de commande (démo);TSUI;P-3001;Coque boîtier gris;Plastique;DIB;115;70;TSUI;0,6;pesée (démo);démo;True;69,0
-FRU-B300-R;Boîtier de commande (démo);TSUI;P-3004;Cable harness boîtier;Câbles;DEEE;77;59;TSUI;0,3;pesée (démo);démo;True;23,099999999999998
-FRU-B300-R;Boîtier de commande (démo);TSUI;P-3005;Keypad controller board;Carte C;DEEE;54;40;TSUI;0,2;pesée (démo);démo;True;10,8
-FRU-B400-R;Pupitre de table (démo);TSUI;P-3002;Tête de joystick;Plastique;DIB;59;44;TSUI;0,05;pesée (démo);démo;True;2,95
-FRU-B400-R;Pupitre de table (démo);TSUI;P-4001;Grille de protection;Métal;Métal;43;37;TSUI;0,3;pesée (démo);démo;True;12,9
-FRU-B400-R;Pupitre de table (démo);TSUI;P-3005;Keypad controller board;Carte C;DEEE;13;11;TSUI;0,2;pesée (démo);démo;True;2,6
-FRU-C500-R;Antenne de surface (démo);Coils;P-5001;Coil preamp board;Carte C;DEEE;54;34;Coils;0,1;pesée (démo);démo;True;5,4
-FRU-C500-R;Antenne de surface (démo);Coils;P-5002;Coil cable;Câbles;DEEE;30;29;Coils;0,2;pesée (démo);démo;True;6,0
-FRU-W600-R;Station de travail (démo);(non rattaché);P-6002;Cooling fan 80mm;Composant standard;DEEE;60;38;(non rattaché);0,12;pesée (démo);démo;True;7,199999999999999
-FRU-W600-R;Station de travail (démo);(non rattaché);P-6001;Mainboard station;;;17;17;(non rattaché);;;;False;
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;Condensateur;DEEE;277,0;92;MR;;;démo;False;
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1001;IGBT 400A 1200V;Composant de puissance;DEEE;200,0;65;MR;0,35;pesée (démo);démo;True;70,0
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1002;IGBT 400A 600V;Composant de puissance;DEEE;170,0;58;MR;0,35;pesée (démo);démo;True;59,49999999999999
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1006;Bus resistance 33k ohm 10W;Composant standard;DEEE;119,0;63;MR;0,05;pesée (démo);démo;True;5,95
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1004;Gate Driver Board;Carte B;DEEE;86,0;64;MR;0,4;pesée (démo);démo;True;34,4
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1007;Protection fuse 100A high speed;Composant standard;DEEE;55,0;43;MR;0,08;pesée (démo);démo;True;4,4
+FRU-A100-R;Amplificateur de gradient (démo);MR;P-1005;Control board assembly;Carte B;DEEE;31,0;28;MR;0,45;pesée (démo);démo;True;13,950000000000001
+FRU-A200-R;Alimentation de puissance (démo);MR;P-2002;Cooling fan 120mm;Composant standard;DEEE;76,0;48;MR;0,25;pesée (démo);démo;True;19,0
+FRU-A200-R;Alimentation de puissance (démo);MR;P-1002;IGBT 400A 600V;Composant de puissance;DEEE;74,0;31;MR;0,35;pesée (démo);démo;True;25,9
+FRU-A200-R;Alimentation de puissance (démo);MR;P-2001;Power supply board;Carte B;DEEE;52,0;42;MR;0,6;pesée (démo);démo;True;31,2
+FRU-A200-R;Alimentation de puissance (démo);MR;P-1007;Protection fuse 100A high speed;Composant standard;DEEE;35,0;28;MR;0,08;pesée (démo);démo;True;2,8000000000000003
+FRU-B300-R;Boîtier de commande (démo);TSUI;P-3003;Soufflet caoutchouc;Plastique;DIB;370,0;106;TSUI;0,02;pesée (démo);démo;True;7,4
+FRU-B300-R;Boîtier de commande (démo);TSUI;P-3002;Tête de joystick;Plastique;DIB;209,0;86;TSUI;0,05;pesée (démo);démo;True;10,450000000000001
+FRU-B300-R;Boîtier de commande (démo);TSUI;P-3001;Coque boîtier gris;Plastique;DIB;115,0;70;TSUI;0,6;pesée (démo);démo;True;69,0
+FRU-B300-R;Boîtier de commande (démo);TSUI;P-3004;Cable harness boîtier;Câbles;DEEE;77,0;59;TSUI;0,3;pesée (démo);démo;True;23,099999999999998
+FRU-B300-R;Boîtier de commande (démo);TSUI;P-3005;Keypad controller board;Carte C;DEEE;54,0;40;TSUI;0,2;pesée (démo);démo;True;10,8
+FRU-B400-R;Pupitre de table (démo);TSUI;P-3002;Tête de joystick;Plastique;DIB;59,0;44;TSUI;0,05;pesée (démo);démo;True;2,95
+FRU-B400-R;Pupitre de table (démo);TSUI;P-4001;Grille de protection;Métal;Métal;43,0;37;TSUI;0,3;pesée (démo);démo;True;12,9
+FRU-B400-R;Pupitre de table (démo);TSUI;P-3005;Keypad controller board;Carte C;DEEE;13,0;11;TSUI;0,2;pesée (démo);démo;True;2,6
+FRU-C500-R;Antenne de surface (démo);Coils;P-5001;Coil preamp board;Carte C;DEEE;54,0;34;Coils;0,1;pesée (démo);démo;True;5,4
+FRU-C500-R;Antenne de surface (démo);Coils;P-5002;Coil cable;Câbles;DEEE;30,0;29;Coils;0,2;pesée (démo);démo;True;6,0
+FRU-W600-R;Station de travail (démo);(non rattaché);P-6002;Cooling fan 80mm;Composant standard;DEEE;60,0;38;(non rattaché);0,12;pesée (démo);démo;True;7,199999999999999
+FRU-W600-R;Station de travail (démo);(non rattaché);P-6001;Mainboard station;;;17,0;17;(non rattaché);;;;False;

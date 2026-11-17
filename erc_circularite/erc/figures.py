@@ -22,6 +22,7 @@ from __future__ import annotations
 import math
 import textwrap
 import traceback
+import warnings
 
 import matplotlib
 import numpy as np
@@ -29,7 +30,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-from matplotlib.ticker import FuncFormatter, MaxNLocator
+from matplotlib.ticker import Formatter, MaxNLocator
 from matplotlib.transforms import blended_transform_factory
 
 # --------------------------------------------------------------------------- palette et tailles
@@ -81,11 +82,35 @@ def _pct(x, dec: int = 0, signe: bool = False) -> str:
         return "inconnu"
 
 
-def _fmt(dec: int = 0, unite: str = "", pct: bool = False) -> FuncFormatter:
-    """Graduations au format français."""
-    if pct:
-        return FuncFormatter(lambda v, _p: _pct(v, dec))
-    return FuncFormatter(lambda v, _p: _fr(v, dec, unite))
+class _Graduations(Formatter):
+    """Graduations au format français. `dec` est un nombre minimal de décimales : quand les graduations sont plus
+    serrées (0 ; 0,25 ; 0,5 ou 0 ; 0,5 ; 1 sur un axe de petites valeurs), les décimales nécessaires sont ajoutées,
+    pour qu'aucune graduation ne soit arrondie et que deux graduations ne portent jamais le même nombre."""
+
+    def __init__(self, dec: int = 0, unite: str = "", pct: bool = False):
+        self.dec, self.unite, self.pct, self._dec = int(dec), unite, pct, int(dec)
+
+    def set_locs(self, locs):                         # appelée par matplotlib avec toutes les graduations, avant de les écrire
+        self._dec = self.dec
+        try:
+            v = sorted({float(x) * (100.0 if self.pct else 1.0) for x in locs if math.isfinite(float(x))})
+        except (TypeError, ValueError):
+            return
+        if len(v) < 2:
+            return
+        pas = min(b - a for a, b in zip(v, v[1:]))
+        for d in range(self.dec, self.dec + 4):
+            self._dec = d
+            if all(abs(round(x, d) - x) <= 0.02 * pas for x in v):
+                break
+
+    def __call__(self, x, pos=None):
+        return _pct(x, self._dec) if self.pct else _fr(x, self._dec, self.unite)
+
+
+def _fmt(dec: int = 0, unite: str = "", pct: bool = False) -> Formatter:
+    """Graduations au format français (voir _Graduations)."""
+    return _Graduations(dec, unite, pct)
 
 
 def _court(texte, n: int) -> str:
@@ -96,8 +121,14 @@ def _court(texte, n: int) -> str:
 
 def _lib(reference, description, n: int = 30) -> str:
     """« Référence · description courte »."""
-    d = _court(description, n)
-    return f"{reference} · {d}" if d else str(reference)
+    r, d = _court(reference, 24), _court(description, n)      # une référence démesurée ne doit pas écraser le graphique
+    return f"{r} · {d}" if d else r
+
+
+def _liste(noms, maxi: int = 6) -> str:
+    """« a, b, c et 4 autres » : une énumération qui reste courte."""
+    noms = [_court(x, 30) for x in noms]
+    return ", ".join(noms) if len(noms) <= maxi else ", ".join(noms[:maxi]) + f" et {len(noms) - maxi} autres"
 
 
 def _pluriel(n, singulier: str, pluriel: str | None = None) -> str:
@@ -105,7 +136,36 @@ def _pluriel(n, singulier: str, pluriel: str | None = None) -> str:
 
 
 def _num(t: pd.DataFrame, colonne: str) -> pd.Series:
-    return pd.to_numeric(t[colonne], errors="coerce")
+    """Colonne en nombres ; tout ce qui n'est pas un nombre fini (texte, vide, infini) devient inconnu (NaN)."""
+    s = pd.to_numeric(t[colonne], errors="coerce").astype(float)
+    return s.where(np.isfinite(s))
+
+
+def _dates(s) -> pd.Series:
+    """Colonne en dates ; ce qui n'est pas une date devient inconnu (NaT), sans avertissement."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return pd.to_datetime(s, errors="coerce")
+
+
+def _etendue(x, defaut: float = 1.0) -> float:
+    """Borne haute d'un axe qui part de zéro : la valeur si elle est finie et positive, sinon `defaut` (jamais un axe de largeur nulle)."""
+    x = _reel(x)
+    return x if np.isfinite(x) and x > 0 else defaut
+
+
+def _dico(o) -> dict:
+    """L'objet s'il est un dictionnaire, sinon un dictionnaire vide (note absente ou mal formée)."""
+    return o if isinstance(o, dict) else {}
+
+
+def _reel(v) -> float:
+    """Valeur d'une note (JSON ou attribut de table) en nombre ; NaN si elle est absente ou n'est pas un nombre."""
+    try:
+        x = float(v)
+    except (TypeError, ValueError):
+        return float("nan")
+    return x if math.isfinite(x) else float("nan")
 
 
 def _vrai(s: pd.Series) -> pd.Series:
@@ -170,6 +230,14 @@ def _table(ctx, etape: str, nom: str, colonnes=()):
     return t
 
 
+def _table_meme_vide(ctx, etape: str, nom: str, colonnes=()):
+    """Comme `_table`, mais une table sans ligne est rendue telle quelle : « aucune ligne » est alors une information."""
+    t = (getattr(ctx, "res", None) or {}).get(etape, {}).get(nom)
+    if not isinstance(t, pd.DataFrame) or any(c not in t.columns for c in colonnes):
+        return None
+    return t
+
+
 def _objet(ctx, etape: str, nom: str) -> dict:
     o = (getattr(ctx, "res", None) or {}).get(etape, {}).get(nom)
     return o if isinstance(o, dict) else {}
@@ -193,7 +261,7 @@ def _descriptions(ctx) -> dict:
 def _descriptions_fru(ctx) -> dict:
     t = _table(ctx, "classement", "FRU rebutées", ["FRU", "Description FRU"])
     d = {} if t is None else dict(zip(t["FRU"].astype(str), t["Description FRU"]))
-    for f, v in (_objet(ctx, "ligne", "Modèle").get("frus") or {}).items():
+    for f, v in _dico(_objet(ctx, "ligne", "Modèle").get("frus")).items():
         if isinstance(v, dict) and v.get("description"):
             d.setdefault(str(f), v["description"])
     return d
@@ -327,7 +395,7 @@ def _zero(ax, sens="v"):
 
 def _semaines(dates: pd.Series):
     """Dates de semaine → (rangs entiers depuis la première semaine, fonction rang → libellé « jj/mm »)."""
-    d = pd.to_datetime(dates, errors="coerce")
+    d = _dates(dates)
     debut = d.min()
     rangs = ((d - debut).dt.days / 7.0).round()
     plusieurs_annees = d.dt.year.nunique() > 1
@@ -345,36 +413,55 @@ def _graduer_semaines(ax, n: int, libelle, maxi: int = 12):
     ax.set_xlim(-0.7, n - 0.3)
 
 
+def _semaines_absentes(ax, rangs, texte: str = "non extraite"):
+    """Marque les semaines sans donnée (non extraites) : un mot vertical au pied du cadre, là où manque la barre ou le point."""
+    for r in rangs:
+        ax.text(r, 0.03, texte, transform=ax.get_xaxis_transform(), rotation=90, ha="center", va="bottom", fontsize=T_NOTE, color=ENCRE_3, style="italic", zorder=4)
+
+
 def _annee(debut, fin) -> str:
     return str(debut.year) if debut.year == fin.year else f"{debut.year}-{fin.year}"
 
 
-def _placer_etiquettes(ax, points, tous, larg: float, haut: float, taille=T_ETIQ):
-    """Étiquette des points d'un nuage sans chevauchement : essaie six positions autour du point et garde la moins
-    encombrée. `points` : [(x, y, texte)] ; `tous` : [(x, y)] de tous les points tracés ; larg, haut : taille du cadre en pouces."""
-    (x0, x1), (y0, y1) = ax.get_xlim(), ax.get_ylim()
+def _choisir_etiquettes(points, tous, xlim, ylim, larg: float, haut: float, taille=T_ETIQ, maxi: int = 14):
+    """Choisit où nommer les points d'un nuage, sans chevauchement : huit positions sont essayées autour de chaque point,
+    dans l'ordre de `points` (les plus importants d'abord). Une étiquette n'est retenue que si elle tient dans le cadre,
+    ne recouvre aucune étiquette déjà retenue et cache au plus deux autres points ; sinon le point reste sans nom.
+    Renvoie ([(x, y, texte, décalage, ha, va)], nombre de points laissés sans nom). `points` : [(x, y, texte)] ;
+    `tous` : [(x, y)] de tous les points tracés ; xlim, ylim : limites des axes ; larg, haut : taille du cadre en pouces."""
+    (x0, x1), (y0, y1) = xlim, ylim
     fx = lambda x: (x - x0) / (x1 - x0)
     fy = lambda y: (y - y0) / (y1 - y0)
     lig = taille * 1.25 / 72.0 / haut                                        # hauteur d'une ligne, en fraction du cadre
     dx, dy = 7 / 72.0 / larg, 7 / 72.0 / haut
     places, pts = [], [(fx(x), fy(y)) for x, y in tous]
     positions = [(1, 0, "left", "center"), (-1, 0, "right", "center"), (0, 1, "center", "bottom"), (0, -1, "center", "top"),
-                 (1, 1, "left", "bottom"), (1, -1, "left", "top")]
-    for x, y, texte in sorted(points, key=lambda p: -p[1]):
+                 (1, 1, "left", "bottom"), (1, -1, "left", "top"), (-1, 1, "right", "bottom"), (-1, -1, "right", "top")]
+    sans_nom, choisies = 0, []
+    for x, y, texte in points:
+        if len(choisies) >= maxi:
+            sans_nom += 1
+            continue
         px, py, w = fx(x), fy(y), _largeur_texte(texte, taille) / larg
         meilleur = None
         for sx, sy, ha, va in positions:
             gx = px + sx * dx - (w if ha == "right" else w / 2 if ha == "center" else 0)
             gy = py + sy * dy - (lig if va == "top" else lig / 2 if va == "center" else 0)
             boite = (gx, gy, gx + w, gy + lig)
-            cout = sum(10.0 for b in places if boite[0] < b[2] and b[0] < boite[2] and boite[1] < b[3] and b[1] < boite[3])
-            cout += sum(3.0 for qx, qy in pts if (qx, qy) != (px, py) and boite[0] - 0.01 < qx < boite[2] + 0.01 and boite[1] - 0.015 < qy < boite[3] + 0.015)
-            cout += 20.0 * (boite[0] < 0 or boite[2] > 1 or boite[1] < 0 or boite[3] > 1)
-            if meilleur is None or cout < meilleur[0]:
-                meilleur = (cout, sx, sy, ha, va, boite)
+            if boite[0] < 0.005 or boite[2] > 0.995 or boite[1] < 0.01 or boite[3] > 0.99:
+                continue                                                     # hors du cadre
+            if any(boite[0] < q[2] and q[0] < boite[2] and boite[1] < q[3] and q[1] < boite[3] for q in places):
+                continue                                                     # sur une étiquette déjà posée
+            caches = sum(1 for qx, qy in pts if (qx, qy) != (px, py) and boite[0] - 0.01 < qx < boite[2] + 0.01 and boite[1] - 0.015 < qy < boite[3] + 0.015)
+            if caches <= 2 and (meilleur is None or caches < meilleur[0]):
+                meilleur = (caches, sx, sy, ha, va, boite)
+        if meilleur is None:
+            sans_nom += 1
+            continue
         _, sx, sy, ha, va, boite = meilleur
         places.append(boite)
-        _etiquette(ax, texte, (x, y), decalage=(7 * sx, 7 * sy), ha=ha, va=va, taille=taille, couleur=ENCRE)
+        choisies.append((x, y, texte, (7 * sx, 7 * sy), ha, va))
+    return choisies, sans_nom
 
 
 # =========================================================================== 1. classement
@@ -419,11 +506,13 @@ def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection
     if t is None:
         return None
     d = t.assign(_x=_num(t, "FRU rebutées (nomenclature)"), _y=_num(t, "MMICV total (USD)"), _p=_vrai(t["Sur le front de Pareto"]))
+    d.loc[(d["_x"] < 0) | (d["_y"] < 0), ["_x", "_y"]] = np.nan      # un nombre de FRU ou une valeur négatifs : donnée invalide, traitée comme inconnue
     hors = int(d[["_x", "_y"]].isna().any(axis=1).sum())
     d = d.dropna(subset=["_x", "_y"])
     if not len(d):
         return None
     actifs = t.attrs.get("Critères actifs") or _objet(ctx, etape, "Notes").get("criteres_actifs") or []
+    actifs = [str(c) for c in actifs] if isinstance(actifs, (list, tuple)) else []
     court = {"MMICV total (USD)": "valeur", "FRU rebutées (nomenclature)": "gisement", "Score risque matière (0-1)": "risque matière",
              "Risque supply retenu": "risque d'approvisionnement", "Fiabilité réemploi (1/rapport)": "fiabilité du réemploi"}
     sous = "En bleu : pièces qu'aucune autre ne dépasse sur tous les critères à la fois (front de Pareto)."
@@ -435,19 +524,25 @@ def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection
         note += f" {_pluriel(hors, 'pièce')} sans valeur connue sur un des deux axes : non tracée{'s' if hors > 1 else ''}."
     legende = [_trait(BLEU, "Sur le front de Pareto", "o", epaisseur=0, taille=8), _trait(GRIS_FONCE, "Dépassée par une autre pièce", "o", epaisseur=0, taille=6)]
     h = 4.3
+    a, b = d[~d["_p"]], d[d["_p"]].sort_values("_y", ascending=False)      # les pièces du front sont nommées par valeur décroissante
+    xlim, ylim = (0, max(float(d["_x"].max()), 1.0) * 1.12), (0, max(float(d["_y"].max()), 1.0) * 1.1)
+    desc = b["Description"] if "Description" in b else pd.Series([""] * len(b), index=b.index)
+    points = [(x, y, _lib(r, de, 20)) for x, y, r, de in zip(b["_x"], b["_y"], b["Référence"], desc)]
+    etiquettes, sans_nom = _choisir_etiquettes(points, list(zip(d["_x"], d["_y"])), xlim, ylim, LARGEUR - 1.1, h - 0.6)
+    if sans_nom:
+        verbe = "ne sont pas nommées" if sans_nom > 1 else "n'est pas nommée"
+        note += f" {_pluriel(sans_nom, 'pièce')} du front {verbe} sur la figure, faute de place : la table les donne toutes."
     fig, corps = _cadre(ctx, h, titre, sous, note, legende, colonnes=2)
     ax = fig.add_subplot(corps)
-    a, b = d[~d["_p"]], d[d["_p"]]
     ax.plot(a["_x"], a["_y"], linestyle="none", marker="o", markersize=6, markerfacecolor=GRIS_FONCE, markeredgecolor=SURFACE, markeredgewidth=0.9, zorder=2)
     ax.plot(b["_x"], b["_y"], linestyle="none", marker="o", markersize=8.5, markerfacecolor=BLEU, markeredgecolor=SURFACE, markeredgewidth=1.1, zorder=3)
-    ax.set_xlim(0, max(float(d["_x"].max()), 1.0) * 1.12)
-    ax.set_ylim(0, max(float(d["_y"].max()), 1.0) * 1.1)
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
     ax.xaxis.set_major_formatter(_fmt())
     ax.yaxis.set_major_formatter(_fmt())
     _axe(ax, "xy", xlabel="FRU rebutées sur la période dont la nomenclature contient la pièce", ylabel="MMICV total consommé (USD)")
-    desc = b["Description"] if "Description" in b else pd.Series([""] * len(b), index=b.index)
-    points = [(x, y, _lib(r, de, 20)) for x, y, r, de in zip(b["_x"], b["_y"], b["Référence"], desc)][:14]
-    _placer_etiquettes(ax, points, list(zip(d["_x"], d["_y"])), LARGEUR - 1.1, h - 0.6)
+    for x, y, texte, decalage, ha, va in etiquettes:
+        _etiquette(ax, texte, (x, y), decalage=decalage, ha=ha, va=va, couleur=ENCRE)
     description = ("Chaque point est une pièce : en abscisse le nombre de FRU rebutées qui la contiennent (gisement), en ordonnée son MMICV total "
                    "consommé (valeur). Les points bleus forment le front de Pareto : ce sont les candidates à examiner en premier.")
     if etape == "fiabilite":
@@ -460,7 +555,7 @@ def _fru_par_semaine(ctx):
     t = _table(ctx, "flux", "FRU rebutées par semaine", ["Semaine", "FRU", "FRU rebutées"])
     if t is None:
         return None
-    d = t.assign(_s=pd.to_datetime(t["Semaine"], errors="coerce"), _n=_num(t, "FRU rebutées")).dropna(subset=["_s"])
+    d = t.assign(_s=_dates(t["Semaine"]), _n=_num(t, "FRU rebutées")).dropna(subset=["_s"])
     if not len(d) or not d["_n"].notna().any():
         return None
     rangs, libelle, debut = _semaines(d["_s"])
@@ -486,8 +581,10 @@ def _fru_par_semaine(ctx):
     if np.isfinite(moyenne):
         legende.append(_trait(ENCRE_2, f"Moyenne des semaines complètes : {_fr(moyenne, 1)} FRU par semaine", epaisseur=1.0))
     fin = debut + pd.Timedelta(days=7 * (n_sem - 1))
-    sous = f"Une barre par semaine, du lundi au dimanche ({_annee(debut, fin)}). Une semaine extraite sans rebut compte pour zéro ; une semaine non extraite n'a pas de barre."
-    note = "Date de rebut : " + _court(_objet(ctx, "flux", "Notes").get("regle_date_rebut", "règle non précisée"), 150) + "."
+    absentes = [r for r in range(n_sem) if r not in set(int(i) for i in piv.index)]
+    sous = (f"Une barre par semaine, du lundi au dimanche ({_annee(debut, fin)}). Une semaine extraite sans rebut compte pour zéro (« 0 »)"
+            + (" ; une semaine non extraite est marquée comme telle et ne compte pas." if absentes else "."))
+    note = "Date de rebut : " + (_court(_objet(ctx, "flux", "Notes").get("regle_date_rebut"), 150) or "règle non précisée") + "."
     fig, corps = _cadre(ctx, 3.3, "FRU rebutées par semaine et par type de FRU", sous, note, legende, colonnes=3)
     ax = fig.add_subplot(corps)
     x, bas = piv.index.to_numpy(float), np.zeros(len(piv))
@@ -502,6 +599,10 @@ def _fru_par_semaine(ctx):
         _etiquette(ax, f"{_fr(j)} j" if np.isfinite(j) else "incomplète", (r, h), decalage=(0, 3), ha="center", va="bottom", taille=T_NOTE)
     if np.isfinite(moyenne):
         ax.axhline(moyenne, color=ENCRE_2, linewidth=1.0, zorder=2.5)
+    for r in piv.index:                                          # zéro constaté : écrit, pour ne pas le confondre avec une semaine absente
+        if float(total.get(r, 0.0)) == 0 and int(r) not in incompletes:
+            _etiquette(ax, "0", (r, 0), decalage=(0, 3), ha="center", va="bottom", taille=T_NOTE)
+    _semaines_absentes(ax, absentes)
     _graduer_semaines(ax, n_sem, libelle)
     ax.set_ylim(0, float(total.max()) * 1.12 + 0.5)
     ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=6))
@@ -516,7 +617,7 @@ def _estime_contre_pese(ctx):
     t = _table(ctx, "flux", "Estimé contre pesé", cols)
     if t is None:
         return None
-    d = t.assign(_s=pd.to_datetime(t["Semaine"], errors="coerce"), _c=_num(t, "Estimé central (kg)"), _b=_num(t, "Estimé bas (kg)"),
+    d = t.assign(_s=_dates(t["Semaine"]), _c=_num(t, "Estimé central (kg)"), _b=_num(t, "Estimé bas (kg)"),
                  _h=_num(t, "Estimé haut (kg)"), _m=_num(t, "Masse mesurée (kg)")).dropna(subset=["_s"])
     d["_u"] = _num(d, "Incertitude mesure (kg)") if "Incertitude mesure (kg)" in d else np.nan
     d["_j"] = _num(d, "Jours extraits") if "Jours extraits" in d else np.nan
@@ -539,18 +640,21 @@ def _estime_contre_pese(ctx):
             "du flux. Barre verticale d'une pesée : son incertitude. Échelle verticale propre à chaque flux.")
     note = ""
     if muets:
-        note += "Flux sans aucun poids connu, donc sans estimation ni tracé : " + ", ".join(muets) + ". "
+        note += "Flux sans aucun poids connu, donc sans estimation ni tracé : " + _liste(muets) + ". "
     if en_trop:
-        note += "Flux non tracés (au-delà de six) : " + ", ".join(str(f) for f in en_trop) + ". "
+        note += "Flux non tracés (au-delà de six) : " + _liste(en_trop) + ". "
     if not d["_m"].notna().any():
-        note += "Aucune pesée enregistrée : l'estimation n'est pas encore vérifiée."
+        note += "Aucune pesée enregistrée : l'estimation n'est pas encore vérifiée. "
+    # Une semaine sans ligne pour un flux : aucune pièce de ce flux consommée (ou semaine non extraite). Le trait s'interrompt.
+    if any(d.loc[d["Flux"].eq(f) & d["_c"].notna(), "_r"].nunique() < n_sem for f in traces):
+        note += "Trait interrompu : semaine sans pièce consommée dans ce flux, ou semaine non extraite ; aucune masse n'est estimée."
     fig, corps = _cadre(ctx, 1.85 * len(traces) + 0.35, "Masse estimée contre masse pesée, par semaine et par flux", sous, note.strip(), legende, colonnes=2)
     grille = corps.subgridspec(len(traces), 1, hspace=0.12)
     premier = None
     for i, f in enumerate(traces):
         ax = fig.add_subplot(grille[i], sharex=premier) if premier is not None else fig.add_subplot(grille[i])
         premier = premier or ax
-        g = d[d["Flux"].eq(f)].sort_values("_r")
+        g = d[d["Flux"].eq(f)].sort_values("_r").drop_duplicates("_r")      # une ligne par semaine et par flux
         serie = g.set_index("_r").reindex(range(n_sem))
         for r in g.loc[g["_j"] < 7, "_r"]:
             ax.axvspan(r - 0.5, r + 0.5, color=GRILLE, linewidth=0, zorder=0.5)
@@ -578,7 +682,7 @@ def _estime_contre_pese(ctx):
         ax.set_ylim(0, haut * 1.15 if haut > 0 else 1.0)
         ax.yaxis.set_major_locator(MaxNLocator(nbins=4))
         ax.yaxis.set_major_formatter(_fmt(1 if haut < 10 else 0))
-        _axe(ax, "y", ylabel="kg par semaine", titre=f"{f} : {bilan}")
+        _axe(ax, "y", ylabel="kg par semaine", titre=f"{_court(f, 34)} : {bilan}")
         if i < len(traces) - 1:
             ax.tick_params(labelbottom=False)
         else:
@@ -592,21 +696,25 @@ def _cumul(ctx):
     t = _table(ctx, "flux", "Estimé contre pesé", ["Semaine", "Flux", "Cumul estimé (kg)", "Cumul mesuré (kg)"])
     if t is None:
         return None
-    d = t.assign(_s=pd.to_datetime(t["Semaine"], errors="coerce"), _e=_num(t, "Cumul estimé (kg)"), _m=_num(t, "Cumul mesuré (kg)")).dropna(subset=["_s", "_e", "_m"])
+    d = t.assign(_s=_dates(t["Semaine"]), _e=_num(t, "Cumul estimé (kg)"), _m=_num(t, "Cumul mesuré (kg)")).dropna(subset=["_s", "_e", "_m"])
     if not len(d):
         return None
-    flux = list(d.groupby("Flux")["_e"].max().sort_values(ascending=False).index[:4])
+    tous_flux = list(d.groupby("Flux")["_e"].max().sort_values(ascending=False).index)
+    flux, en_trop = tous_flux[:4], tous_flux[4:]
     n = len(flux)
     if not n:
         return None
     legende = [_trait(BLEU, "Cumul estimé", "o"), _trait(ENCRE, "Cumul pesé", "s")]
     sous = ("Cumul sur les seules semaines où une pesée et une estimation existent. Le cumul absorbe les décalages d'une semaine à l'autre "
             "(bacs vidés plus tard) : un écart qui persiste en cumul vient d'ailleurs. Échelle verticale propre à chaque flux.")
-    fig, corps = _cadre(ctx, 3.0, "Cumul estimé contre cumul pesé, par flux", sous, "", legende, colonnes=2)
-    grille = corps.subgridspec(1, n, wspace=0.08)
+    note = ("Flux non tracés (au-delà de quatre) : " + _liste(en_trop) + ".") if en_trop else ""
+    ncol = 1 if n == 1 else 2                                    # deux cadres par rangée au plus : titres et dates restent lisibles
+    nlig = int(math.ceil(n / float(ncol)))
+    fig, corps = _cadre(ctx, 2.75 * nlig + 0.25, "Cumul estimé contre cumul pesé, par flux", sous, note, legende, colonnes=2)
+    grille = corps.subgridspec(nlig, ncol, wspace=0.08, hspace=0.12)
     for i, f in enumerate(flux):
-        ax = fig.add_subplot(grille[i])
-        g = d[d["Flux"].eq(f)].sort_values("_s")
+        ax = fig.add_subplot(grille[i // ncol, i % ncol])
+        g = d[d["Flux"].eq(f)].sort_values("_s").drop_duplicates("_s")
         x = np.arange(len(g))
         ax.plot(x, g["_e"], color=BLEU, linewidth=1.8, marker="o", markersize=6, markeredgecolor=SURFACE, markeredgewidth=0.9, zorder=3)
         ax.plot(x, g["_m"], color=ENCRE, linewidth=1.8, marker="s", markersize=5.5, markeredgecolor=SURFACE, markeredgewidth=0.9, zorder=3)
@@ -617,13 +725,17 @@ def _cumul(ctx):
         ecart = (fm - fe) / fe if fe else np.nan
         pas = max(int(math.ceil(len(g) / 6.0)), 1)
         ax.set_xticks(list(x[::pas]))
-        ax.set_xticklabels([s.strftime("%d/%m") for s in g["_s"].iloc[::pas]])
-        ax.set_xlim(-0.4, (len(g) - 1) * (1.22 if n > 1 else 1.1) + 0.5)
-        ax.set_ylim(0, max(fe, fm, float(g["_e"].max()), float(g["_m"].max())) * 1.18)
+        ax.set_xticklabels([j.strftime("%d/%m") for j in g["_s"].iloc[::pas]])
+        ax.set_xlim(-0.4, (len(g) - 1) * (1.22 if ncol > 1 else 1.1) + 0.5)
+        bas = min(0.0, float(g["_e"].min()), float(g["_m"].min()))
+        ax.set_ylim(bas * 1.1, _etendue(max(fe, fm, float(g["_e"].max()), float(g["_m"].max())), max(-bas, 1.0)) * 1.18)
         ax.yaxis.set_major_locator(MaxNLocator(nbins=5))
         ax.yaxis.set_major_formatter(_fmt())
-        _axe(ax, "y", xlabel="Semaine pesée (date du lundi)", ylabel="kg cumulés" if i == 0 else None,
-             titre=f"{f} : écart cumulé final {_pct(ecart, 0, signe=True)}")
+        derniere = i + ncol >= n                                 # aucun cadre en dessous : c'est lui qui porte le nom de l'axe
+        _axe(ax, "y", xlabel="Semaine pesée (date du lundi)" if derniere else None, ylabel="kg cumulés" if i % ncol == 0 else None)
+        ax.set_title(_court(f, 40 if ncol > 1 else 80), loc="left", fontsize=T_AXE + 0.3, color=ENCRE, fontweight="bold", pad=18)
+        ax.annotate(f"Écart cumulé final (pesé contre estimé) : {_pct(ecart, 0, signe=True)}", (0, 1), xycoords="axes fraction", xytext=(0, 5),
+                    textcoords="offset points", ha="left", va="bottom", fontsize=T_NOTE, color=ENCRE_2, annotation_clip=False)
     return ("Masse cumulée estimée et masse cumulée pesée, flux par flux, sur les semaines comparables. Lecture : deux courbes qui se suivent "
             "valident l'estimation ; deux courbes qui s'écartent régulièrement désignent une cause permanente (périmètre de la benne, poids manquants).", fig)
 
@@ -647,7 +759,7 @@ def _rebut_annuel(ctx):
         sous += f" Base : {_fr(sem.min())} à {_fr(sem.max())} semaines complètes." if sem.min() != sem.max() else f" Base : {_fr(sem.max())} semaines complètes."
     note = "Ces valeurs (bas, moyen, haut) alimentent le modèle de ligne quand le rebut annuel n'est pas saisi dans le classeur de paramètres."
     if inconnus:
-        note += " Rebut annuel inconnu (non tracé) : " + ", ".join(inconnus) + "."
+        note += " Rebut annuel inconnu (non tracé) : " + _liste(inconnus) + "."
     if en_trop > 0:
         note += f" {_pluriel(en_trop, 'autre type', 'autres types')} dans la table."
     fig, corps = _cadre(ctx, 0.6 + 0.34 * n, "Rebut annuel estimé par type de FRU", sous, note)
@@ -666,7 +778,7 @@ def _rebut_annuel(ctx):
     ax.set_yticklabels([_lib(f, descf.get(str(f), ""), 36) for f in d["FRU"]])
     ax.invert_yaxis()
     ax.set_ylim(n - 0.4, -0.6)
-    ax.set_xlim(0, float(np.nanmax(d[["_m", "_h"]].to_numpy(float))) * 1.38)
+    ax.set_xlim(0, _etendue(np.nanmax(d[["_m", "_h"]].to_numpy(float))) * 1.38)
     ax.xaxis.set_major_formatter(_fmt())
     _axe(ax, "x", xlabel="FRU rebutées par an")
     return ("Le rebut annuel de chaque type de FRU, tiré du suivi hebdomadaire : point = estimation moyenne, trait = intervalle à 90 %. "
@@ -679,16 +791,20 @@ def _par_type_de_dechet(ctx):
         return None
     d = t.assign(_p=_num(t, "Pièces"))
     d["_kg"] = _num(d, "Kg (poids connus)") if "Kg (poids connus)" in d else np.nan
+    d["_kg"] = d["_kg"].where(d["_kg"] >= 0)                       # une masse négative n'existe pas : traitée comme inconnue
     d["_ref"] = _num(d, "Références") if "Références" in d else np.nan
     d["_con"] = _num(d, "Références au poids connu") if "Références au poids connu" in d else np.nan
     d["Benne"] = d["Benne"].fillna("(sans benne)").astype(str)
     d["Type de déchet"] = d["Type de déchet"].fillna("(non classé)").astype(str)
-    d = d[d["_p"] > 0].sort_values(["Benne", "_p"], ascending=[True, False]).head(24)
+    d = d[d["_p"] > 0].sort_values(["Benne", "_p"], ascending=[True, False])
+    en_trop, d = len(d) - 24, d.head(24)
     if not len(d):
         return None
     n = len(d)
     sous = "À gauche : pièces consommées sur la période. À droite : leur masse, calculée avec les seules références dont le poids unitaire est connu."
     note = "« Poids inconnu » : aucune référence de ce type n'a de poids unitaire ; la masse n'est pas comptée à zéro, elle manque. Une masse partielle est signalée."
+    if en_trop > 0:
+        note += f" {_pluriel(en_trop, 'autre ligne', 'autres lignes')} dans la table."
     fig, corps = _cadre(ctx, 0.6 + 0.3 * n, "Pièces consommées et masse par benne et type de déchet", sous, note)
     grille = corps.subgridspec(1, 2, wspace=0.06)
     ax1 = fig.add_subplot(grille[0])
@@ -707,11 +823,11 @@ def _par_type_de_dechet(ctx):
         partiel = np.isfinite(r["_ref"]) and np.isfinite(r["_con"]) and r["_con"] < r["_ref"]
         _etiquette(ax2, _fr(r["_kg"], 1) + " kg" + (f"  (partiel : {_fr(r['_con'])} réf. sur {_fr(r['_ref'])} au poids connu)" if partiel else ""), (r["_kg"], yi))
     ax1.set_yticks(y)
-    ax1.set_yticklabels([f"{b} · {_court(ty, 26)}" for b, ty in zip(d["Benne"], d["Type de déchet"])])
+    ax1.set_yticklabels([f"{_court(b, 18)} · {_court(ty, 26)}" for b, ty in zip(d["Benne"], d["Type de déchet"])])
     ax1.invert_yaxis()
     ax1.set_ylim(n - 0.4, -0.6)
     ax1.set_xlim(0, float(d["_p"].max()) * 1.25)
-    ax2.set_xlim(0, kg_max * 1.35)
+    ax2.set_xlim(0, _etendue(kg_max) * 1.35)
     ax1.xaxis.set_major_formatter(_fmt())
     ax2.xaxis.set_major_formatter(_fmt())
     ax1.xaxis.set_major_locator(MaxNLocator(nbins=4))
@@ -752,7 +868,7 @@ def _legende_origines(d: pd.DataFrame, suffixe: str = ""):
     presentes = [o for o in ORIGINES if (d["Origine posée"].astype(str) == o).any()]
     autres = sorted(set(d["Origine posée"].astype(str)) - set(ORIGINES))
     return [_trait(ORIGINES[o][0], f"Pièce posée {o.lower()}{suffixe}", ORIGINES[o][1]) for o in presentes] + \
-           [_trait(GRIS_FONCE, f"Origine « {o} »", "D") for o in autres]
+           [_trait(GRIS_FONCE, f"Origine « {_court(o, 24)} »", "D") for o in autres[:3]]
 
 
 def _taux_precoce(ctx):
@@ -785,7 +901,7 @@ def _taux_precoce(ctx):
             ax.text(1.015, y, f"{_fr(r['Défaillances ELF'])} / {_fr(r['Pièces posées (même période)'])}", transform=ax.get_yaxis_transform(),
                     ha="left", va="center", fontsize=T_NOTE, color=ENCRE_2)
     _habiller_references(ax, centres, etiquettes)
-    ax.set_xlim(0, float(np.nanmax(d[["_t", "_h"]].to_numpy(float))) * 1.08)
+    ax.set_xlim(0, _etendue(np.nanmax(d[["_t", "_h"]].to_numpy(float)), 0.01) * 1.08)
     haut = ax.get_xlim()[1]
     ax.xaxis.set_major_formatter(_fmt(1 if haut < 0.2 else 0, pct=True))
     _axe(ax, "x", xlabel="Taux de défaillance précoce (défaillances pour 100 pièces posées)")
@@ -800,7 +916,8 @@ def _kaplan_meier(ctx):
     d = t.assign(_t=_num(t, "t"), _s=_num(t, "S(t)")).dropna(subset=["_t", "_s"])
     if not len(d):
         return None
-    refs = list(pd.unique(d["Référence"]))[:6]
+    toutes = list(pd.unique(d["Référence"]))
+    refs, en_trop = toutes[:6], len(toutes) - 6
     d = d[d["Référence"].isin(refs)]
     n = len(refs)
     ncol = 2 if n == 4 else min(n, 3)
@@ -809,6 +926,8 @@ def _kaplan_meier(ctx):
     sous = ("Parmi les pièces qui ont défailli : part de celles qui tenaient encore après t jours. Toutes les courbes finissent à 0 % parce que "
             "le fichier ne contient que des défaillances, aucune pièce encore en service.")
     note = "Ces courbes comparent la vitesse des défaillances précoces entre origines ; elles ne donnent ni une durée de vie ni une probabilité de panne."
+    if en_trop > 0:
+        note += f" {_pluriel(en_trop, 'autre référence', 'autres références')} dans la table."
     fig, corps = _cadre(ctx, 2.35 * nlig + 0.2, "Délai avant défaillance des pièces défaillantes, par origine (Kaplan-Meier)", sous, note,
                         _legende_origines(d), colonnes=3)
     grille = corps.subgridspec(nlig, ncol, wspace=0.05, hspace=0.1)
@@ -829,8 +948,9 @@ def _kaplan_meier(ctx):
             pas = max(len(x) // 5, 1)
             ax.plot(x[1::pas], s[1::pas], linestyle="none", marker=marq, markersize=5.5, markerfacecolor=coul, markeredgecolor=SURFACE, markeredgewidth=0.8, zorder=4)
             nb = _num(k, "défaillances").sum() if "défaillances" in k else len(k)
-            effectifs.append(f"{o.lower()} : {_fr(nb)}")
-        ax.text(0.98, 0.96, "défaillances\n" + "\n".join(effectifs), transform=ax.transAxes, ha="right", va="top", fontsize=T_NOTE, color=ENCRE_2, linespacing=1.3)
+            effectifs.append(f"{_court(o.lower(), 18)} : {_fr(nb)}")
+        ax.text(0.98, 0.96, "défaillances\n" + "\n".join(effectifs), transform=ax.transAxes, ha="right", va="top", fontsize=T_NOTE, color=ENCRE_2, linespacing=1.3,
+                zorder=5, bbox={"facecolor": SURFACE, "edgecolor": "none", "pad": 1.5, "alpha": 0.85})    # reste lisible si une courbe passe derrière
         derniere_ligne, premiere_colonne = i // ncol == nlig - 1 or i + ncol >= n, i % ncol == 0
         _axe(ax, "y", xlabel="Jours depuis la pose" if derniere_ligne else None, ylabel="Part encore en service" if premiere_colonne else None,
              titre=_lib(r, desc.get(str(r), ""), 20 if ncol == 3 else 34))
@@ -838,7 +958,7 @@ def _kaplan_meier(ctx):
             ax.tick_params(labelbottom=False)
         if not premiere_colonne:
             ax.tick_params(labelleft=False)
-    premier.set_xlim(0, tmax * 1.04)
+    premier.set_xlim(-0.025 * tmax if tmax > 0 else -0.5, tmax * 1.04 if tmax > 0 else 1.0)      # marge à gauche : une défaillance au jour 0 reste visible
     premier.set_ylim(0, 1.04)
     premier.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
     premier.yaxis.set_major_formatter(_fmt(pct=True))
@@ -862,34 +982,43 @@ def _forme_weibull(ctx):
         return None
     lignes, centres, etiquettes, en_trop = _rangees_par_reference(d, ctx)
     sous = ("k < 1 : défaillances surtout au début (mortalité infantile). k proche de 1 : risque constant. k > 1 : le risque croît avec l'âge (usure). "
-            + ("Trait : intervalle à 90 % sur k." if intervalle else "À droite : nombre de défaillances datées qui fondent l'estimation."))
+            + ("Trait : intervalle à 90 % sur k. " if intervalle and d[["_b", "_h"]].notna().all(axis=1).any() else "")
+            + ("À droite : nombre de défaillances datées qui fondent l'estimation." if "elf_days renseigné" in d else "")).strip()
     note = ("Forme estimée sur des défaillances précoces seulement (fenêtre d'observation tronquée) : elle décrit le début de vie, "
             "pas la durée de vie. ")
-    if not intervalle:
+    if not intervalle or not d[["_b", "_h"]].notna().all(axis=1).any():
         note += "L'intervalle d'incertitude sur k n'est pas calculé : avec peu de défaillances, k est imprécis. "
     if sans:
-        note += f"{_pluriel(sans, 'ligne')} avec moins de 3 défaillances : k inconnu, non tracé. "
+        note += f"{_pluriel(sans, 'ligne')} sans k calculé (trop peu de défaillances datées) : k inconnu, non tracé. "
     if en_trop > 0:
-        note += f"{_pluriel(en_trop, 'autre référence', 'autres références')} dans la table."
+        note += f"{_pluriel(en_trop, 'autre référence', 'autres références')} dans la table. "
+    # L'axe suit les valeurs de k ; un intervalle très large (peu de défaillances) est coupé au bord droit plutôt que d'écraser tous les points à gauche.
+    k_max = float(d["_k"].max())
+    h_max = float(d["_h"].max()) if d["_h"].notna().any() else k_max
+    haut = max(k_max * 1.12, 1.6, min(h_max * 1.05, max(k_max * 1.8, 3.0)))
+    coupes = int((d["_h"] > haut).sum())
+    if coupes:
+        note += f"Flèche au bord droit : l'intervalle continue au-delà du cadre (jusqu'à {_fr(h_max, 1)} au plus ; valeurs dans la table)."
     legende = _legende_origines(d) + [_pave("#e9e8e2", "Zone 0,9 à 1,1 : risque constant")]
     fig, corps = _cadre(ctx, 0.75 + 0.62 * len(centres), "Forme de Weibull k des défaillances précoces, par référence et origine", sous, note.strip(),
                         legende, colonnes=4)
     ax = fig.add_subplot(corps)
-    haut = max(float(np.nanmax(d[["_k", "_h"]].to_numpy(float))) * 1.12, 1.6)
     ax.axvspan(0.9, 1.1, color="#e9e8e2", linewidth=0, zorder=0.6)        # seuils de lecture de erc.fiabilite.lecture_forme
     ax.axvline(1.0, color=ENCRE_2, linewidth=0.9, zorder=1.5)
     for y, r, o in lignes:
         coul, marq = ORIGINES.get(o, (GRIS_FONCE, "D"))
         if np.isfinite(r["_b"]) and np.isfinite(r["_h"]):
-            ax.plot([r["_b"], r["_h"]], [y, y], color=coul, linewidth=2.0, solid_capstyle="round", zorder=2)
+            ax.plot([r["_b"], min(r["_h"], haut)], [y, y], color=coul, linewidth=2.0, solid_capstyle="round" if r["_h"] <= haut else "butt", zorder=2)
+            if r["_h"] > haut:
+                ax.plot([haut], [y], linestyle="none", marker=">", markersize=6, markerfacecolor=coul, markeredgecolor=coul, clip_on=False, zorder=2.5)
         ax.plot([r["_k"]], [y], linestyle="none", marker=marq, markersize=7.5, markerfacecolor=coul, markeredgecolor=SURFACE, markeredgewidth=1.0, zorder=3)
         if "elf_days renseigné" in d:
             ax.text(1.015, y, f"n = {_fr(r['elf_days renseigné'])}", transform=ax.get_yaxis_transform(), ha="left", va="center", fontsize=T_NOTE, color=ENCRE_2)
     _habiller_references(ax, centres, etiquettes)
     ax.set_xlim(0, haut)
-    for x, texte, ha in ((0.86, "mortalité infantile", "right"), (1.14, "usure", "left")):
+    # Deux repères de lecture de part et d'autre de k = 1 ; ils s'écartent l'un de l'autre, donc ne se recouvrent jamais.
+    for x, texte, ha in ((0.88, "mortalité infantile (k < 1)", "right"), (1.12, "usure (k > 1)", "left")):
         ax.text(x, 1.01, texte, transform=ax.get_xaxis_transform(), ha=ha, va="bottom", fontsize=T_NOTE, color=ENCRE_2)
-    ax.text(1.0, 1.01, "k = 1", transform=ax.get_xaxis_transform(), ha="center", va="bottom", fontsize=T_NOTE, color=ENCRE, fontweight="bold")
     ax.xaxis.set_major_locator(MaxNLocator(nbins=7, steps=[1, 2, 5, 10]))
     ax.xaxis.set_major_formatter(_fmt(1))
     _axe(ax, "x", xlabel="Forme de Weibull k")
@@ -902,15 +1031,16 @@ def _age_du_donneur(ctx):
     if t is None:
         return None
     d = t.assign(_k=_num(t, "Forme k"), _a=_num(t, "Âge du donneur (j)"), _p=_num(t, "P(tenir la garantie)")).dropna(subset=["_k", "_a", "_p"])
+    d = d[(d["_p"] >= 0) & (d["_p"] <= 1) & (d["_a"] >= 0)]         # une probabilité est entre 0 et 1, un âge est positif
     ks = sorted(d["_k"].unique())[:3]
     if not ks or d["_a"].nunique() < 2:
         return None
-    garantie = _objet(ctx, "fiabilite", "Notes").get("garantie_jours")
+    garantie = _reel(_objet(ctx, "fiabilite", "Notes").get("garantie_jours"))
     teintes = [BLEU_CLAIR, BLEU, BLEU_FONCE][3 - len(ks):] if len(ks) < 3 else [BLEU_CLAIR, BLEU, BLEU_FONCE]
     marques = ["o", "s", "^"]
     lecture = {k: str(v) for k, v in zip(d["_k"], d["Lecture"])} if "Lecture" in d else {}
     legende = [_trait(c, f"k = {_fr(k, 1)}" + (f" : {lecture[k]}" if k in lecture else ""), m) for k, c, m in zip(ks, teintes, marques)]
-    sous = ("Calcul théorique (loi de Weibull, échelle arbitraire de 1 000 jours)" + (f", garantie de {_fr(garantie)} jours" if garantie else "")
+    sous = ("Calcul théorique (loi de Weibull, échelle arbitraire de 1 000 jours)" + (f", garantie de {_fr(garantie)} jours" if np.isfinite(garantie) else "")
             + ". Ce ne sont pas des mesures de l'atelier : seule la tendance se lit.")
     fig, corps = _cadre(ctx, 3.1, "Illustration : effet de l'âge du donneur sur la tenue de la garantie, selon la forme k", sous, "", legende, colonnes=3)
     ax = fig.add_subplot(corps)
@@ -935,7 +1065,8 @@ def _q_par_piece(ctx):
     d = t.assign(_q=_num(t, "q moyen"), _b=_num(t, "q bas (5 %)"), _h=_num(t, "q haut (95 %)"))
     d["_q0"] = _num(d, "q0") if "q0" in d else np.nan
     d["_n"] = _num(d, "Pièces testées").fillna(0) if "Pièces testées" in d else 0.0
-    d = d.dropna(subset=["_q"])
+    sans_q = int(d["_q"].isna().sum())
+    d = d.dropna(subset=["_q", "Type de FRU", "Pièce"])
     if not len(d):
         return None
     desc, descf = _descriptions(ctx), _descriptions_fru(ctx)
@@ -953,15 +1084,18 @@ def _q_par_piece(ctx):
             y += 1.0
         y += 0.5
         gardes += len(g)
-    legende = [_trait(BLEU, "Après audit : moyenne et intervalle à 90 %", "o"),
-               _trait(BLEU_CLAIR, "Sans audit : a priori seul et son intervalle à 90 %", "D", plein=False, taille=6),
-               _trait(ENCRE_2, "A priori q0 tiré de la consommation", "D", epaisseur=0, plein=False, taille=6)]
+    sans_audit = _trait(BLEU_CLAIR, "Sans audit : a priori seul et son intervalle à 90 %", "D", plein=False, taille=6)
+    sans_audit.set_markeredgecolor(BLEU)                          # même losange que sur le tracé : contour bleu, trait bleu clair
+    legende = [_trait(BLEU, "Après audit : moyenne et intervalle à 90 %", "o"), sans_audit,
+               _trait(ENCRE_2, "A priori q0 tiré de la consommation, avant l'audit", "D", epaisseur=0, plein=False, taille=6)]
     sous = ("q = probabilité qu'une pièce extraite d'un FRU rebuté soit réutilisable. L'audit de démontage déplace l'a priori et resserre l'intervalle ; "
             "sans pièce testée, la valeur n'est qu'une hypothèse tirée de la consommation.")
     note = ("L'a priori q0 dépend du nombre de pièces par FRU, inconnu avant un audit de démontage (le maximum observé sur un PO n'est qu'un minimum). "
             "À droite : pièces testées lors de l'audit.")
+    if sans_q:
+        note += f" {_pluriel(sans_q, 'couple')} (FRU, pièce) sans valeur de q, faute d'audit et d'a priori : non tracé{'s' if sans_q > 1 else ''}."
     if coupes:
-        note += f" {_pluriel(coupes, 'couple')} (FRU, pièce) non tracé{'s' if coupes > 1 else ''} : voir la table."
+        note += f" {_pluriel(coupes, 'couple')} (FRU, pièce) non tracé{'s' if coupes > 1 else ''}, faute de place : voir la table."
     fig, corps = _cadre(ctx, 0.5 + 0.235 * y, "Probabilité de réemploi q par type de FRU et par pièce", sous, note, legende, colonnes=2)
     ax = fig.add_subplot(corps)
     for yi, r in rangees:
@@ -995,24 +1129,24 @@ def _regret(ctx):
     t = _table(ctx, "rex", "Banc d'essai (courbes de regret)")
     if t is None:
         return None
-    politiques = [c for c in t.columns if c != "Pièce n°" and pd.api.types.is_numeric_dtype(t[c]) and t[c].notna().any()]
+    politiques = [c for c in t.columns if c != "Pièce n°" and pd.api.types.is_numeric_dtype(t[c]) and _num(t, c).notna().any()]
     if not politiques or len(t) < 2:
         return None
     x = (_num(t, "Pièce n°") + 1).to_numpy(float) if "Pièce n°" in t else np.arange(1, len(t) + 1, dtype=float)
-    if not np.isfinite(x).all():
+    if not np.isfinite(x).all() or (x <= 0).any() or (np.diff(x) <= 0).any():
         x = np.arange(1, len(t) + 1, dtype=float)
     couleurs = {"Thompson": BLEU, "Glouton": ORANGE, "A priori seul": GRIS_FONCE}
     libres = [VERT_EAU, JAUNE, MAGENTA]                           # règles de décision au nom inconnu : teintes suivantes
     groupes = []                                                  # courbes confondues : un seul trait, une seule étiquette
     for p in politiques:
-        v = t[p].to_numpy(float)
+        v = _num(t, p).to_numpy(float)
         for g in groupes:
             if np.allclose(g[1], v, rtol=1e-9, atol=1e-9, equal_nan=True):
                 g[0].append(p)
                 break
         else:
             groupes.append(([p], v))
-    param = _objet(ctx, "rex", "Notes").get("banc_essai") or {}
+    param = _dico(_objet(ctx, "rex", "Notes").get("banc_essai"))
     banc = _table(ctx, "rex", "Banc d'essai des politiques")
     if not param and banc is not None:
         param = dict(banc.attrs)
@@ -1020,12 +1154,13 @@ def _regret(ctx):
     if param:
         morceaux = [(f"part réelle de pièces bonnes {_fr(param.get('q vrai'), 2)}", "q vrai"), (f"a priori {_fr(param.get('q0'), 2)}", "q0"),
                     (f"réemploi choisi au-dessus de {_fr(param.get('Seuil q* (réemploi si q > q*)'), 2)}", "Seuil q* (réemploi si q > q*)")]
-        sous += " : " + ", ".join(m for m, cle in morceaux if param.get(cle) is not None)
+        connus = [m for m, cle in morceaux if np.isfinite(_reel(param.get(cle)))]
+        sous += (" : " + ", ".join(connus)) if connus else ""
     sous += ". Regret = gain perdu par rapport à une règle qui connaîtrait la vraie part de pièces bonnes."
     legende, traces = [], []
     for noms, v in groupes:
         coul = next((couleurs[n] for n in noms if n in couleurs and n != "A priori seul"), None) or couleurs.get(noms[0]) or (libres.pop(0) if libres else GRIS)
-        nom = " et ".join(noms) + (" (courbes confondues)" if len(noms) > 1 else "")
+        nom = " et ".join(_court(n, 28) for n in noms) + (" (courbes confondues)" if len(noms) > 1 else "")
         legende.append(_trait(coul, nom))
         traces.append((nom, v, coul))
     fig, corps = _cadre(ctx, 3.3, "Banc d'essai synthétique : regret cumulé des règles de décision", sous,
@@ -1037,12 +1172,12 @@ def _regret(ctx):
         fin = float(v[-1])
         if np.isfinite(fin):
             _etiquette(ax, f"{_fr(fin)} €", (x[-1], fin), decalage=(6, 0))
-    ax.set_xlim(0, float(x[-1]) * 1.1)
-    ax.set_ylim(0, float(np.nanmax([np.nanmax(v) for _, v, _c in traces])) * 1.08)
+    ax.set_xlim(0, _etendue(x[-1]) * 1.1)
+    ax.set_ylim(0, _etendue(np.nanmax([np.nanmax(v) for _, v, _c in traces])) * 1.08)
     ax.xaxis.set_major_formatter(_fmt())
     ax.yaxis.set_major_formatter(_fmt())
     _axe(ax, "y", xlabel="Pièces traitées depuis le début", ylabel="Regret cumulé moyen (€)")
-    return ("Banc d'essai SYNTHÉTIQUE du choix réemploi ou recyclage : regret cumulé de trois règles de décision quand l'a priori est trop pessimiste. "
+    return (f"Banc d'essai SYNTHÉTIQUE du choix réemploi ou recyclage : regret cumulé de {_pluriel(len(politiques), 'règle')} de décision quand l'a priori est trop pessimiste. "
             "Lecture : une courbe qui s'aplatit a appris ; une droite qui monte répète la même erreur à chaque pièce.", fig)
 
 
@@ -1058,8 +1193,9 @@ def _metriques(ctx):
         ("Couverture IC90", "Couverture de l'intervalle à 90 %", 0.90, "cible", True)) if c in t and _num(t, c).notna().any()]
     if not cadres:
         return None
-    ordre = ["Bêta-binomial"] + [m for m in t["Modèle"].astype(str) if m != "Bêta-binomial"]
-    d = t.assign(_m=t["Modèle"].astype(str)).set_index("_m").reindex([m for m in ordre if m in set(t["Modèle"].astype(str))])
+    t = t.assign(_m=t["Modèle"].astype(str).map(lambda m: _court(m, 24))).drop_duplicates("_m")
+    ordre = ["Bêta-binomial"] + [m for m in t["_m"] if m != "Bêta-binomial"]
+    d = t.set_index("_m").reindex([m for m in ordre if m in set(t["_m"])])
     n = len(d)
     lots = _num(t, "Lots").max() if "Lots" in t else np.nan
     pieces = _num(t, "Pièces").max() if "Pièces" in t else np.nan
@@ -1076,12 +1212,15 @@ def _metriques(ctx):
     for i, (c, titre, repere, texte, pct) in enumerate(cadres):
         ax = fig.add_subplot(grille[i])
         v = _num(d, c).to_numpy(float)
-        haut = max(float(np.nanmax(v)), repere or 0.0) * 1.42
+        if c == "Couverture IC90":
+            v = np.where((v >= 0) & (v <= 1), v, np.nan)             # une part de lots est entre 0 et 1
+        v = np.where(v >= 0, v, np.nan)                              # ces mesures ne sont jamais négatives
+        haut = _etendue(max(float(np.nanmax(v)) if np.isfinite(v).any() else 0.0, repere or 0.0)) * 1.42
         if c == "Couverture IC90":
             haut = 1.3
         for yi, vi, m in zip(y, v, d.index):
-            if not np.isfinite(vi):
-                _etiquette(ax, "sans objet", (0, yi), couleur=ENCRE_3, style="italic")
+            if not np.isfinite(vi):                      # une référence sans intervalle n'a pas de couverture ; ailleurs, la valeur manque
+                _etiquette(ax, "sans objet" if c == "Couverture IC90" and m != "Bêta-binomial" else "inconnu", (0, yi), couleur=ENCRE_3, style="italic")
                 continue
             ax.barh([yi], [vi], height=0.58, color=BLEU if m == "Bêta-binomial" else GRIS_FONCE, edgecolor="none", zorder=2)
             _etiquette(ax, _pct(vi, 1) if pct else _fr(vi, 3), (vi, yi), fond=True)
@@ -1113,7 +1252,8 @@ def _reglage_n0(ctx):
     if len(d) < 2:
         return None
     d["_c"] = _num(d, "Couverture IC90") if "Couverture IC90" in d else np.nan
-    retenu = _objet(ctx, "rex", "Notes").get("N0")
+    retenu = _reel(_objet(ctx, "rex", "Notes").get("N0"))
+    retenu = retenu if np.isfinite(retenu) else None
     x = np.arange(len(d))
     mini = int(np.argmin(d["_l"].to_numpy(float)))
     deux = d["_c"].notna().any()
@@ -1121,7 +1261,7 @@ def _reglage_n0(ctx):
     n_min = d["_n"].iloc[mini]
     note = f"L'axe de la log-perte ne part pas de zéro : les écarts sont faibles. Sur ces données, elle est la plus basse pour N0\u00a0=\u00a0{_fr(n_min)}."
     if retenu is not None:
-        note += f" Le modèle utilise N0\u00a0=\u00a0{_fr(retenu)} (valeur fixée dans le code)" + ("." if float(retenu) == float(n_min) else " : à revoir si l'écart se confirme sur l'audit réel.")
+        note += f" Le modèle utilise N0\u00a0=\u00a0{_fr(retenu)}" + ("." if float(retenu) == float(n_min) else " : réglage à revoir si l'écart se confirme sur l'audit réel.")
     fig, corps = _cadre(ctx, 2.7, "Réglage de la force de l'a priori N0 du modèle de Rex", sous, note)
     grille = corps.subgridspec(1, 2 if deux else 1, wspace=0.08)
     ax = fig.add_subplot(grille[0])
@@ -1158,6 +1298,21 @@ def _reglage_n0(ctx):
 
 
 # =========================================================================== 5. ligne de démontage et de tri
+def _phrase_incomplets(ctx) -> str:
+    """« 1 type de FRU sur 4 est exclu du calcul… » d'après les notes de l'étape ligne ; phrase générale sans ces notes."""
+    notes = _objet(ctx, "ligne", "Notes")
+    inc, tous = _reel(notes.get("types_incomplets")), _reel(notes.get("types_de_fru"))
+    if not (np.isfinite(inc) and np.isfinite(tous) and tous > 0):
+        return " Les types de FRU aux paramètres incomplets sont exclus du calcul."
+    if inc <= 0:
+        return ""
+    if inc >= tous:
+        return (f" Aucun des {_fr(tous)} types de FRU n'a tous ses paramètres : rien n'est calculable tant que le classeur de paramètres n'est pas complété."
+                if tous > 1 else " Le seul type de FRU du modèle n'a pas tous ses paramètres : rien n'est calculable.")
+    return (f" {_fr(inc)} type{'s' if inc > 1 else ''} de FRU sur {_fr(tous)} {'sont exclus' if inc > 1 else 'est exclu'} du calcul, faute de paramètres : "
+            "le gisement réel est sous-estimé.")
+
+
 def _nom_carcasse() -> str:
     try:
         from .parametres import CARCASSE
@@ -1180,7 +1335,7 @@ def _options_par_piece(ctx):
     en_trop, frus = frus[6:], frus[:6]
     carcasse = _nom_carcasse()
     desc, descf = _descriptions(ctx), _descriptions_fru(ctx)
-    modele = _objet(ctx, "ligne", "Modèle").get("frus") or {}
+    modele = _dico(_objet(ctx, "ligne", "Modèle").get("frus"))
     tailles = [int(d["Type de FRU"].eq(f).sum()) for f in frus]
     legende = [_pave(BLEU, "Réemploi : démontage soigné, test, pièce réutilisée"), _pave(ORANGE, "Recyclage trié : pièce vendue au kilo"),
                _trait(ENCRE_3, "Inconnu : une donnée manque, la valeur n'est pas calculée", "s", epaisseur=0, plein=False, taille=5)]
@@ -1213,13 +1368,13 @@ def _options_par_piece(ctx):
                     texte = "sans objet : la carcasse ne se réemploie pas"
                 else:
                     champs = [c.strip() for c in manque.split(",") if c.strip()]
-                    texte = "inconnu" + (f" : il manque {', '.join(champs[:3])}" + ("…" if len(champs) > 3 else "") if champs else "")
+                    texte = "inconnu" + (f" : il manque {_court(', '.join(champs[:3]), 72)}" + ("…" if len(champs) > 3 else "") if champs else "")
                 ax.plot([0], [yi + dy], linestyle="none", marker="s", markersize=4.5, markerfacecolor=SURFACE, markeredgecolor=coul, markeredgewidth=1.2, zorder=3)
                 _etiquette(ax, texte, (0, yi + dy), decalage=(6, 0), taille=T_NOTE, couleur=ENCRE_3, style="italic")
         _zero(ax)
         libelles = []
         for p in g["Pièce"]:
-            de = desc.get(str(p)) or ((modele.get(f) or {}).get("pieces") or {}).get(p, {}).get("description", "")
+            de = desc.get(str(p)) or _dico(_dico(_dico(modele.get(f)).get("pieces")).get(p)).get("description", "")
             libelles.append("Carcasse (châssis et reste du FRU)" if str(p) == carcasse else _lib(p, de, 26))
         ax.set_yticks(list(y))
         ax.set_yticklabels(libelles)
@@ -1238,6 +1393,8 @@ def _options_par_piece(ctx):
             ax.set_xlabel("Valeur nette par FRU, par rapport à la pièce laissée dans le FRU (€)", fontsize=T_AXE, color=ENCRE_2, labelpad=5)
     premier.set_xlim(bas - marge * (1.0 if bas < 0 else 0.25), haut + marge)
     premier.xaxis.set_major_formatter(_fmt())
+    if not np.isfinite(finis).any():                           # aucune valeur calculable : pas d'échelle inventée, seulement le zéro
+        premier.set_xticks([0])
     return ("Pour chaque pièce de chaque type de FRU : ce que rapporte le réemploi (bleu) et ce que rapporte le recyclage trié (orange), par FRU "
             "traité, comparés à la pièce laissée dans le FRU. Une option dont une donnée manque est écrite « inconnu », jamais tracée à zéro.", fig)
 
@@ -1246,22 +1403,24 @@ def _actuel_contre_ligne(ctx):
     t = _table(ctx, "ligne", "Actuel contre ligne", ["Poste (€/an)", "Actuel", "Avec la ligne"])
     if t is None:
         return None
+    if not t["Poste (€/an)"].notna().any():
+        return None
     d = t.assign(_a=_num(t, "Actuel"), _l=_num(t, "Avec la ligne"), _p=t["Poste (€/an)"].fillna("(poste sans nom)").astype(str))
     total = d[d["_p"].str.upper().eq("TOTAL")]
     d = pd.concat([d[~d["_p"].str.upper().eq("TOTAL")], total], ignore_index=True)
     n = len(d)
     ecart = float(total["_l"].iloc[0] - total["_a"].iloc[0]) if len(total) else np.nan
-    attrs = _objet(ctx, "ligne", "Notes").get("actuel_contre_ligne") or dict(t.attrs)
+    attrs = _dico(_objet(ctx, "ligne", "Notes").get("actuel_contre_ligne")) or dict(t.attrs)
     sous = "Flux annuels au centre des plages de paramètres : un coût est négatif, un gain positif."
     if np.isfinite(ecart):
         sous += f" Total avec la ligne moins total actuel : {_fr(ecart, signe=True)} € par an."
     elif len(total):
         sous += " Un poste est inconnu : le total n'est pas calculé."
     note = ""
-    m, md, part = attrs.get("Masse rebutée (kg/an)"), attrs.get("Masse détournée (kg/an)"), attrs.get("Part détournée")
-    if m is not None and md is not None and np.isfinite(m) and np.isfinite(md):
-        note = f"Masse détournée de la benne actuelle : {_fr(md)} kg par an sur {_fr(m)} kg rebutés" + (f" ({_pct(part)})." if part is not None and np.isfinite(part) else ".")
-    note += " Estimation : les types de FRU aux paramètres incomplets sont exclus du calcul."
+    m, md, part = (_reel(attrs.get(k)) for k in ("Masse rebutée (kg/an)", "Masse détournée (kg/an)", "Part détournée"))
+    if np.isfinite(m) and np.isfinite(md):
+        note = f"Masse détournée de la benne actuelle : {_fr(md)} kg par an sur {_fr(m)} kg rebutés" + (f" ({_pct(part)})." if np.isfinite(part) else ".")
+    note += " Estimation, pas un résultat constaté." + _phrase_incomplets(ctx)
     legende = [_pave(GRIS_FONCE, "Situation actuelle : tout part chez le recycleur actuel"), _pave(BLEU, "Avec la ligne de démontage et de tri")]
     fig, corps = _cadre(ctx, 0.65 + 0.78 * n, "Situation actuelle contre ligne de démontage et de tri, poste par poste", sous, note.strip(), legende, colonnes=2)
     ax = fig.add_subplot(corps)
@@ -1282,10 +1441,12 @@ def _actuel_contre_ligne(ctx):
         ax.axhline(n - 1.5, color=AXE, linewidth=0.9, zorder=1)
     _zero(ax)
     ax.set_yticks(list(y))
-    ax.set_yticklabels(["\n".join(textwrap.wrap(p if p.upper() != "TOTAL" else "Total", 30)) for p in d["_p"]])
+    ax.set_yticklabels(["\n".join(textwrap.wrap(_court(p, 88) if p.upper() != "TOTAL" else "Total", 30)) for p in d["_p"]])
     ax.set_ylim(n - 0.45, -0.55)
     ax.set_xlim(bas - etendue * (0.2 if bas < 0 else 0.02), haut + etendue * 0.2)
     ax.xaxis.set_major_formatter(_fmt())
+    if not (np.isfinite(valeurs) & (valeurs != 0)).any():      # rien de calculable : pas d'échelle inventée, seulement le zéro
+        ax.set_xticks([0])
     _axe(ax, "x", xlabel="Euros par an")
     for etiq, p in zip(ax.get_yticklabels(), d["_p"]):
         if p.upper() == "TOTAL":
@@ -1299,7 +1460,7 @@ def _semaine_par_semaine(ctx):
     t = _table(ctx, "ligne", "Période par période", ["Semaine", "Résultat (€)"])
     if t is None:
         return None
-    d = t.assign(_s=pd.to_datetime(t["Semaine"], errors="coerce"), _r=_num(t, "Résultat (€)")).dropna(subset=["_s"]).sort_values("_s")
+    d = t.assign(_s=_dates(t["Semaine"]), _r=_num(t, "Résultat (€)")).dropna(subset=["_s"]).sort_values("_s")
     if not len(d) or not d["_r"].notna().any():
         return None
     rangs, libelle, debut = _semaines(d["_s"])
@@ -1310,16 +1471,16 @@ def _semaine_par_semaine(ctx):
         d["_c"] = d["_r"].cumsum()
     r = d["_r"].to_numpy(float)
     pertes, inconnues = int((r < 0).sum()), int(np.isnan(r).sum())
-    attrs = _objet(ctx, "ligne", "Notes").get("periode_par_periode") or dict(t.attrs)
+    attrs = _dico(_objet(ctx, "ligne", "Notes").get("periode_par_periode")) or dict(t.attrs)
     sous = (f"Le modèle rejoué sur le flux réel de chaque semaine : coût fixe payé chaque semaine, pas de stock d'une semaine à l'autre. "
             f"{_pluriel(pertes, 'semaine')} en perte sur {_fr(len(d) - inconnues)}.")
-    a, b, c = (attrs.get(k) for k in ("Résultat annualisé, période par période (€)", "Résultat du modèle annuel au flux moyen (€)", "Coût de la variabilité du flux (€/an)"))
+    a, b, c = (_reel(attrs.get(k)) for k in ("Résultat annualisé, période par période (€)", "Résultat du modèle annuel au flux moyen (€)", "Coût de la variabilité du flux (€/an)"))
     note = ""
-    if all(v is not None and np.isfinite(v) for v in (a, b, c)):
+    if all(np.isfinite(v) for v in (a, b, c)):
         note = (f"Résultat annualisé semaine par semaine : {_fr(a)} € ; modèle annuel au flux moyen : {_fr(b)} € ; "
                 f"l'écart, {_fr(c)} € par an, est le coût de l'irrégularité du flux.")
     if inconnues:
-        note += f" {_pluriel(inconnues, 'semaine')} au résultat inconnu : sans barre."
+        note += f" {_pluriel(inconnues, 'semaine')} au résultat inconnu : sans barre, marquée{'s' if inconnues > 1 else ''} « inconnu »."
     legende = [_pave(BLEU, "Semaine bénéficiaire"), _pave(ROUGE, "Semaine en perte")] if pertes else None
     fig, corps = _cadre(ctx, 4.5, "Résultat de la ligne semaine par semaine, puis cumulé", sous, note.strip(), legende, colonnes=2)
     grille = corps.subgridspec(2, 1, height_ratios=[1.15, 1.0], hspace=0.1)
@@ -1330,6 +1491,9 @@ def _semaine_par_semaine(ctx):
         if v < 0:
             _etiquette(ax1, _fr(v) + " €", (xi, v), decalage=(0, -3), ha="center", va="top", taille=T_NOTE)
     _zero(ax1, "h")
+    absentes = sorted(set(range(n_sem)) - set(int(v) for v in x))
+    _semaines_absentes(ax1, absentes)
+    _semaines_absentes(ax1, [int(xi) for xi, v in zip(x, r) if not np.isfinite(v)], "inconnu")
     etendue = float(np.nanmax(r) - min(np.nanmin(r), 0.0)) or 1.0
     ax1.set_ylim(min(float(np.nanmin(r)), 0.0) - etendue * 0.14, float(np.nanmax(r)) + etendue * 0.08)
     ax1.yaxis.set_major_formatter(_fmt())
@@ -1370,7 +1534,8 @@ def _monte_carlo(ctx):
     centres = (bornes[:-1] + bornes[1:]) / 2
     sous = (f"{_fr(len(x))} tirages des plages de paramètres ; la ligne est ré-optimisée à chaque tirage. "
             f"Part des tirages où la ligne est rentable : {_pct(rentable)}.")
-    note = "Les plages viennent du classeur de paramètres : des plages trop étroites donnent une assurance qui n'existe pas. Les types de FRU incomplets sont exclus."
+    note = ("Les plages viennent du classeur de paramètres : des plages trop étroites donnent une assurance qui n'existe pas ; "
+            "un paramètre saisi comme une valeur unique est tenu pour certain.") + _phrase_incomplets(ctx)
     if inconnus:
         note += f" {_pluriel(inconnus, 'tirage')} sans résultat calculable : non compté{'s' if inconnus > 1 else ''}."
     pertes = bool((x <= 0).any())
@@ -1403,8 +1568,8 @@ def _sensibilite_heures(ctx):
         return None
     col_v = "Valeur d'une heure opérateur en plus (€ net)"
     d["_v"] = _num(d, col_v) if col_v in d else np.nan
-    capacite = (_objet(ctx, "ligne", "Notes").get("resume") or {}).get("Capacité (h/an)")
-    capacite = float(capacite) if capacite is not None and np.isfinite(capacite) else None
+    capacite = _reel(_dico(_objet(ctx, "ligne", "Notes").get("resume")).get("Capacité (h/an)"))
+    capacite = capacite if np.isfinite(capacite) else None
     deux = d["_v"].notna().any()
     sous = "La ligne est ré-optimisée pour chaque niveau d'heures disponibles, les autres paramètres restant au centre de leur plage."
     note = ("Valeur d'une heure en plus : marge nette qu'apporterait une heure opérateur supplémentaire ; elle tombe à zéro quand tous les FRU "
@@ -1426,14 +1591,16 @@ def _sensibilite_heures(ctx):
         ax2 = fig.add_subplot(grille[1], sharex=ax1)
         axes.append(ax2)
         ax2.plot(d["_h"], d["_v"], color=BLEU, linewidth=1.9, marker="o", markersize=6.5, markeredgecolor=SURFACE, markeredgewidth=0.9, zorder=3)
-        ax2.set_ylim(0, max(float(d["_v"].max()), 1.0) * 1.25)
+        ax2.set_ylim(min(0.0, float(d["_v"].min())) * 1.15, max(float(d["_v"].max()), 1.0) * 1.25)
         ax2.yaxis.set_major_formatter(_fmt())
         ax2.yaxis.set_major_locator(MaxNLocator(nbins=5))
         _axe(ax2, "y", ylabel="€ par heure", titre="Valeur d'une heure opérateur supplémentaire")
         ax1.tick_params(labelbottom=False)
     axes[-1].set_xlabel("Heures opérateur disponibles par an", fontsize=T_AXE, color=ENCRE_2, labelpad=5)
-    ax1.set_xlim(0, float(d["_h"].max()) * 1.04)
+    ax1.set_xlim(0, _etendue(d["_h"].max()) * 1.04)
     ax1.xaxis.set_major_formatter(_fmt())
+    if capacite is not None and not (0 <= capacite <= float(d["_h"].max()) * 1.04):
+        capacite = None                                          # hors de la plage tracée : pas de repère
     if capacite is not None:
         for a in axes:
             a.axvline(capacite, color=ENCRE_2, linewidth=0.9, zorder=1.6)
@@ -1454,8 +1621,12 @@ def _preparation(ctx):
     t = _table(ctx, "ligne", "Paramètres effectifs", ["FRU", "Paramètre", "État"])
     if t is None:
         return None
-    obtenir = _table(ctx, "ligne", "Données à obtenir", ["Paramètre"])
-    bloquants = set(obtenir["Paramètre"].astype(str)) if obtenir is not None else None
+    # « Données à obtenir » liste les paramètres manquants qui bloquent un calcul. Table présente mais vide : rien ne
+    # bloque (tous les manquants sont facultatifs). Table absente : on ne sait pas, les manquants restent « manquants ».
+    obtenir = _table_meme_vide(ctx, "ligne", "Données à obtenir", ["Paramètre"])
+    bloquants = set(obtenir["Paramètre"].dropna().astype(str)) if obtenir is not None else None
+    if bloquants is not None and not bloquants and _reel(_objet(ctx, "ligne", "Notes").get("types_incomplets")) > 0:
+        bloquants = None                      # liste vide alors que des types de FRU sont incomplets : la liste n'a pas pu être établie
     d = t.dropna(subset=["FRU", "État"])
     if not len(d):
         return None
@@ -1464,8 +1635,9 @@ def _preparation(ctx):
         d.loc[d["_e"].eq("manquant") & d["Paramètre"].astype(str).isin(bloquants), "_e"] = "manquant, bloque un calcul"
         d.loc[d["_e"].eq("manquant"), "_e"] = "manquant, facultatif"
     etats = [("saisi", BLEU_FONCE, "Saisi dans le classeur de paramètres", "white"), ("tiré des données", BLEU_CLAIR, "Tiré des données", ENCRE),
-             ("manquant, facultatif", GRIS, "Manquant, facultatif (ne bloque aucun calcul)", ENCRE),
-             ("manquant, bloque un calcul", ORANGE, "Manquant, bloque un calcul", "white"), ("manquant", ORANGE, "Manquant", "white")]
+             # gris foncé : le gris clair se distingue mal du bleu clair voisin (écart contrôlé avec le script de validation des couleurs)
+             ("manquant, facultatif", GRIS_FONCE, "Manquant, facultatif (ne bloque aucun calcul)", ENCRE),
+             ("manquant, bloque un calcul", ORANGE, "Manquant, bloque un calcul", ENCRE), ("manquant", ORANGE, "Manquant", ENCRE)]
     etats = [e for e in etats if d["_e"].eq(e[0]).any()]
     if not etats:
         return None
@@ -1493,7 +1665,7 @@ def _preparation(ctx):
                 ax.text(gi + vi / 2.0, yi, _fr(vi), ha="center", va="center", fontsize=T_NOTE, color=encre, zorder=3)
         gauche = gauche + v
     for yi, f in zip(y, ordre):
-        nb = int(compte.at[f, "manquant, bloque un calcul"]) if "manquant, bloque un calcul" in compte else None
+        nb = None if bloquants is None else (int(compte.at[f, "manquant, bloque un calcul"]) if "manquant, bloque un calcul" in compte else 0)
         if nb is None:
             nb_m = int(compte.at[f, "manquant"]) if "manquant" in compte else 0
             texte = f"{_fr(nb_m)} manquant{'s' if nb_m > 1 else ''}" if nb_m else "aucun manquant"

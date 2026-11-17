@@ -1,12 +1,12 @@
 ﻿Indicateur;Valeur;Lecture
-Gain annuel par rapport à la situation actuelle;46 903 €;Total « avec la ligne » moins total « actuel », au centre des plages
+Gain annuel par rapport à la situation actuelle;42 361 €;Total « avec la ligne » moins total « actuel », au centre des plages
 Probabilité que la ligne soit rentable;100 %;400 tirages des plages de paramètres
-Résultat annuel : P5 / médiane / P95;27 726 € / 42 583 € / 57 350 €;Monte-Carlo
-Résultat annualisé, semaine par semaine;36 010 €;Flux hebdomadaire réel, coût fixe payé chaque semaine, pas de stock
-Coût de la variabilité du flux;10 893 €/an;Écart entre le modèle annuel au flux moyen et le calcul semaine par semaine
-Seuil de rentabilité;83 FRU/an;Coûts fixes annualisés ÷ marge moyenne par FRU
+Résultat annuel : P5 / médiane / P95;24 335 € / 38 295 € / 53 519 €;Monte-Carlo
+Résultat annualisé, semaine par semaine;32 468 €;Flux hebdomadaire réel, coût fixe payé chaque semaine, pas de stock
+Coût de la variabilité du flux;9 893 €/an;Écart entre le modèle annuel au flux moyen et le calcul semaine par semaine
+Seuil de rentabilité;90 FRU/an;Coûts fixes annualisés ÷ marge moyenne par FRU
 Retour sur investissement;0,6 ans;Investissement ÷ (marge variable − coûts fixes annuels)
 Heures utilisées / capacité;900 h / 900 h;Au centre des plages
-Valeur d'une heure opérateur en plus;52 €;Marge nette qu'apporterait une heure de plus (0 si la capacité n'est pas saturée)
-Masse détournée de la benne actuelle;24 644 kg/an;Pièces réemployées ou triées
+Valeur d'une heure opérateur en plus;50 €;Marge nette qu'apporterait une heure de plus (0 si la capacité n'est pas saturée)
+Masse détournée de la benne actuelle;24 665 kg/an;Pièces réemployées ou triées
 Types de FRU incomplets;1;FRU exclus du calcul faute de paramètres : voir « Données à obtenir »

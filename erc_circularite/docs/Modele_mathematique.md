@@ -61,11 +61,13 @@ $x_{f s_0 t}$ = FRU en scrap direct (décision A = non). Tout autre $s$ = FRU d�
 3. **Capacité = heures opérateur** : la place et le banc de test ne sont pas limitants (contraintes à ajouter si l'audit le montre).
 4. **Indépendance des pièces** d'une même FRU ; le facteur « FRU rebutée » du modèle de Rex corrige en moyenne.
 5. **Demande** : toute pièce réemployable est absorbée par la réparation (sinon ajouter $\sum_f n_{fp}\,q_{fp}\,x \le D_{pt}$).
-6. **Poids inconnu** : aucun traitement évité compté pour la pièce (prudent).
+6. **Poids inconnu** : aucun traitement évité compté pour la pièce. C'est prudent si le recycleur actuel facture ($c^{trait} \ge 0$) ; s'il paie, la valeur du réemploi est légèrement surestimée, et la pièce est signalée dans « Non compté faute de donnée ».
 7. **Carcasse** : reste chez le recycleur actuel sauf si elle est déclarée comme pièce à trier ; elle porte l'essentiel de la masse.
 8. **Coût fixe par période** : payé dès que la ligne existe, quel que soit le volume de la période.
 9. **Valeur de réemploi** $v_p$ : fraction du MMICV, pas un prix de vente ; la tenue en service (taux de défaillance précoce d'une pièce réemployée) s'en retranche via le coût d'une défaillance terrain.
-10. **Pas de stock entre périodes** : une FRU rebutée en $t$ est traitée ou jetée en $t$ (à lever avec une variable de stock si la place le permet).
+10. **Entrées facultatives** : transport, délai d'approvisionnement évité, revente au kilo des exemplaires refusés au test et traitement évité ne sont comptés que s'ils sont saisis ; la colonne « Non compté faute de donnée » dit, pièce par pièce, ce qui a été laissé de côté. En revanche un coût de traitement du recycleur actuel inconnu bloque le calcul : la comparaison à la situation actuelle n'aurait pas de sens (saisir 0 si l'enlèvement est gratuit).
+11. **Au plus huit pièces examinées par type de FRU** : au-delà, les pièces dont la meilleure option seule vaut le moins restent dans le FRU ; le plan les nomme dans « Pièces non examinées » et le résultat est alors un minimum garanti.
+12. **Pas de stock entre périodes** : une FRU rebutée en $t$ est traitée ou jetée en $t$ (à lever avec une variable de stock si la place le permet).
 
 ## 5. Fonctions coûts
 
@@ -75,7 +77,7 @@ $$h_{fs} = t^{ouv}_f\,\mathbb{1}[\exists p : o_s(p)=1] + t^{tri,ouv}_f\,\mathbb{
 
 **Coût variable par FRU** : $C^{var}_{fs} = c^{h}_f \cdot h_{fs}$
 
-**Coût fixe de la ligne par période** : $C^{ligne}_t = \dfrac{I}{A} + C^{fix}_t$
+**Coût fixe de la ligne par période** : $C^{ligne}_t = \dfrac{I}{A} + C^{fix}_t$. Une durée d'amortissement inférieure à une période compte pour une période ; sans investissement ($I = 0$), la durée n'intervient pas.
 
 **Coût de la situation actuelle** (scrap direct de tout le flux) : $C^{actuel}_t = c^{trait} \sum_f N_{ft}\, m_f$
 
@@ -86,6 +88,8 @@ Par FRU traitée selon le plan $s$ :
 $$V^{1}_{fp} = n_{fp}\,\big[\,q_{fp}\,(v_p + L_p \lambda_p) + (1 - q_{fp})\,m_p \pi_p - \tau_p\,\big] \qquad \text{réemploi ; l'exemplaire qui échoue au test est vendu au kg}$$
 
 $$V^{2}_{fp} = n_{fp}\, m_p\, \pi_p \qquad \text{recyclage trié}$$
+
+Le transport $\tau_p$ est compté pour chaque exemplaire extrait. Un exemplaire refusé au test est vendu au kilo dès que son poids et le prix du recycleur sont connus (le temps de tri n'intervient pas : il est déjà sorti du FRU) ; sinon il retourne à la benne actuelle, et seule la part réutilisable $q_{fp}$ compte comme masse détournée.
 
 $$E_{fs} = c^{trait} \sum_{p:\,o_s(p) \in \{1,2\}} n_{fp}\, m_p \qquad \text{traitement évité : masse sortie de la benne actuelle}$$
 
@@ -107,7 +111,7 @@ $$x_{fst} \ge 0,\quad y \in \{0,1\}$$
 
 $Z$ est le **gain par rapport au recycleur actuel**. On installe la ligne si $Z^* > 0$ ; coût total avec la ligne $= \sum_t C^{actuel}_t - Z^*$.
 
-**Résolution.** À $y = 1$ le problème est linéaire et séparable par période. Le multiplicateur $\mu_t$ de la contrainte d'heures donne pour chaque type de FRU le plan qui maximise $g_{fs} - \mu_t h_{fs}$ ; $\mu_t$ est trouvé par dichotomie. **$\mu_t$ est la valeur nette d'une heure opérateur supplémentaire.**
+**Résolution.** À $y = 1$ le problème est linéaire et séparable par période. Le résultat du code est comparé à un solveur exact de programmation linéaire dans `tests/test_ligne.py` (600 instances tirées au hasard, écart inférieur à $10^{-6}$). Le multiplicateur $\mu_t$ de la contrainte d'heures donne pour chaque type de FRU le plan qui maximise $g_{fs} - \mu_t h_{fs}$ ; $\mu_t$ est trouvé par dichotomie. **$\mu_t$ est la valeur nette d'une heure opérateur supplémentaire.**
 
 **Indicateurs.** Seuil de rentabilité $= C^{ligne} / \bar g$ (FRU par période) ; retour sur investissement $= I / (\sum g\,x - C^{fix})$ ; part de masse détournée.
 

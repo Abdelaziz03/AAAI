@@ -88,7 +88,7 @@ Ce premier notebook exécute tout le calcul et vérifie que le dossier est en é
 | **05 Ligne de démontage et de tri** | Une ligne est-elle rentable, avec quelles pièces et combien d'heures opérateur ? |
 | **06 Synthèse décideurs** | Que retenir, que reste-t-il à obtenir, où est l'outil de décision ? |
 
-La cellule suivante exécute les sept étapes (une dizaine de secondes en démonstration). Chaque notebook commence par la même cellule, limitée à l'étape dont il a besoin.
+La cellule suivante exécute les sept étapes (une vingtaine de secondes en démonstration). Chaque notebook commence par la même cellule, limitée à l'étape dont il a besoin.
 """),
     depart("synthese"),
     code("aff.etat(ctx)"),
@@ -105,9 +105,9 @@ erc.memoriser_chemins(projet=r"C:\\chemin\\du\\dossier\\des\\extractions", racin
 
 puis relancer le notebook en entier. `projet` est le dossier qui contient les extractions `ERC_R26_extraction_AAAAMMJJ_AAAAMMJJ.xlsx` et les sous-dossiers `Classification_matieres/`, `Extraction_R26/` et `Acquisition/` (pesées hebdomadaires, audit de démontage). `racine` est le dossier des référentiels (valorisation, fiche des FRU, fichier de fiabilité) ; s'il est omis, c'est le dossier parent de `projet`.
 
-- Les chemins sont notés dans `parametres/chemins.json`, que tous les notebooks relisent. Les données réelles ne sont jamais copiées dans le dossier : elles sont lues là où elles se trouvent.
-- Les options d'analyse se mémorisent de la même façon, par exemple `erc.memoriser_chemins(projet=..., debut="2026-01-01", fin="2026-07-01")` pour borner la période (début inclus, fin exclue), ou `ateliers_prioritaires=[...]` pour changer les ateliers étudiés en premier.
-- Pour revenir à la démonstration sans rien effacer : `ctx = erc.executer(demo=True)`.
+- Les chemins sont notés dans `parametres/chemins.json`, que tous les notebooks relisent. Les données réelles ne sont jamais copiées dans le dossier : elles sont lues là où elles se trouvent. Les résultats vont dans `artefacts/`, le classeur de paramètres dans `parametres/`.
+- Les options d'analyse se mémorisent par la même commande, par exemple `erc.memoriser_chemins(projet=..., racine=..., debut="2026-01-01", fin="2026-07-01")` pour borner la période (début inclus, fin exclue), ou `ateliers_prioritaires=[...]` pour changer les ateliers étudiés en premier. **Chaque appel remplace le précédent** : redonner à chaque fois `projet`, `racine` s'il a été donné, et toutes les options voulues.
+- Pour revoir la démonstration sans rien effacer, dans une cellule : `ctx = erc.executer(demo=True)`. Les autres notebooks restent sur les données réelles tant que `parametres/chemins.json` existe ; le supprimer ramène tout le dossier à la démonstration.
 
 **Le dépôt du code est public.** Les artefacts réels (`artefacts/`) et le classeur de paramètres (`parametres/`) en sont exclus, mais un notebook exécuté sur données réelles contient ses résultats : ne pas l'enregistrer dans le dépôt. La commande `python outils/construire_notebooks.py --executer` remet les sept notebooks dans leur état de démonstration.
 """),
@@ -115,6 +115,8 @@ puis relancer le notebook en entier. `projet` est le dossier qui contient les ex
 ## Périmètre de cette exécution
 
 Mode, période couverte par les extractions, volumes lus, règle qui date un rebut, emplacement des fichiers. **À vérifier en premier** : la période et le nombre de jours extraits, parce que tous les volumes annuels du dossier en découlent.
+
+La ligne « Classeur de paramètres » dit s'il existait au début de cette exécution : « absent » à la toute première, où il vient d'être créé (section suivante). Les emplacements sont abrégés : seul le dernier élément d'un chemin extérieur au dossier est affiché.
 """),
     code('aff.notes(ctx, "sources", "Périmètre")'),
     md("""
@@ -136,8 +138,8 @@ Les extractions ne contiennent ni les temps de démontage, ni les coûts, ni les
     - `30|70` : une plage, du plus bas au plus haut (toutes les valeurs également plausibles) ;
     - `30|45|70` : une plage avec sa valeur la plus plausible, dans l'ordre bas, mode, haut ;
     - cellule vide : inconnu. Le calcul cherche la valeur dans les données (poids, prix du référentiel, MMICV), sinon la laisse inconnue. Jamais zéro.
-- **Couleurs** : les colonnes à en-tête **gris** (cellules grises) sont des informations tirées des données, pour repère ; les modifier n'a aucun effet. Les colonnes à en-tête **bleu** (cellules jaune pâle) sont à saisir.
-- **Colonne `Source`** : noter d'où vient chaque valeur (devis, audit du jour J, service qui l'a fournie). Pour l'onglet `Ligne`, la source est reprise telle quelle dans la provenance des paramètres (notebook 05) et dans l'outil des décideurs.
+- **Couleurs** : les colonnes à en-tête **gris** (cellules grises) sont des informations tirées des données, pour repère : les chiffres qu'elles contiennent ne sont pas relus par le calcul. Seule exception : les colonnes qui désignent la ligne (`FRU`, `Pièce`, `Paramètre`, `Référence`) sont relues, ne pas les modifier. Les colonnes à en-tête **bleu** (cellules jaune pâle) sont à saisir.
+- **Colonne `Source`** : noter d'où vient chaque valeur (devis, audit du jour J, service qui l'a fournie). Dans les onglets `Ligne`, `FRU` et `Pieces`, la source est reprise telle quelle dans la provenance des paramètres (notebook 05). Une ligne n'a qu'une cellule `Source` : elle vaut pour toutes les valeurs saisies sur cette ligne.
 - **Onglets** : `Lisez_moi` (mode d'emploi), `Ligne` (paramètres de la ligne et valeurs par défaut), `FRU` (un type de FRU par ligne ; retirer une ligne l'exclut du modèle), `Pieces` (les pièces de chaque FRU), `Supply` (délais d'approvisionnement), `Ateliers` (rattachement manuel d'un FRU à un atelier), `Chiffres_a_verifier` (chiffres annoncés à comparer aux extractions).
 - **Après une saisie** : enregistrer le classeur, puis relancer le notebook. Le notebook 05 montre, paramètre par paramètre, ce qui est saisi, tiré des données ou encore manquant.
 
@@ -234,7 +236,8 @@ FRU rebutées sur la période, par type, avec leur poids. C'est le gisement que 
 Par couple (type de FRU, pièce), ce que montrent les consommations en réparation :
 
 - **Réparations du FRU** : nombre d'ordres de réparation de ce type de FRU qui ont consommé au moins une pièce ;
-- **Part des réparations** : part de ces réparations où la pièce a été changée ; c'est la base de la probabilité de défaut utilisée par le modèle de Rex (notebook 04) ;
+- **Part des réparations** : part de ces réparations où la pièce a été changée ;
+- **Pièces consommées** et **Réparations du FRU** : la base de la probabilité de défaut utilisée par le modèle de Rex (notebook 04) ;
 - **Max par PO** : la plus grande quantité de la pièce consommée sur une même réparation.
 
 **Limite essentielle** : le nombre de pièces par FRU est **inconnu avant un audit de démontage**. « Max par PO » n'est qu'un minimum : un FRU peut contenir quatre exemplaires d'une pièce dont on n'a jamais changé plus de deux à la fois.
@@ -259,8 +262,8 @@ Une pièce est **sur le front de Pareto** quand aucune autre ne fait au moins au
 """),
     code('aff.figures(ctx, "classement", "Pré-sélection")'),
     code('''
-aff.table(ctx, "classement", "Priorisation", colonnes=["Référence", "Description", "Ateliers", "MMICV total (USD)", "FRU rebutées (nomenclature)", "Type de pièce",
-          "CRM", "Score risque matière (0-1)", "Risque supply retenu", "Source supply retenue", "Sur le front de Pareto", "Note (poids égaux, indicatif)"])
+aff.table(ctx, "classement", "Priorisation", colonnes=["Référence", "Description", "Sur le front de Pareto", "MMICV total (USD)", "FRU rebutées (nomenclature)",
+          "Score risque matière (0-1)", "Risque supply retenu", "Source supply retenue", "Note (poids égaux, indicatif)", "Type de pièce", "CRM", "Ateliers"])
 '''),
     md("## Notes de l'étape\n\nSource des FRU rebutées, critères actifs et inactifs, création du classeur de paramètres."),
     code('aff.notes(ctx, "classement")'),
@@ -291,7 +294,7 @@ Une ligne par couple (FRU, composant) observé dans les consommations : type de 
 aff.table(ctx, "flux", "Composant FRU type de déchet", colonnes=["FRU", "Description FRU", "Atelier du FRU", "Référence", "Description", "Type de déchet", "Benne",
           "Pièces sur ce FRU", "Poids unitaire (kg)", "Source poids", "Niveau de preuve", "Kg sur ce FRU (poids connus)"])
 '''),
-    md("La même information, résumée par benne et type de déchet. Un type dont aucune référence n'a de poids connu est écrit « poids inconnu » sur la figure."),
+    md("La même information, résumée par benne et type de déchet. Un type dont aucune référence n'a de poids connu est écrit « poids inconnu » sur la figure ; dans la table, sa masse reste vide."),
     code('aff.figures(ctx, "flux", "Pièces et masse par type de déchet")'),
     code('aff.table(ctx, "flux", "Synthèse par benne")'),
     md("""
@@ -302,15 +305,15 @@ Pour chaque semaine et chaque flux : la valeur estimée, la valeur mesurée, la 
 - **Estimé** = pièces consommées × poids unitaires. **Bas** : seules les pièces au poids connu sont comptées. **Haut** : les pièces sans poids sont comptées au poids moyen du flux. La **marge d'erreur** est la moitié de l'écart entre haut et bas : elle vient uniquement des poids manquants.
 - **Dans la marge** : « oui » si la pesée, avec son incertitude, tombe entre le bas et le haut de l'estimation.
 - **Causes candidates** : proposées automatiquement selon le sens de l'écart, la part de poids manquants, une semaine incomplète, ou un écart qui se résorbe en cumul.
-- **Cause constatée (à saisir)** : la table est réécrite à chaque exécution, cette colonne y est donc toujours vide. Pour garder la trace d'une cause constatée sur le terrain, la noter dans la colonne `Commentaire` du fichier des pesées (`Acquisition/pesees_hebdo.csv`).
+- **Cause constatée (à saisir)** : ce que l'atelier a constaté sur place. Elle se saisit dans le fichier des pesées (`Acquisition/pesees_hebdo.csv`), dans une colonne facultative nommée `Cause constatée`, sur la ligne de la pesée ; elle est reportée ici à chaque exécution et reste vide tant que rien n'est saisi. Écrire dans la table elle-même ne sert à rien : elle est réécrite à chaque exécution.
 
-Les semaines où une pesée existe sont affichées d'abord ; la table complète (toutes les semaines) suit.
+Les semaines comparables (une pesée et une estimation) sont affichées d'abord ; la table complète (toutes les semaines) suit.
 
 **Limites** : la marge ne couvre pas l'incertitude des poids unitaires eux-mêmes, tant qu'elle n'est pas mesurée. Une benne partagée avec d'autres ateliers ou d'autres déchets fausse la comparaison : vérifier le périmètre de chaque pesée.
 """),
     code('''
 colonnes = ["Semaine", "Flux", "Estimé central (kg)", "Masse mesurée (kg)", "Marge d'erreur (± kg)", "Écart (%)", "Dans la marge", "Écart cumulé (%)",
-            "Causes candidates de l'écart", "Cause constatée (à saisir)"]
+            "Cause constatée (à saisir)", "Causes candidates de l'écart"]
 aff.table(ctx, "flux", "Estimé contre pesé", colonnes=colonnes, ou={"Dans la marge": ["oui", "non"]})
 '''),
     code('aff.figures(ctx, "flux", ["Estimé contre pesé", "Cumul estimé contre pesé"])'),
@@ -367,14 +370,15 @@ N03 = ("03_Fiabilite", [
 
 Défaillances précoces rapportées aux pièces posées sur la même période. Le point est le taux moyen, le trait son intervalle à 90 %.
 
-**Lecture** : comparer, pour une même référence, la pièce neuve aux pièces réparées ou récupérées. Deux intervalles qui se recouvrent ne permettent pas de conclure. La colonne « Rapport au neuf » divise le taux d'une origine par celui de la pièce neuve : 2 signifie deux fois plus de défaillances précoces.
+**Lecture** : comparer, pour une même référence, la pièce neuve aux pièces réparées ou récupérées. Deux intervalles qui se recouvrent ne permettent pas de conclure. La colonne « Rapport au neuf » divise le taux d'une origine par celui de la pièce neuve : 2 signifie deux fois plus de défaillances précoces. Quand la table donne aussi un rapport bas et un rapport haut, ils encadrent ce rapport : si 1 est entre les deux, l'écart avec la pièce neuve n'est pas établi.
 
 **Limites** : sans le nombre de pièces posées, aucun taux n'est calculé et la figure n'est pas produite. Avec peu de pièces posées, l'intervalle est large : c'est l'information, pas un défaut.
 """),
     code('aff.figures(ctx, "fiabilite", "Taux de défaillance précoce")'),
     code('''
 aff.table(ctx, "fiabilite", "Fiabilité par référence", colonnes=["Référence", "Origine posée", "Défaillances ELF", "Pièces posées (même période)",
-          "Taux ELF moyen", "IC90 bas", "IC90 haut", "Rapport au neuf (taux)", "elf_days médiane", "Part à J0 (DOA)"])
+          "Taux ELF moyen", "IC90 bas", "IC90 haut", "Rapport au neuf (taux)", "Rapport bas (5 %)", "Rapport haut (95 %)", "Lecture du rapport",
+          "elf_days médiane", "Part à J0 (DOA)"])
 '''),
     md("""
 ## 2. À quelle vitesse surviennent les défaillances ?
@@ -414,12 +418,14 @@ Les a priori physiques rappellent, pour deux familles de pièces, le mécanisme 
 
 La pré-sélection du notebook 01, complétée du critère « fiabilité du réemploi » pour les références où un rapport au neuf a pu être calculé. Le front de Pareto peut donc changer.
 
-**Limite** : le critère n'existe que pour les références présentes dans le fichier de fiabilité avec une origine réparée ou récupérée ; ailleurs il reste vide et n'entre pas dans la comparaison.
+**Lecture** : la colonne « Fiabilité réemploi (1/rapport) » est l'inverse du rapport au neuf, pris sur l'origine la plus favorable (réparée ou récupérée). Au-dessus de 1 : moins de défaillances précoces que la pièce neuve ; en dessous : davantage.
+
+**Limites** : le critère n'existe que pour les références présentes dans le fichier de fiabilité avec une origine réparée ou récupérée ; ailleurs il reste vide et la pièce y est classée au plus bas. Il ne tient pas compte de l'incertitude du rapport : fondé sur deux ou trois défaillances, il est fragile (voir les intervalles de la section 1).
 """),
     code('aff.figures(ctx, "fiabilite", "Pré-sélection avec fiabilité")'),
     code('''
-aff.table(ctx, "fiabilite", "Priorisation avec fiabilité", colonnes=["Référence", "Description", "MMICV total (USD)", "FRU rebutées (nomenclature)", "Score risque matière (0-1)",
-          "Risque supply retenu", "Fiabilité réemploi (1/rapport)", "Sur le front de Pareto", "Note (poids égaux, indicatif)"])
+aff.table(ctx, "fiabilite", "Priorisation avec fiabilité", colonnes=["Référence", "Description", "Sur le front de Pareto", "MMICV total (USD)", "FRU rebutées (nomenclature)",
+          "Score risque matière (0-1)", "Risque supply retenu", "Fiabilité réemploi (1/rapport)", "Note (poids égaux, indicatif)"])
 '''),
     md("## Notes de l'étape\n\nNombre de défaillances lues, présence du dénominateur (pièces posées), fenêtre d'observation, durée de garantie utilisée."),
     code('aff.notes(ctx, "fiabilite")'),
@@ -534,9 +540,9 @@ N05 = ("05_Ligne_demontage_tri", [
 
 Chaque paramètre du modèle arrive avec sa provenance : **saisi** dans le classeur de paramètres, **tiré des données** (poids du classement matière, prix du référentiel des grades, MMICV, rebut annuel du suivi hebdomadaire, probabilité *q* du modèle de Rex), ou **manquant**.
 
-**Lecture de la figure** : seuls les paramètres manquants *qui bloquent un calcul* (en orange) demandent une action ; les manquants facultatifs (transport, délai d'approvisionnement, valeur d'une semaine de délai) laissent simplement de côté le terme correspondant.
+**Lecture de la figure** : seuls les paramètres manquants *qui bloquent un calcul* (en orange) demandent une action ; les manquants facultatifs (transport, délai d'approvisionnement, valeur d'une semaine de délai) laissent simplement de côté le terme correspondant, et une ouverture sommaire non saisie est remplacée par l'ouverture soignée.
 
-**Limite** : « saisi » ne veut pas dire « mesuré ». La colonne `Source` du classeur dit d'où vient chaque valeur ; en démonstration, toutes sont fictives.
+**Limite** : « saisi » ne veut pas dire « mesuré ». La colonne « Provenance » reprend la source notée dans le classeur, quand il y en a une ; en démonstration, toutes les valeurs sont fictives.
 """),
     code('aff.figures(ctx, "ligne", "Préparation des paramètres")'),
     md("Les paramètres généraux de la ligne, puis l'ensemble des paramètres (début de la table ; le fichier est complet) :"),
@@ -561,14 +567,14 @@ Valeur nette **par FRU traité** de chaque option, comparée à la pièce laiss�
 
 L'ouverture du FRU est payée **une seule fois par FRU**, quel que soit le nombre de pièces extraites : elle n'est pas dans ces valeurs, elle est indiquée dans le titre de chaque cadre. C'est pourquoi une pièce peu rentable seule peut le devenir à côté d'une autre.
 
-**Lecture** : une barre à droite du zéro rapporte, à gauche elle coûte. « inconnu » signifie qu'une donnée manque, avec son nom : la valeur n'est pas calculée et l'option n'est jamais choisie.
+**Lecture** : une barre à droite du zéro rapporte, à gauche elle coûte. « inconnu » signifie qu'une donnée manque : son nom est celui de la colonne du classeur de paramètres à remplir. La valeur n'est pas calculée et l'option n'est jamais choisie. Dans la table, la colonne « Non compté faute de donnée » dit ce que la valeur du réemploi laisse de côté (transport, délai évité) parce qu'une donnée facultative n'est pas saisie.
 
 **Limites** : la valeur d'une pièce réemployée est une fraction du MMICV, pas un prix constaté ; *q* vient du modèle de Rex. Ce sont des estimations.
 """),
     code('aff.figures(ctx, "ligne", "Options par pièce")'),
     code('''
 aff.table(ctx, "ligne", "Options par pièce", colonnes=["Type de FRU", "Pièce", "1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)", "3 Jeté (€/FRU)", "Heures réemploi",
-          "Heures recyclage", "Manque réemploi", "Manque recyclage", "Ouverture soignée (€/FRU)", "Ouverture sommaire (€/FRU)"])
+          "Heures recyclage", "Manque réemploi", "Manque recyclage", "Non compté faute de donnée", "Ouverture soignée (€/FRU)", "Ouverture sommaire (€/FRU)"])
 '''),
     md("""
 ## 4. Le plan optimal
@@ -603,7 +609,7 @@ Flux annuels en euros, coût en négatif. La situation actuelle se résume au tr
 
 Le modèle est rejoué sur le flux réel de chaque semaine : capacité et coût fixe de la semaine, pas de stock d'une semaine à l'autre.
 
-**Lecture** : les semaines creuses paient le coût fixe sans marge ; les semaines chargées saturent les heures et laissent des FRU. L'écart entre ce résultat annualisé et celui du modèle annuel au flux moyen est le **coût de l'irrégularité du flux** : c'est ce que rapporterait un stock tampon de FRU en attente.
+**Lecture** : les semaines creuses paient le coût fixe sans marge ; les semaines chargées saturent les heures et laissent des FRU. L'écart entre ce résultat annualisé et celui du modèle annuel au flux moyen est le **coût de l'irrégularité du flux** : c'est, au plus, ce que rapporterait un stock tampon de FRU en attente.
 
 **Limite** : l'hypothèse « pas de stock » est pessimiste si l'atelier peut garder des FRU quelques semaines.
 """),
@@ -614,7 +620,7 @@ Le modèle est rejoué sur le flux réel de chaque semaine : capacité et coût 
 
 Chaque paramètre saisi comme une plage est tiré au hasard dans sa plage, et la ligne est ré-optimisée à chaque tirage.
 
-**Lecture** : P5 et P95 encadrent neuf tirages sur dix ; la part des tirages à droite de zéro est la probabilité que la ligne soit rentable.
+**Lecture** : P5 et P95 encadrent neuf tirages sur dix ; la part des tirages à droite de zéro estime la probabilité que la ligne soit rentable, pour les plages saisies.
 
 **Limites** : le résultat ne vaut que ce que valent les plages saisies. Un paramètre saisi comme une valeur unique est traité comme certain. Des plages trop étroites donnent une assurance qui n'existe pas.
 """),

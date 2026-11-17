@@ -77,5 +77,16 @@ Fichiers de terrain facultatifs, à déposer dans le dossier des extractions :
 python -m pytest tests
 ```
 
+| Fichier | Ce qu'il vérifie |
+|---|---|
+| `test_ligne.py` | Le modèle de ligne : formules du document, optimalité contre un solveur exact, valeur d'une heure, entrées inconnues |
+| `test_outil.py` | L'outil des décideurs recalcule exactement comme le modèle Python (scénarios tirés au hasard, exécutés par `node`) |
+| `test_stats.py` | Fiabilité (forme retrouvée, intervalle, lectures prudentes), modèle de Rex (pas de fuite, exploration), flux hebdomadaire, risques |
+| `test_donnees.py` | Premier lancement sur données réelles, fichiers manquants ou abîmés, classeur jamais réécrit, manifeste, répétabilité |
+
+Les tests tournent sur Python 3.9 avec pandas 1.5 comme sur les versions récentes.
+
+Régénérer les notebooks exécutés sur la démonstration : `python outils/construire_notebooks.py --executer`.
+
 La modélisation (ensembles, variables de décision, hypothèses, fonctions de coût et de valorisation, fonction
 objectif, modèle de Rex) est dans `docs/Modele_mathematique.md`.

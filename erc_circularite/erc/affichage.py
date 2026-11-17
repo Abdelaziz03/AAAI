@@ -20,6 +20,8 @@ import html
 import json
 import math
 import os
+import re
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -40,6 +42,8 @@ COLONNES_POURCENT = {
 COLONNES_DATE = {"Semaine", "Date", "Date rebut", "Jour"}
 # Colonnes d'identifiants : gardées telles qu'elles sont écrites dans le fichier (pas de séparateur de milliers).
 COLONNES_TEXTE = {"Référence", "Pièce", "FRU", "Type de FRU", "FRU ITEM", "Component ITEM", "Paramètre", "Mois"}
+# Colonnes de texte qui contiennent une valeur ou une plage « bas | haut » : affichées avec la virgule décimale.
+COLONNES_PLAGE = {"Valeur"}
 
 LIBELLES_NOTES = {
     "mode": "Mode", "demo": "Démonstration", "periode": "Période", "jours_extraits": "Jours extraits", "debut": "Premier jour extrait",
@@ -92,8 +96,11 @@ def _decimales_valeur(v: float) -> int:
 
 
 def _vide(v) -> bool:
+    """Vrai pour une valeur inconnue (None, NaN, NaT). Une liste, même vide, n'est pas une valeur inconnue."""
     if v is None:
         return True
+    if isinstance(v, (list, tuple, set, dict, np.ndarray, pd.Series, pd.DataFrame)):
+        return False
     try:
         return bool(pd.isna(v))
     except (TypeError, ValueError):
@@ -116,20 +123,37 @@ def _texte(v) -> str:
     return str(v)
 
 
-def _formater(d: pd.DataFrame):
-    """Table → (table de textes prêts à afficher, colonnes numériques à aligner à droite)."""
+_NOMBRE = re.compile(r"-?\d+(?:\.\d+)?(?:e[+-]?\d+)?")
+
+
+def _plage_fr(v: str) -> str:
+    """« 0.15 | 0.35 » → « 0,15 | 0,35 » : une valeur ou une plage écrite avec un point décimal, affichée avec une virgule.
+    Tout autre texte est rendu tel quel."""
+    morceaux = [m.strip() for m in v.split("|")]
+    if not morceaux or not all(_NOMBRE.fullmatch(m) for m in morceaux):
+        return v
+    return " | ".join(m.replace(".", ",") for m in morceaux)
+
+
+def _formater(d: pd.DataFrame, plages: bool = True):
+    """Table → (table de textes prêts à afficher, colonnes numériques à aligner à droite).
+    plages=False : les textes sont laissés exactement comme ils sont écrits (onglet du classeur de paramètres)."""
     out, numeriques = pd.DataFrame(index=d.index), []
     for c in d.columns:
         s, nom = d[c], str(c)
         if nom in COLONNES_DATE or pd.api.types.is_datetime64_any_dtype(s):
-            j = pd.to_datetime(s, errors="coerce")
+            with warnings.catch_warnings():                    # un texte qui n'est pas une date reste affiché tel quel, sans avertissement
+                warnings.simplefilter("ignore")
+                j = pd.to_datetime(s, errors="coerce")
             out[c] = [x.strftime("%d/%m/%Y") if pd.notna(x) else ("" if _vide(v) else str(v)) for x, v in zip(j, s)]
         elif pd.api.types.is_bool_dtype(s):
             out[c] = ["oui" if v else "non" for v in s]
         elif pd.api.types.is_numeric_dtype(s) and nom not in COLONNES_TEXTE:
             numeriques.append(c)
             if nom in COLONNES_POURCENT:
-                out[c] = [nombre(v * 100, 1, ESP + "%") if not _vide(v) else "" for v in s]
+                f = s.astype(float)
+                petits = bool(len(f.dropna())) and float(f.abs().max()) < 0.10        # tout est sous 10 % : deux décimales, sinon 0,5 % et 0,9 % se confondent
+                out[c] = [nombre(v * 100, 2 if petits else 1, ESP + "%") if not _vide(v) else "" for v in f]
             else:
                 f = s.astype(float)
                 a = f.abs()[f.abs() > 0]
@@ -138,6 +162,8 @@ def _formater(d: pd.DataFrame):
                 else:
                     dec = _decimales(f)
                     out[c] = [nombre(v, dec) for v in f]
+        elif plages and nom in COLONNES_PLAGE:
+            out[c] = [_plage_fr(v) if isinstance(v, str) else _texte(v) for v in s]
         else:
             out[c] = [_texte(v) if not isinstance(v, str) else v for v in s]
     return out, numeriques
@@ -198,6 +224,26 @@ def _relatif(ctx, chemin) -> str:
         return str(chemin)
 
 
+def _est_chemin(v) -> bool:
+    """Vrai pour un texte qui a la forme d'un chemin complet (« /… », « C:\\… », « \\\\serveur\\… »)."""
+    return (isinstance(v, str) and len(v) > 2 and (v.startswith(("/", "\\\\")) or v[1:3] in (":\\", ":/"))
+            and ("/" in v[1:] or "\\" in v[2:]) and "\n" not in v)
+
+
+def _debut_execution(ctx):
+    """Date et heure du début de cette exécution (texte AAAA-MM-JJTHH:MM:SS), ou None si elle n'est pas connue."""
+    p = (getattr(ctx, "res", None) or {}).get("sources", {})
+    p = p.get("Périmètre") if isinstance(p, dict) else None
+    v = p.get("genere_le") if isinstance(p, dict) else None
+    return v if isinstance(v, str) and len(v) >= 19 else None
+
+
+def _perime(ctx, genere_le) -> bool:
+    """Vrai si un artefact a été écrit avant le début de cette exécution : il vient d'une exécution précédente."""
+    debut = _debut_execution(ctx)
+    return bool(debut) and isinstance(genere_le, str) and len(genere_le) >= 19 and genere_le[:19] < debut[:19]
+
+
 # --------------------------------------------------------------------------- tables
 def _lire_csv(chemin: Path) -> pd.DataFrame:
     """Relit une table du dépôt (CSV « ; », virgule décimale, UTF-8 avec BOM) ; les identifiants restent du texte."""
@@ -208,6 +254,8 @@ def _lire_csv(chemin: Path) -> pd.DataFrame:
 
 def table(ctx, etape: str, nom: str, n=None, colonnes=None, ou=None) -> Tableau:
     """Une table du dépôt des artefacts, relue sur le disque : ce qui s'affiche est ce qui est dans le fichier.
+    Seule la présentation change : nombres et dates au format français, fractions en pourcentages, case vide pour une
+    valeur inconnue, et un chemin complet réduit à son dernier élément (il peut contenir un nom de personne).
 
     n        : nombre de lignes affichées (défaut : option n_top de la configuration, 30) ; 0 = toutes
     colonnes : colonnes à montrer, dans cet ordre (défaut : toutes)
@@ -228,8 +276,8 @@ def table(ctx, etape: str, nom: str, n=None, colonnes=None, ou=None) -> Tableau:
             origine = "table en mémoire (fichier verrouillé, sans doute ouvert dans Excel)"
         except Exception:
             return _tableau(pd.DataFrame(), f"Table « {nom} » illisible : fichier verrouillé. Fermer le fichier puis relancer la cellule.")
-    except Exception as e:
-        return _tableau(pd.DataFrame(), f"Table « {nom} » absente de l'étape « {etape} » ({type(e).__name__}) : exécuter l'étape, puis voir les anomalies.")
+    except Exception:
+        return _tableau(pd.DataFrame(), f"Table « {nom} » absente de l'étape « {etape} » : relancer la première cellule du notebook, puis regarder la table des anomalies (notebook 00).")
     total, filtre = len(d), ""
     for c, v in (ou or {}).items():
         if c in d.columns:
@@ -250,6 +298,11 @@ def table(ctx, etape: str, nom: str, n=None, colonnes=None, ou=None) -> Tableau:
         legende += f" (table complète : {nombre(total)})" + filtre
     legende += " · " + origine
     textes, numeriques = _formater(d)
+    if len(textes) and len(textes.columns) and all(str(v) == "" for c in textes.columns for v in textes[c]):
+        legende += " · toutes les cases sont vides : aucune de ces valeurs n'a pu être calculée"
+    for c in textes.columns:                                  # un chemin complet peut contenir un nom de personne : seul le nom du fichier est affiché
+        if c not in numeriques and any(_est_chemin(v) for v in textes[c]):
+            textes[c] = [_relatif(ctx, v) if _est_chemin(v) else v for v in textes[c]]
     return _tableau(textes, legende, numeriques)
 
 
@@ -260,7 +313,7 @@ def manifeste(ctx, etape: str | None = None) -> Tableau:
         contenu = json.loads(f.read_text(encoding="utf-8"))
         entrees = contenu.get("artefacts", [])
     except Exception:
-        return _tableau(pd.DataFrame(), "Manifeste absent : exécuter le pipeline (erc.executer()).")
+        return _tableau(pd.DataFrame(), "Liste des artefacts absente : relancer la première cellule du notebook.")
     d = pd.DataFrame(entrees)
     if not len(d):
         return _tableau(pd.DataFrame(), "Manifeste vide.")
@@ -275,13 +328,25 @@ def manifeste(ctx, etape: str | None = None) -> Tableau:
         rang = {e: i for i, e in enumerate(ETAPES)}
     except Exception:
         rang = {}
+    anciens = [str(n) for n, g in zip(d["nom"], d["genere_le"]) if _perime(ctx, g)]
     d = d.assign(_r=d["etape"].map(rang).fillna(99)).sort_values(["_r", "type", "nom"]).drop(columns=["_r", "genere_le", "donnees"])
     d["lignes"] = [nombre(v) for v in d["lignes"]]
-    d["description"] = d["description"].fillna("")
+    d["description"] = [_premiere_phrase(v) for v in d["description"].fillna("")]
     legende = f"{nombre(len(d))} artefacts · données : {contenu.get('donnees', 'inconnu')} · fichier : {_relatif(ctx, f)}"
     if absents:
         legende += f" · {nombre(absents)} entrée{'s' if absents > 1 else ''} d'anciennes exécutions sans fichier, non affichée{'s' if absents > 1 else ''}"
+    if anciens:
+        legende += (f" · {nombre(len(anciens))} fichier{'s' if len(anciens) > 1 else ''} d'une exécution précédente, non recalculé{'s' if len(anciens) > 1 else ''} cette fois : "
+                    + ", ".join(anciens[:8]) + ("…" if len(anciens) > 8 else ""))
     return _tableau(d.rename(columns=LIBELLES_MANIFESTE), legende, ["Lignes"])
+
+
+def _premiere_phrase(texte, maxi: int = 130) -> str:
+    """Première phrase d'une description, pour une liste qui doit tenir dans la page (la description complète est affichée avec la figure)."""
+    t = " ".join(str(texte).split())
+    if ". " in t and len(t) > maxi:
+        t = t.split(". ")[0] + "."
+    return t if len(t) <= maxi else t[: maxi - 1].rstrip(" ,;:") + "…"
 
 
 def _aplatir(objet, prefixe: str = "") -> list:
@@ -306,12 +371,12 @@ def notes(ctx, etape: str, nom: str = "Notes") -> Tableau:
     try:
         objet = ctx.depot.lire_json(etape, nom)
         chemin = ctx.depot.chemin(etape, nom, "json")
-    except Exception as e:
-        return _tableau(pd.DataFrame(), f"« {nom} » absent de l'étape « {etape} » ({type(e).__name__}) : exécuter l'étape.")
+    except Exception:
+        return _tableau(pd.DataFrame(), f"« {nom} » absent de l'étape « {etape} » : relancer la première cellule du notebook.")
     lignes, vues = [], set()
     for cle, v in _aplatir(objet):
         fin = cle.split(" › ")[-1]
-        if isinstance(v, str) and len(v) > 2 and (v.startswith(("/", "\\\\")) or v[1:3] in (":\\", ":/")):
+        if _est_chemin(v):
             v = _relatif(ctx, v)                              # chemin : jamais affiché en entier hors du dossier
         elif isinstance(v, str) and len(v) >= 19 and v[4:5] == "-" and v[10:11] == "T":
             j = pd.to_datetime(v, errors="coerce")
@@ -344,7 +409,7 @@ def classeur(ctx, onglet: str = "Lisez_moi", n=None) -> Tableau:
         return _tableau(pd.DataFrame(), f"Onglet « {onglet} » illisible ({type(e).__name__}) : fermer le classeur s'il est ouvert, vérifier le nom de l'onglet.")
     total = len(d)
     d = d.head(int(n)) if n else d
-    textes, _ = _formater(d.astype(object).where(d.notna(), None))
+    textes, _ = _formater(d.astype(object).where(d.notna(), None), plages=False)
     return _tableau(textes, f"{nombre(len(d))} ligne{'s' if len(d) > 1 else ''}" + (f" sur {nombre(total)}" if total > len(d) else "")
                     + f" · onglet « {onglet} » de {_relatif(ctx, f)}")
 
@@ -370,7 +435,7 @@ def etat(ctx) -> Bandeau:
     demo = bool(getattr(ctx.cfg, "demo", False))
     periode = getattr(getattr(ctx, "src", None), "periode", None) or "période inconnue"
     n = len(getattr(ctx, "anomalies", None) or [])
-    suite = f"Période : {periode}. " + ("Aucune anomalie de calcul." if not n else f"{n} anomalie{'s' if n > 1 else ''} de calcul : voir aff.anomalies(ctx).")
+    suite = f"Période : {periode}. " + ("Aucune anomalie de calcul." if not n else f"{n} anomalie{'s' if n > 1 else ''} de calcul : voir la table des anomalies (notebook 00 ou 06) avant de lire les résultats.")
     if demo:
         return Bandeau("DÉMONSTRATION : toutes les données affichées sont fictives. " + suite, "#eda100", "#fff7e0")
     return Bandeau("Données réelles. " + suite + " Le dépôt du code est public : ne pas y enregistrer ce notebook une fois exécuté.", "#2a78d6", "#eef4fc")
@@ -380,8 +445,8 @@ def outil(ctx) -> Bandeau:
     """Où se trouve l'outil des décideurs produit par l'étape « synthese » (une phrase s'il n'a pas été produit)."""
     chemin = ((getattr(ctx, "res", None) or {}).get("synthese", {}).get("Outil") or {}).get("chemin")
     if not chemin or not Path(str(chemin)).is_file():
-        return Bandeau("L'outil des décideurs n'a pas été produit à cette exécution (étape « synthese » non exécutée, ou outil en cours de "
-                       "construction : voir aff.anomalies(ctx)). Les tables et les figures de ce notebook restent valables.", "#898781", "#f3f2ee")
+        return Bandeau("L'outil des décideurs n'a pas été produit à cette exécution : voir la table des anomalies ci-dessous. "
+                       "Les tables et les figures de ce notebook restent valables.", "#898781", "#f3f2ee")
     try:
         lien = Path(os.path.relpath(str(chemin), os.getcwd())).as_posix()
     except ValueError:                                        # autre lecteur sous Windows
@@ -392,24 +457,43 @@ def outil(ctx) -> Bandeau:
 
 # --------------------------------------------------------------------------- figures
 def _ipython():
+    """Le module d'affichage d'IPython quand on est dans un notebook (ou une console IPython) ; None dans un script ordinaire."""
     try:
-        from IPython import display
-        return display
+        from IPython import display, get_ipython
+        return display if get_ipython() is not None else None
     except Exception:
         return None
 
 
+def _trace_possible() -> bool:
+    try:
+        import importlib.util
+        return importlib.util.find_spec("matplotlib") is not None
+    except Exception:
+        return False
+
+
+ECART_COULEUR_MAX = 16                                # sur 255, par canal : au-delà, l'image d'origine est gardée
+
+
 def _png(chemin: Path) -> bytes:
-    """Octets de l'image à insérer dans le notebook. Si Pillow est installé, la palette est réduite : même image à
-    l'œil, fichier trois fois plus léger (les notebooks exécutés restent de taille raisonnable). Le PNG du dépôt n'est pas modifié."""
+    """Octets de l'image à insérer dans le notebook. Si Pillow est installé, l'image est ramenée à 256 couleurs pour
+    alléger le notebook (environ quatre fois), à condition qu'aucun point ne change de couleur de plus de
+    ECART_COULEUR_MAX sur 255 : sinon, ou au moindre doute, ce sont les octets du fichier qui sont insérés tels quels.
+    Le PNG du dépôt n'est jamais modifié."""
     brut = Path(chemin).read_bytes()
     try:
         import io
 
         from PIL import Image
-        image = Image.open(io.BytesIO(brut)).convert("RGB").quantize(colors=128, dither=0)
+        image = Image.open(io.BytesIO(brut)).convert("RGB")
+        methode = getattr(getattr(Image, "Quantize", Image), "FASTOCTREE", 2)      # regroupe les couleurs voisines, sans en déplacer aucune loin
+        reduite = image.quantize(colors=256, method=methode, dither=0)
+        ecart = np.abs(np.asarray(image, dtype=np.int16) - np.asarray(reduite.convert("RGB"), dtype=np.int16)).max()
+        if int(ecart) > ECART_COULEUR_MAX:
+            return brut
         tampon = io.BytesIO()
-        image.save(tampon, format="PNG", optimize=True)
+        reduite.save(tampon, format="PNG", optimize=True)
         allege = tampon.getvalue()
         return allege if len(allege) < len(brut) else brut
     except Exception:
@@ -425,7 +509,7 @@ def figures(ctx, etape: str, noms=None, largeur: int = LARGEUR_IMAGE):
     try:
         m = ctx.depot.manifeste()
         m = m[m["etape"].eq(etape) & m["type"].eq("figure")]
-        connues = {r["nom"]: (Path(ctx.depot.racine) / r["fichier"], r["description"]) for _, r in m.iterrows()}
+        connues = {r["nom"]: (Path(ctx.depot.racine) / r["fichier"], r["description"], r.get("genere_le")) for _, r in m.iterrows()}
     except Exception:
         connues = {}
     if isinstance(noms, str):
@@ -433,16 +517,19 @@ def figures(ctx, etape: str, noms=None, largeur: int = LARGEUR_IMAGE):
     if noms is None:
         try:
             from . import figures as _figures
-            noms = [n for n in _figures.NOMS.get(etape, []) if n in connues]
+            noms = [n for n in _figures.NOMS.get(etape, []) if n in connues] + sorted(n for n in connues if n not in _figures.NOMS.get(etape, []))
         except Exception:                                      # matplotlib absent : ordre alphabétique des figures présentes
             noms = sorted(connues)
     vue = _ipython()
     chemins = []
     for nom in noms:
-        chemin, description = connues.get(nom, (None, ""))
-        if chemin is None or not Path(chemin).is_file():
-            message = (f"Figure « {nom} » non produite à cette exécution : la table qu'elle représente est vide ou incomplète "
-                       f"(ou matplotlib n'est pas installé).")
+        chemin, description, genere_le = connues.get(nom, (None, "", None))
+        ancienne = chemin is not None and Path(chemin).is_file() and _perime(ctx, genere_le)
+        if chemin is None or not Path(chemin).is_file() or ancienne:
+            message = (f"Figure « {nom} » non produite à cette exécution : " + ("le module de tracé (matplotlib) n'est pas installé sur ce poste."
+                       if not _trace_possible() else "les valeurs qu'elle représente manquent ou n'ont pas pu être calculées (voir la table correspondante)."))
+            if ancienne:                                       # ne jamais montrer une image qui ne correspond plus aux tables affichées
+                message += " Un fichier du même nom existe, mais il date d'une exécution précédente : il n'est pas affiché."
             vue.display(Bandeau(message, "#898781", "#f3f2ee")) if vue else print(message)
             continue
         chemins.append(Path(chemin))

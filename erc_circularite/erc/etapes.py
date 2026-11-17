@@ -25,6 +25,10 @@ from .config import ETAPES, Config, charger as charger_config
 from .sources import Sources, base_ref, charger as charger_sources, origine
 
 
+class _SansFigures(Exception):
+    """Les figures sont désactivées dans la configuration."""
+
+
 class Contexte:
     def __init__(self, cfg: Config):
         self.cfg = cfg
@@ -54,11 +58,18 @@ class Contexte:
                 self.depot.json(etape, nom, obj, descriptions.get(nom, ""))
         self.res[etape] = tables
         try:
+            if not getattr(self.cfg, "figures", True):
+                raise _SansFigures
             from . import figures
             import matplotlib.pyplot as plt
+            produites = []
             for nom, description, fig in figures.tracer(etape, self):
                 self.depot.figure(etape, nom, fig, description)
+                produites.append(nom)
                 plt.close(fig)
+            self.depot.purger_figures(etape, produites)
+        except _SansFigures:
+            pass
         except Exception as e:                                # une figure ratée ne doit pas faire perdre les tables
             self.anomalies.append({"Étape": etape, "Calcul": "figures", "Erreur": f"{type(e).__name__}: {e}"[:400],
                                    "Détail": traceback.format_exc(limit=3)[-600:]})
@@ -85,9 +96,15 @@ def etape_sources(ctx: Contexte) -> dict:
                  "fru_rebutees": float(s.fru_rebutees["Unités"].sum()) if len(s.fru_rebutees) else 0.0,
                  "regle_date_rebut": s.regle_date_rebut, "ateliers_prioritaires": cfg.ateliers_prioritaires,
                  "classeur_parametres": "présent" if ctx.params.existe else "absent : il sera créé à l'étape classement",
-                 "genere_le": datetime.now().isoformat(timespec="seconds"), **{k: v for k, v in cfg.resume().items()}}
-    return ctx.deposer("sources", {"État des sources": s.etat_df(), "Périmètre": perimetre},
+                 "genere_le": datetime.now().isoformat(timespec="seconds"),
+                 # Noms des dossiers seulement : un chemin complet contient le nom de l'utilisateur du poste.
+                 "Mode": cfg.mode, "Dossier": cfg.dossier.name, "Extractions (projet)": cfg.projet.name if cfg.projet else None,
+                 "Référentiels (racine)": cfg.racine.name if cfg.racine else None, "Artefacts": cfg.artefacts.name,
+                 "Paramètres": f"{cfg.parametres.name}/{cfg.classeur.name}"}
+    controles = s.controles_df() if hasattr(s, "controles_df") else _vide("Source", "Fichier", "Gravité", "Constat")
+    return ctx.deposer("sources", {"État des sources": s.etat_df(), "Contrôles des sources": controles, "Périmètre": perimetre},
                        {"État des sources": "Chaque fichier attendu : chargé, absent ou en erreur, et ce à quoi il sert",
+                        "Contrôles des sources": "Ce que la lecture a toléré, écarté ou trouvé incohérent, avec le nombre de lignes concernées",
                         "Périmètre": "Mode (réel ou démonstration), période couverte, volumes lus, chemins"})
 
 

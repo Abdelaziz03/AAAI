@@ -44,6 +44,7 @@ class Config:
     col_date_rebut: str | None = None   # colonne qui date le rebut ; None = recherche automatique affichée
     fenetre_elf_jours: float | None = None
     garantie_jours: int = 365
+    figures: bool = True                # False : les figures ne sont pas tracées (exécutions rapides, tests)
     n_monte_carlo: int = 400
     graine: int = 2026
 

@@ -1,7 +1,7 @@
 {
- "lignes_elf": 132,
+ "lignes_elf": 399,
  "denominateur": "chargé",
- "fenetre_elf_jours": 87.0,
+ "fenetre_elf_jours": 89.0,
  "garantie_jours": 365,
  "criteres_actifs": [
   "MMICV total (USD)",

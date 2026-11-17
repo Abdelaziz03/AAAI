@@ -1,0 +1,7 @@
+﻿Source;Fichier;Gravité;Constat
+Rapprochement des sources;;à vérifier;"1 FRU sans atelier dans FRU_info (FRU-W600-R) : rangé dans « (non rattaché) » ; à rattacher dans l'onglet Ateliers du classeur de paramètres"
+Rapprochement des sources;;à vérifier;"1 pièce consommée absente du classement matière (1% des pièces consommées ; P-6001) : type de déchet, benne et poids inconnus"
+Rapprochement des sources;;à vérifier;"1 pièce consommée classée mais sans poids unitaire (12% des pièces consommées ; P-1003) : masse estimée incomplète"
+Rapprochement des sources;;à vérifier;"1 pièce consommée sans MMICV (12% des pièces consommées ; P-1003) : valeur inconnue, non comptée dans les totaux"
+Extraction R26;ERC_R26_extraction_20260601_20260913.xlsx;information;192 lignes sur des jours déjà couverts par une extraction plus récente : non reprises ici
+Fiche article (vwAllItems);poids_items_vwAllItems.csv;information;1 référence au MMICV nul : valeur traitée comme inconnue (MMICV de repli de QueryComponents s'il existe)

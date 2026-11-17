@@ -14,11 +14,11 @@
   "TSUI"
  ],
  "classeur_parametres": "présent",
- "genere_le": "2026-11-17T16:00:20",
+ "genere_le": "2026-11-17T22:12:52",
  "Mode": "DÉMONSTRATION (données fictives)",
- "Dossier": "/home/user/AAAI/erc_circularite/demo",
- "Extractions (projet)": "/home/user/AAAI/erc_circularite/demo/sources/ERC_Flux_Dechets_Ateliers",
- "Référentiels (racine)": "/home/user/AAAI/erc_circularite/demo/sources",
- "Artefacts": "/home/user/AAAI/erc_circularite/demo/artefacts",
- "Paramètres": "/home/user/AAAI/erc_circularite/demo/parametres/ERC_Parametres.xlsx"
+ "Dossier": "demo",
+ "Extractions (projet)": "ERC_Flux_Dechets_Ateliers",
+ "Référentiels (racine)": "sources",
+ "Artefacts": "artefacts",
+ "Paramètres": "parametres/ERC_Parametres.xlsx"
 }

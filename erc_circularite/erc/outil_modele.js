@@ -43,9 +43,20 @@
   function lire(o, k, defaut) {
     return possede(o, k) ? o[k] : defaut;
   }
-  /** « v or 0 » de Python pour un nombre : inconnu ou nul → 0. */
+  /** Entrée facultative (_facultatif de ligne.py) : comptée si elle est saisie, 0 sinon (None, NaN compris). */
   function ou0(v) {
-    return (v === null || v === undefined || v === 0) ? 0 : v;
+    return inconnu(v) ? 0 : v;
+  }
+  /** Semaine explicitement marquée incomplète (False, 0, « non », « faux ») : _semaine_incomplete de ligne.py. */
+  function semaineIncomplete(v) {
+    return !inconnu(v) && ["false", "0", "0.0", "non", "faux"].indexOf(String(v).trim().toLowerCase()) >= 0;
+  }
+  /** pd.to_numeric(errors="coerce") pour une cellule : nombre, texte numérique, sinon NaN. */
+  function nombre(v) {
+    if (typeof v === "number") return v;
+    if (v === null || v === undefined || typeof v === "boolean") return v === true ? 1 : v === false ? 0 : NaN;
+    var t = String(v).trim();
+    return t === "" ? NaN : Number(t);
   }
   function somme(valeurs) {
     var s = 0;
@@ -66,11 +77,14 @@
     });
   }
 
-  /** Entrées qui empêchent de calculer un type de FRU (liste vide = calculable). */
+  /** Entrées qui empêchent de calculer un type de FRU (liste vide = calculable). Le coût de traitement du recycleur
+   *  actuel est lu dans fru._c_trait, qu'optimiserLigne renseigne : présent et inconnu, il bloque le type de FRU. */
   function manques(fru, tauxDefaut) {
     var m = [];
     if (inconnu(fru.rebut_an)) m.push("rebut_an");
+    else if (fru.rebut_an < 0) m.push("rebut_an négatif");
     if (inconnu(lire(fru, "taux_horaire_eur", tauxDefaut))) m.push("taux_horaire_eur");
+    if (possede(fru, "_c_trait") && inconnu(fru._c_trait)) m.push("cout_traitement_eur_kg");
     var dispo = optionsDisponibles(fru);
     var uneOption = dispo.some(function (o) { return !o["réemploi"].length || !o.recyclage.length; });
     if (!uneOption) {
@@ -86,13 +100,18 @@
   function valeursOptions(fru, tauxDefaut) {
     var taux = lire(fru, "taux_horaire_eur", tauxDefaut);
     var tauxConnu = !inconnu(taux);
-    var cTrait = ou0(fru._c_trait);
+    var cFourni = possede(fru, "_c_trait");
+    var cConnu = !(cFourni && inconnu(fru._c_trait));
+    var cTrait = cConnu ? ou0(fru._c_trait) : NaN;
+    var chiffrable = tauxConnu && cConnu;        // taux ou coût de traitement inconnu : valeurs NaN, heures et kg donnés
     var dispo = optionsDisponibles(fru);
     var lignes = (fru.pieces || []).map(function (d, i) {
       var n = d.n_par_fru;
-      var kg = inconnu(d.poids_kg) ? 0.0 : d.poids_kg;         // poids inconnu : aucun traitement évité compté
-      var kgv = dispo[i].recyclage.length ? null : d.poids_kg * d.prix_recycleur_eur_kg;
-      var kRe = 0.0, kRc = 0.0, vRe, hRe, vRc, hRc;
+      var poidsConnu = !inconnu(d.poids_kg);
+      var kg = poidsConnu ? d.poids_kg : 0.0;                   // poids inconnu : aucun traitement évité compté
+      // Vente au kilo d'un exemplaire refusé au test : son poids et le prix du recycleur suffisent (pas le temps de tri).
+      var kgv = poidsConnu && !inconnu(d.prix_recycleur_eur_kg) ? d.poids_kg * d.prix_recycleur_eur_kg : null;
+      var kRe = 0.0, kRc = 0.0, vRe, hRe, vRc, hRc, nonCompte = [];
       if (dispo[i]["réemploi"].length) {
         vRe = NaN; hRe = NaN;
       } else {
@@ -101,14 +120,19 @@
         var bonus = ou0(d.delai_semaines) * ou0(d.valeur_semaine_eur);
         var echec = kgv !== null ? kgv : 0.0;
         hRe = n * (d.extraction_min + d.test_min) / 60;
-        vRe = tauxConnu ? n * (q * (d.valeur_eur + bonus) + (1 - q) * echec - ou0(d.transport_eur)) - hRe * taux + kRe * cTrait : NaN;
+        vRe = chiffrable ? n * (q * (d.valeur_eur + bonus) + (1 - q) * echec - ou0(d.transport_eur)) - hRe * taux + kRe * cTrait : NaN;
+        if (inconnu(d.transport_eur)) nonCompte.push("transport");
+        if (inconnu(d.delai_semaines) || inconnu(d.valeur_semaine_eur)) nonCompte.push("délai évité");
+        if (kgv === null) nonCompte.push("revente au kilo des exemplaires refusés au test");
+        if (!poidsConnu || !cFourni) nonCompte.push("traitement évité");
       }
       if (dispo[i].recyclage.length) {
         vRc = NaN; hRc = NaN;
       } else {
         hRc = n * d.tri_min / 60;
         kRc = n * kg;
-        vRc = tauxConnu ? n * kgv - hRc * taux + kRc * cTrait : NaN;
+        vRc = chiffrable ? n * kgv - hRc * taux + kRc * cTrait : NaN;
+        if (!cFourni && nonCompte.indexOf("traitement évité") < 0) nonCompte.push("traitement évité");
       }
       var meilleure = null, vMax = NaN;                         // idxmax sur (réemploi, recyclage, jeté), NaN ignorés
       [["Réemploi", vRe], ["Recyclage", vRc], ["Jeté", 0.0]].forEach(function (o) {
@@ -118,14 +142,14 @@
         "Pièce": d.piece, "1 Réemploi (€/FRU)": vRe, "2 Recyclage (€/FRU)": vRc, "3 Jeté (€/FRU)": 0.0,
         "Heures réemploi": hRe, "Heures recyclage": hRc, "Kg détournés réemploi": kRe, "Kg détournés recyclage": kRc,
         "Manque réemploi": dispo[i]["réemploi"].join(", "), "Manque recyclage": dispo[i].recyclage.join(", "),
+        "Non compté faute de donnée": nonCompte.join(", "),
         "Meilleure option seule": meilleure,
-        manque_reemploi: dispo[i]["réemploi"], manque_recyclage: dispo[i].recyclage
+        manque_reemploi: dispo[i]["réemploi"], manque_recyclage: dispo[i].recyclage, non_compte: nonCompte
       };
     });
     var ouvTri = lire(fru, "ouverture_tri_min", fru.ouverture_min);
     return {
       lignes: lignes,
-      // Écart voulu avec ligne.py : une ouverture de 0 minute coûte 0 € (ligne.py affiche « inconnu »).
       "Ouverture soignée (€/FRU)": tauxConnu && !inconnu(fru.ouverture_min) ? fru.ouverture_min / 60 * taux : NaN,
       "Ouverture sommaire (€/FRU)": tauxConnu && !inconnu(ouvTri) ? ouvTri / 60 * taux : NaN
     };
@@ -170,10 +194,15 @@
       if (xn || yn) return xn && yn ? x.i - y.i : xn ? 1 : -1;
       return (y.m > x.m ? 1 : y.m < x.m ? -1 : 0) || x.i - y.i;
     });
+    var calculables = t.filter(function (l) { return !(isNaN(l["1 Réemploi (€/FRU)"]) && isNaN(l["2 Recyclage (€/FRU)"])); })
+      .map(function (l) { return l["Pièce"]; });
     ordre = ordre.slice(0, MAX_PIECES_ENUM);
     var n = ordre.length;
-    this.noms = ordre.map(function (o) { return o.l["Pièce"]; });
-    this.ignorees = Math.max((fru.pieces || []).length - n, 0);   // pièces au-delà de MAX_PIECES_ENUM : laissées dans le FRU
+    var noms = ordre.map(function (o) { return o.l["Pièce"]; });
+    this.noms = noms;
+    // pièces écartées par la limite alors qu'une de leurs options était calculable : elles restent dans le FRU
+    this.noms_ignores = calculables.filter(function (p) { return noms.indexOf(p) < 0; });
+    this.ignorees = this.noms_ignores.length;
     this.n = n;
     var cd = codes(n), N = cd.N;
     var V = new Float64Array(N), H = new Float64Array(N), K = new Float64Array(N), ok = new Uint8Array(N);
@@ -213,7 +242,7 @@
       var o = cd.aReemploi[i2] ? ouv : cd.aRecyclage[i2] ? ouvTri : 0.0;
       this.idx[p] = i2;
       this.H[p] = H[i2] + o;
-      this.M[p] = V[i2] - o * taux;
+      this.M[p] = V[i2] - (o !== 0 ? o * (inconnu(taux) ? NaN : taux) : 0.0);
       this.K[p] = K[i2];
       p++;
     }
@@ -289,16 +318,16 @@
    *  `prep` (facultatif) = résultat de preparer(ligne, frus). Renvoie {detail: [lignes], resume: {indicateurs}}. */
   function optimiserLigne(ligne, frus, prep) {
     var taux = ligne.taux_horaire_eur;
-    var incomplets = frus.map(function (d) { return manques(d, taux); });
+    var avec = frus.map(function (d) { return avecTraitement(d, ligne); });
+    var incomplets = avec.map(function (d) { return manques(d, taux); });
     var ok = [], opts = [];
-    frus.forEach(function (d, i) {
+    avec.forEach(function (d, i) {
       if (incomplets[i].length) return;
       ok.push(d);
-      opts.push(prep && prep[i] ? prep[i] : new Options(avecTraitement(d, ligne), taux));
+      opts.push(prep && prep[i] ? prep[i] : new Options(d, taux));
     });
     var cap = ligne.heures_operateur_an;
-    cap = (cap === null || cap === undefined) ? Infinity : +cap;
-    if (cap < 0) cap = 0;                       // ligne.py ne se termine pas sur une capacité négative : ramenée à 0 ici
+    cap = inconnu(cap) ? Infinity : Math.max(+cap, 0);   // heures inconnues = pas de limite ; négatives = aucune heure
 
     function choix(mu) {
       return opts.map(function (o) { return o.meilleur(mu); });
@@ -342,7 +371,7 @@
     }
     var detail = [];
     ok.forEach(function (d, i) {
-      var a = cHi[i], n = +d.rebut_an, x = bascule[i] || 0.0;
+      var a = cHi[i], n = +d.rebut_an, x = bascule[i] || 0.0, debut = detail.length;
       if (x > 0) {                              // x FRU au plan plus gourmand, le reste au plan sobre
         var b = cLo[i];
         detail.push(ligneRes(d.fru, b.e, x, b.h, b.m, d, b.k));
@@ -350,14 +379,25 @@
       } else {
         detail.push(ligneRes(d.fru, a.e, a.e.length ? n : 0.0, a.h, a.m, d, a.k));
       }
+      for (var z = debut; z < detail.length; z++) detail[z]["Pièces non examinées"] = opts[i].noms_ignores.join(", ");
     });
     frus.forEach(function (d, i) {
       if (incomplets[i].length) {
         detail.push({ "Type de FRU": d.fru, "Décision": "incomplet", "Entrées manquantes": incomplets[i].join(", "),
-                      manques: incomplets[i] });
+                      "Pièces non examinées": null, manques: incomplets[i] });
       }
     });
     return bilan(ligne, detail, muHi, cap, frus);
+  }
+
+  /** Coût fixe d'une année = installation / durée d'amortissement + coûts fixes annuels (_couts_fixes de ligne.py).
+   *  Entrée inconnue → NaN. Une durée inférieure à un an compte pour un an ; sans investissement, la durée n'intervient pas. */
+  function coutsFixes(ligne) {
+    var inv = ligne.cout_installation_eur, fix = ligne.couts_fixes_annuels_eur, duree = ligne.amortissement_ans;
+    if (inconnu(inv) || inconnu(fix)) return NaN;
+    if (inv === 0) return +fix;
+    if (inconnu(duree)) return NaN;
+    return inv / Math.max(duree, 1) + fix;
   }
 
   /** Résultat de la ligne. Coût fixe ou marge inconnus → NaN (jamais 0). */
@@ -366,20 +406,17 @@
     var c = ligne.cout_traitement_eur_kg;
     var masses = [];
     frus.forEach(function (d) {
-      if (!inconnu(d.rebut_an) && !inconnu(d.poids_fru_kg)) masses.push(d.rebut_an * d.poids_fru_kg);
+      if (d && !inconnu(d.rebut_an) && !inconnu(d.poids_fru_kg) && d.rebut_an >= 0) masses.push(d.rebut_an * d.poids_fru_kg);
     });
     var masse = masses.length && masses.length === frus.length ? somme(masses) : NaN;
-    var coutActuel = (c !== null && c !== undefined) ? masse * c : NaN;
+    var coutActuel = !inconnu(c) ? masse * c : NaN;
     var inv = ligne.cout_installation_eur, fix = ligne.couts_fixes_annuels_eur;
-    var invConnu = inv !== null && inv !== undefined, fixConnu = fix !== null && fix !== undefined;
-    var amort = ligne.amortissement_ans;
-    amort = Math.max(amort ? amort : 1, 1);
-    var fixes = invConnu && fixConnu ? inv / amort + fix : NaN;
+    var fixes = coutsFixes(ligne);
     var calc = detail.filter(function (r) { return r["Décision"] !== "incomplet"; });
     var col = function (nom) { return calc.length ? somme(calc.map(function (r) { return r[nom]; })) : NaN; };
     var marge = col("Marge variable / an (€)"), h = col("Heures / an"), n = col("FRU traitées / an");
     var moy = n ? marge / n : NaN;
-    var excedent = fixConnu ? marge - fix : NaN;
+    var excedent = !inconnu(fix) ? marge - fix : NaN;
     return {
       detail: detail,
       resume: {
@@ -387,7 +424,7 @@
         "Heures utilisées / an": h, "Capacité (h/an)": cap, "Taux d'occupation": isFinite(cap) && cap ? h / cap : NaN,
         "FRU traitées / an": n, "Marge moyenne par FRU (€)": moy,
         "Seuil de rentabilité (FRU / an)": moy && moy > 0 ? fixes / moy : NaN,
-        "Retour sur investissement (ans)": invConnu && excedent > 0 ? inv / excedent : NaN,
+        "Retour sur investissement (ans)": !inconnu(inv) && excedent > 0 ? inv / excedent : NaN,
         "Valeur d'une heure opérateur en plus (€ net)": calc.length ? mu : NaN,
         "Types de FRU incomplets": detail.length - calc.length,
         "Masse des FRU rebutées (kg/an)": masse, "Masse détournée de la benne (kg/an)": col("Kg détournés / an"),
@@ -397,24 +434,27 @@
   }
 
   /** Situation actuelle (tout chez le recycleur actuel) contre ligne de démontage + tri. Flux annuels, € ; coût = négatif.
+   *  Les écarts sont calculés directement : ils restent connus quand le coût actuel ne l'est pas (poids d'un FRU manquant).
    *  `base` (facultatif) = résultat déjà calculé de optimiserLigne(ligne, frus). */
   function comparerScenarios(ligne, frus, base) {
     var r = (base || optimiserLigne(ligne, frus)).resume;
     var c = ligne.cout_traitement_eur_kg;
-    c = (c !== null && c !== undefined) ? c : NaN;
+    c = inconnu(c) ? NaN : c;
     var evite = r["Masse détournée de la benne (kg/an)"] * c;
     var actuel = -r["Coût actuel de traitement (€/an)"];
     var margeHorsEvite = r["Marge variable / an (€)"] - evite;
+    var fixes = r["Coûts fixes annualisés (€)"];
     var lignes = [
-      ["Traitement des FRU par le recycleur actuel", actuel, actuel + evite],
-      ["Marge de la ligne : réemploi + vente au kg − main-d'œuvre", 0.0, margeHorsEvite],
-      ["Coûts fixes de la ligne (installation amortie + annuels)", 0.0, -r["Coûts fixes annualisés (€)"]]
+      ["Traitement des FRU par le recycleur actuel", actuel, actuel + evite, evite],
+      ["Marge de la ligne : réemploi + vente au kg − main-d'œuvre", 0.0, margeHorsEvite, margeHorsEvite],
+      ["Coûts fixes de la ligne (installation amortie + annuels)", 0.0, -fixes, -fixes]
     ];
-    lignes.push(["TOTAL", lignes[0][1] + lignes[1][1] + lignes[2][1], lignes[0][2] + lignes[1][2] + lignes[2][2]]);
+    lignes.push(["TOTAL", lignes[0][1] + lignes[1][1] + lignes[2][1], lignes[0][2] + lignes[1][2] + lignes[2][2],
+                 lignes[0][3] + lignes[1][3] + lignes[2][3]]);
     var masse = r["Masse des FRU rebutées (kg/an)"], detournee = r["Masse détournée de la benne (kg/an)"];
     return {
       lignes: lignes.map(function (l) {
-        return { "Poste (€/an)": l[0], "Actuel": l[1], "Avec la ligne": l[2], "Écart": l[2] - l[1] };
+        return { "Poste (€/an)": l[0], "Actuel": l[1], "Avec la ligne": l[2], "Écart": l[3] };
       }),
       attrs: { "Masse rebutée (kg/an)": masse, "Masse détournée (kg/an)": detournee, "Part détournée": masse ? detournee / masse : NaN }
     };
@@ -436,29 +476,33 @@
   }
 
   /** Le modèle rejoué période par période sur le flux réel des FRU rebutées (lignes {Semaine, FRU, "FRU rebutées"}).
-   *  Chaque période : capacité = heures annuelles / périodes ; coût fixe = (installation amortie + fixes annuels) / périodes,
-   *  payé même si peu de FRU arrivent ; pas de stock d'une période à l'autre. */
+   *  Chaque période : capacité = heures annuelles / périodes ; coût fixe = coût fixe annuel / périodes, payé même si peu
+   *  de FRU arrivent ; pas de stock d'une période à l'autre. Comme ligne.py : une semaine marquée incomplète
+   *  (« Semaine complète ») est écartée, ainsi qu'une semaine où le comptage d'un FRU du modèle est inconnu ;
+   *  heures inconnues = pas de limite, 0 heure = rien n'est traité. */
   function resultatParPeriode(ligne, frus, flux, periodesParAn) {
     periodesParAn = periodesParAn || 52;
-    var H = ligne.heures_operateur_an, inv = ligne.cout_installation_eur, fix = ligne.couts_fixes_annuels_eur;
-    var connus = inv !== null && inv !== undefined && fix !== null && fix !== undefined;
-    var amort = ligne.amortissement_ans;
-    var fixeP = connus ? (inv / Math.max(amort ? amort : 1, 1) + fix) / periodesParAn : NaN;
-    var noms = {}, semainesVues = {}, semaines = [], total = {};
+    var H = ligne.heures_operateur_an;
+    var capP = inconnu(H) ? null : Math.max(+H, 0) / periodesParAn;
+    var fixeP = coutsFixes(ligne) / periodesParAn;
+    var noms = {}, semainesVues = {}, sansComptage = {}, total = {};
     frus.forEach(function (d) { noms[d.fru] = true; });
     (flux || []).forEach(function (r) {
+      if (possede(r, "Semaine complète") && semaineIncomplete(r["Semaine complète"])) return;
       var s = r.Semaine;
-      if (!semainesVues[s]) { semainesVues[s] = true; semaines.push(s); }
-      if (noms[r.FRU]) {
-        var cle = s + "\u0000" + r.FRU;
-        total[cle] = (total[cle] || 0) + (inconnu(r["FRU rebutées"]) ? 0 : +r["FRU rebutées"]);
-      }
+      if (inconnu(s)) return;
+      semainesVues[s] = true;
+      if (!noms[r.FRU]) return;
+      var v = nombre(r["FRU rebutées"]);
+      if (isNaN(v)) { sansComptage[s] = true; return; }
+      var cle = s + "\u0000" + r.FRU;
+      total[cle] = (total[cle] || 0) + v;
     });
-    semaines.sort();
+    var semaines = Object.keys(semainesVues).filter(function (s) { return !sansComptage[s]; }).sort();
     var prep = preparer(ligne, frus);
     var lgP = {};
     for (var k in ligne) if (possede(ligne, k)) lgP[k] = ligne[k];
-    lgP.heures_operateur_an = H ? H / periodesParAn : null;     // comme ligne.py : 0 heure ou inconnu = pas de limite
+    lgP.heures_operateur_an = capP;
     function avecRebut(valeur) {
       return frus.map(function (d) {
         var c = {};
@@ -480,16 +524,13 @@
       var res = r["Marge variable / an (€)"] - fixeP;
       cumul += res;
       lignes.push({ "Semaine": s, "FRU arrivées": arrivees, "FRU traitées": r["FRU traitées / an"], "Heures utilisées": r["Heures utilisées / an"],
-                    "Capacité (h)": H ? H / periodesParAn : NaN, "Marge variable (€)": r["Marge variable / an (€)"],
+                    "Capacité (h)": capP === null ? NaN : capP, "Marge variable (€)": r["Marge variable / an (€)"],
                     "Coût fixe (€)": fixeP, "Résultat (€)": res, "Valeur d'une heure en plus (€)": r["Valeur d'une heure opérateur en plus (€ net)"],
                     "Résultat cumulé (€)": cumul });
     });
     var attrs = {};
     if (lignes.length) {
-      var present = {};
-      for (var cle in total) if (possede(total, cle)) present[cle.split("\u0000")[1]] = true;
       var moyen = avecRebut(function (f) {
-        if (!present[f]) return 0.0;
         var s2 = 0;
         semaines.forEach(function (s) { s2 += total[s + "\u0000" + f] || 0; });
         return s2 / semaines.length * periodesParAn;
@@ -615,7 +656,7 @@
   var api = {
     OPTIONS: OPTIONS, CHAMPS_REEMPLOI: CHAMPS_REEMPLOI, CHAMPS_RECYCLAGE: CHAMPS_RECYCLAGE, MAX_PIECES_ENUM: MAX_PIECES_ENUM,
     CLES_LIGNE: CLES_LIGNE, CLES_FRU: CLES_FRU, CLES_PIECE: CLES_PIECE, CLES_TEMPS: CLES_TEMPS,
-    inconnu: inconnu, optionsDisponibles: optionsDisponibles, manques: manques, valeursOptions: valeursOptions,
+    inconnu: inconnu, coutsFixes: coutsFixes, optionsDisponibles: optionsDisponibles, manques: manques, valeursOptions: valeursOptions,
     codes: codes, Options: Options, preparer: preparer, optimiserLigne: optimiserLigne, bilan: bilan,
     comparerScenarios: comparerScenarios, sensibiliteHeures: sensibiliteHeures, resultatParPeriode: resultatParPeriode,
     creerAlea: creerAlea, valeurParametre: valeurParametre, versModele: versModele, quantile: quantile,

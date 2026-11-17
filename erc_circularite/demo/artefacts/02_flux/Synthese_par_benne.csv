@@ -1,10 +1,10 @@
 ﻿Benne;Type de déchet;Références;Pièces;Références au poids connu;Kg (poids connus)
-DEEE;Carte B;3;169;3;79,55
-DEEE;Carte C;2;121;2;18,8
-DEEE;Composant de puissance;2;444;2;155,39999999999998
-DEEE;Composant standard;4;345;4;39,35
-DEEE;Condensateur;1;277;0;0,0
-DEEE;Câbles;2;107;2;29,099999999999998
-DIB;Plastique;3;753;3;89,80000000000001
-Métal;Métal;1;43;1;12,9
-;;1;17;0;0,0
+DEEE;Carte B;3;169,0;3;79,55
+DEEE;Carte C;2;121,0;2;18,8
+DEEE;Composant de puissance;2;444,0;2;155,39999999999998
+DEEE;Composant standard;4;345,0;4;39,35
+DEEE;Condensateur;1;277,0;0;
+DEEE;Câbles;2;107,0;2;29,099999999999998
+DIB;Plastique;3;753,0;3;89,80000000000001
+Métal;Métal;1;43,0;1;12,9
+;;1;17,0;0;

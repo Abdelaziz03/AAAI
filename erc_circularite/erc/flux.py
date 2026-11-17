@@ -52,7 +52,9 @@ def estimation_hebdo(ev: pd.DataFrame, comp: pd.DataFrame, couverts: set, par="B
     d["kg"] = d["Qte"] * d["Poids"]
     d["Qte connue"] = d["Qte"].where(d["Poids"].notna(), 0)
     g = d.groupby(["Semaine", "Flux"]).agg(**{"Pièces": ("Qte", "sum"), "Pièces au poids connu": ("Qte connue", "sum"),
-                                             "Références": ("Component ITEM", "nunique"), "Estimé bas (kg)": ("kg", "sum")}).reset_index()
+                                             "Références": ("Component ITEM", "nunique"),
+                                             # min_count=1 : un flux dont aucun poids n'est connu a une masse inconnue, pas nulle
+                                             "Estimé bas (kg)": ("kg", lambda x: x.sum(min_count=1))}).reset_index()
     g["Couverture poids"] = g["Pièces au poids connu"] / g["Pièces"].replace(0, np.nan)
     g["Estimé haut (kg)"] = g["Estimé bas (kg)"] / g["Couverture poids"]
     if INCERTITUDE_POIDS:
@@ -140,9 +142,10 @@ def flux_fru_hebdo(fr: pd.DataFrame, couverts: set, poids_fru: pd.Series | None 
     return t
 
 
-def rebut_annuel(flux: pd.DataFrame, n_boot=2000, rng=np.random.default_rng(2026)) -> pd.DataFrame:
+def rebut_annuel(flux: pd.DataFrame, n_boot=2000, rng=None) -> pd.DataFrame:
     """N_f du modèle : moyenne hebdomadaire x 52 sur les semaines COMPLÈTES, avec intervalle par ré-échantillonnage
     des semaines. `rebut_an` est le triangle (bas, moyen, haut) à passer à la ligne de tri."""
+    rng = np.random.default_rng(2026) if rng is None else rng      # un générateur par appel : deux exécutions donnent le même intervalle
     lignes = []
     for f, g in flux[flux["Semaine complète"]].groupby("FRU"):
         x = g["FRU rebutées"].to_numpy(float)

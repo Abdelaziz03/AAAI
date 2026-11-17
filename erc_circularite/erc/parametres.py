@@ -179,9 +179,9 @@ def tables_gabarit(cfg: Config, src: Sources, rebut: pd.DataFrame, couples: pd.D
     supply = refs.assign(**{"Délai (semaines)": None, "Source": None})
     non_ratt = sorted(set(src.ev.loc[src.ev["Atelier"].eq("(non rattaché)"), "FRU ITEM"].dropna())) if len(src.ev) else []
     lisez = pd.DataFrame([
-        ("Rôle", "Paramètres que les données ne contiennent pas : temps, coûts, prix, délais. Le pipeline lit ce classeur à chaque exécution et ne le réécrit jamais."),
+        ("Rôle", "Paramètres que les données ne contiennent pas : temps, coûts, prix, délais. Le calcul lit ce classeur à chaque exécution et ne le réécrit jamais."),
         ("Cellule", "Un nombre (45), une plage bas|haut (30|70) ou un triangle bas|mode|haut (30|45|70). Vide = inconnu."),
-        ("Colonnes grises", "Informations tirées des données, pour repère. Les modifier n'a aucun effet."),
+        ("Colonnes grises", "Informations tirées des données, pour repère. Ne pas modifier FRU, Pièce, Paramètre ni Référence : ce sont les clés qui relient chaque ligne aux données."),
         ("Colonnes jaunes", "À saisir. Une cellule vide est cherchée dans les données (poids, prix du référentiel, MMICV) puis laissée inconnue."),
         ("Source", "Notez d'où vient chaque valeur (devis, audit du JJ/MM, personne). Elle suit la valeur jusqu'à l'outil des décideurs."),
         ("Ligne", "Paramètres de la ligne de démontage et de tri, et valeurs par défaut."),
@@ -443,4 +443,9 @@ def a_obtenir(prov: pd.DataFrame, frus: dict) -> pd.DataFrame:
     g = m.groupby("Paramètre").agg(**{"Valeurs manquantes": ("Paramètre", "size"), "FRU concernés": ("FRU", lambda s: s.nunique())}).reset_index()
     g["Donnée"] = g["Paramètre"].map(lib)
     g["À demander à"] = g["Paramètre"].map(qui)
+    # Un paramètre qui existe pour la ligne et pour un FRU (taux horaire) : libellé de la ligne s'il manque à la ligne.
+    de_ligne = set(m.loc[m["FRU"].eq("(ligne)"), "Paramètre"])
+    for k in de_ligne & set(P_LIGNE):
+        g.loc[g["Paramètre"].eq(k), "Donnée"] = P_LIGNE[k][0]
+        g.loc[g["Paramètre"].eq(k), "À demander à"] = P_LIGNE[k][2]
     return g[["Paramètre", "Donnée", "Valeurs manquantes", "FRU concernés", "À demander à"]].sort_values("Valeurs manquantes", ascending=False).reset_index(drop=True)

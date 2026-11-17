@@ -151,7 +151,7 @@ def generer(cfg: Config, forcer: bool = False) -> bool:
     for piece, forme, taux in (("P-1001", 0.7, {"": 0.010, "-R": 0.022}), ("P-1004", 0.8, {"": 0.015, "-R": 0.018, "-H": 0.030}),
                                ("P-1003", 2.4, {"": 0.008}), ("P-3005", 1.0, {"": 0.012, "-R": 0.014})):
         for suffixe, t in taux.items():
-            n_pose = int(rng.integers(600, 3000)) if not suffixe else int(rng.integers(150, 700))
+            n_pose = int(rng.integers(4000, 9000)) if not suffixe else int(rng.integers(1200, 3000))
             org = {"": "Neuve", "-R": "Réparée", "-H": "Récupérée"}[suffixe]
             poses.append({"Référence": piece, "Origine": org, "Pièces posées": n_pose})
             for _ in range(rng.binomial(n_pose, t)):
@@ -177,7 +177,8 @@ def generer(cfg: Config, forcer: bool = False) -> bool:
         for lundi, m in mesure.tail(6).items():
             pes.append({"Semaine": (lundi + pd.Timedelta(days=4)).strftime("%d/%m/%Y"), "Flux": benne,
                         "Masse mesurée (kg)": f"{m * rng.uniform(0.96, 1.04):.1f}".replace(".", ","), "Incertitude mesure (kg)": "0,5",
-                        "Périmètre": "MR, TSUI, Workstation" if benne == "DEEE" else "TSUI", "Commentaire": "pesée du vendredi (démo)"})
+                        "Périmètre": "MR, TSUI, Workstation" if benne == "DEEE" else "TSUI", "Commentaire": "pesée du vendredi (démo)",
+                        "Cause constatée": ("benne partagée : bacs d'un autre atelier vidés le même jour (démo)" if benne == "DEEE" and len(pes) % 3 == 0 else "")})
     _csv(pd.DataFrame(pes), cfg.projet / "Acquisition" / "pesees_hebdo.csv")
     aud = []
     for k in range(6):

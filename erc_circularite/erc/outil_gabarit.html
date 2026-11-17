@@ -1476,7 +1476,9 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
   function decrireManques(f) {
     var lg = calc.modele.ligne, t = [];
     if (inc(f.rebut_an)) t.push("le nombre de FRU rebutés par an");
+    else if (f.rebut_an < 0) t.push("un nombre de FRU rebutés par an positif");
     if (inc(possede(f, "taux_horaire_eur") ? f.taux_horaire_eur : lg.taux_horaire_eur)) t.push("le coût horaire d'un opérateur");
+    if (inc(lg.cout_traitement_eur_kg)) t.push("le coût de traitement du recycleur actuel (0 si l'enlèvement est gratuit)");
     var dispo = M.optionsDisponibles(f);
     if (!dispo.some(function (o) { return !o["réemploi"].length || !o.recyclage.length; })) {
       if (!dispo.length) t.push("la liste des pièces du FRU");

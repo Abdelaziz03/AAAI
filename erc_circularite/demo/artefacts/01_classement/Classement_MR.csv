@@ -1,10 +1,10 @@
 ﻿Référence;Description;Ateliers;Familles;Pièces;PO;Jours avec sortie;MMICV unitaire (USD);Source MMICV;MMICV total (USD);Part du MMICV total;Rang pièces;Rang MMICV;Catégorie proposée;Benne;Poids unitaire (kg);Source poids;Fabricant;Nature réelle;Niveau de preuve;Kg (poids connus);Pièce posée
-P-1004;Gate Driver Board;MR;Amplificateur;86;86;64;320,0;fiche article;27520,0;0,4395077896048103;6;1,0;Carte B;DEEE;0,4;pesée (démo);Fabricant démo;Gate Driver Board;démo;34,4;Neuve
-P-2001;Power supply board;MR;Alimentation;52;52;42;210,0;fiche article;10920,0;0,17439771302632734;8;2,0;Carte B;DEEE;0,6;pesée (démo);Fabricant démo;Power supply board;démo;31,2;Neuve
-P-1005;Control board assembly;MR;Amplificateur;31;31;28;310,0;fiche article;9610,0;0,1534763756577844;9;3,0;Carte B;DEEE;0,45;pesée (démo);Fabricant démo;Control board assembly;démo;13,950000000000001;Neuve
-P-1001;IGBT 400A 1200V;MR;Amplificateur;200;100;65;32,0;fiche article;6400,0;0,1022111138615838;3;4,0;Composant de puissance;DEEE;0,35;pesée (démo);Fabricant démo;IGBT 400A 1200V;démo;70,0;Neuve
-P-1002;IGBT 400A 600V;MR;Alimentation, Amplificateur;244;122;74;25,0;fiche article;6100,0;0,09741996789932206;2;5,0;Composant de puissance;DEEE;0,35;pesée (démo);Fabricant démo;IGBT 400A 600V;démo;85,39999999999999;Neuve
-P-2002;Cooling fan 120mm;MR;Alimentation;76;63;48;18,0;fiche article;1368,0;0,021847625587913536;7;6,0;Composant standard;DEEE;0,25;pesée (démo);Fabricant démo;Cooling fan 120mm;démo;19,0;Neuve
-P-1006;Bus resistance 33k ohm 10W;MR;Amplificateur;119;103;63;4,5;fiche article;535,5;0,008552195542637206;4;7,0;Composant standard;DEEE;0,05;pesée (démo);Fabricant démo;Bus resistance 33k ohm 10W;démo;5,95;Neuve
-P-1007;Protection fuse 100A high speed;MR;Alimentation, Amplificateur;90;86;62;1,8;fiche article;162,0;0,0025872188196213396;5;8,0;Composant standard;DEEE;0,08;pesée (démo);Fabricant démo;Protection fuse 100A high speed;démo;7,2;Neuve
-P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;MR;Amplificateur;277;175;92;;aucune;;;1;;Condensateur;DEEE;;;Fabricant démo;AL Electrolytic Capacitor 450V 4700uF 105degC;démo;;Neuve
+P-1004;Gate Driver Board;MR;Amplificateur;86,0;86;64;320,0;fiche article;27520,0;0,4395077896048103;6;1,0;Carte B;DEEE;0,4;pesée (démo);Fabricant démo;Gate Driver Board;démo;34,4;Neuve
+P-2001;Power supply board;MR;Alimentation;52,0;52;42;210,0;fiche article;10920,0;0,17439771302632734;8;2,0;Carte B;DEEE;0,6;pesée (démo);Fabricant démo;Power supply board;démo;31,2;Neuve
+P-1005;Control board assembly;MR;Amplificateur;31,0;31;28;310,0;fiche article;9610,0;0,1534763756577844;9;3,0;Carte B;DEEE;0,45;pesée (démo);Fabricant démo;Control board assembly;démo;13,950000000000001;Neuve
+P-1001;IGBT 400A 1200V;MR;Amplificateur;200,0;100;65;32,0;fiche article;6400,0;0,1022111138615838;3;4,0;Composant de puissance;DEEE;0,35;pesée (démo);Fabricant démo;IGBT 400A 1200V;démo;70,0;Neuve
+P-1002;IGBT 400A 600V;MR;Alimentation, Amplificateur;244,0;122;74;25,0;fiche article;6100,0;0,09741996789932206;2;5,0;Composant de puissance;DEEE;0,35;pesée (démo);Fabricant démo;IGBT 400A 600V;démo;85,39999999999999;Neuve
+P-2002;Cooling fan 120mm;MR;Alimentation;76,0;63;48;18,0;fiche article;1368,0;0,021847625587913536;7;6,0;Composant standard;DEEE;0,25;pesée (démo);Fabricant démo;Cooling fan 120mm;démo;19,0;Neuve
+P-1006;Bus resistance 33k ohm 10W;MR;Amplificateur;119,0;103;63;4,5;fiche article;535,5;0,008552195542637206;4;7,0;Composant standard;DEEE;0,05;pesée (démo);Fabricant démo;Bus resistance 33k ohm 10W;démo;5,95;Neuve
+P-1007;Protection fuse 100A high speed;MR;Alimentation, Amplificateur;90,0;86;62;1,8;fiche article;162,0;0,0025872188196213396;5;8,0;Composant standard;DEEE;0,08;pesée (démo);Fabricant démo;Protection fuse 100A high speed;démo;7,2;Neuve
+P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;MR;Amplificateur;277,0;175;92;;aucune;;;1;;Condensateur;DEEE;;;Fabricant démo;AL Electrolytic Capacitor 450V 4700uF 105degC;démo;;Neuve

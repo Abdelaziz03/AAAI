@@ -103,6 +103,28 @@ class Depot:
         fig.savefig(chemin, dpi=150, bbox_inches="tight")
         return self._inscrire(etape, nom, "figure", chemin, description)
 
+    def purger_figures(self, etape: str, garder) -> list:
+        """Retire les figures de l'étape qui n'ont pas été produites à cette exécution (fichier et entrée du manifeste) :
+        une image d'une exécution précédente ne doit pas passer pour un résultat courant. Renvoie les noms retirés."""
+        garder, retires = set(garder), []
+        for cle in [k for k in self._entrees if k[0] == etape and k[2] == "figure" and k[1] not in garder]:
+            try:
+                (self.racine / self._entrees[cle]["fichier"]).unlink()
+            except OSError:
+                pass
+            retires.append(cle[1])
+            del self._entrees[cle]
+        d = self.dossier(etape) / "figures"
+        if d.is_dir():                                        # fichiers orphelins : PNG présents sans entrée au manifeste
+            connus = {(self.racine / e["fichier"]).name for k, e in self._entrees.items() if k[0] == etape and k[2] == "figure"}
+            for f in d.glob("*.png"):
+                if f.name not in connus:
+                    try:
+                        f.unlink()
+                    except OSError:
+                        pass
+        return retires
+
     def fichier(self, etape: str, nom: str, chemin: Path, description: str = "", type_: str = "fichier") -> Path:
         return self._inscrire(etape, nom, type_, Path(chemin), description)
 

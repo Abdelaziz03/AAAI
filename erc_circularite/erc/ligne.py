@@ -33,7 +33,8 @@ Ce que devient une entrée inconnue (None ou NaN) : jamais un zéro caché
   par l'atelier (« Capacité (h/an) » vaut inf et « Taux d'occupation » NaN).
 - Entrées facultatives, comptées seulement si elles sont saisies : transport d'une pièce réemployée, délai
   d'approvisionnement évité, poids d'une pièce réemployée (traitement évité), revente au kilo des exemplaires
-  refusés au test. La colonne « Non compté faute de donnée » de `valeurs_options` les signale pièce par pièce.
+  refusés au test (il y faut le poids de la pièce et le prix du recycleur acheteur, pas le temps de tri).
+  La colonne « Non compté faute de donnée » de `valeurs_options` les signale pièce par pièce.
 - « ouverture_tri_min » et « taux_horaire_eur » d'un FRU ne retombent sur leur valeur par défaut (ouverture
   soignée, taux de la ligne) que si la clé est absente du dictionnaire ; présente et inconnue, elle reste inconnue.
 """
@@ -141,16 +142,21 @@ def _milieu(x):
 # 3. Options par type de FRU
 # ---------------------------------------------------------------------------
 # Trois options pour chaque pièce de chaque FRU rebutée, valeurs nettes PAR FRU, comparées à l'option 3 :
-#   1 « réemploi »  : démontage soigné + test → pièce réutilisée ; un exemplaire qui échoue au test part au recyclage
-#                     si le recyclage de cette pièce est renseigné, sinon à la benne (sans coût).
+#   1 « réemploi »  : démontage soigné + test → pièce réutilisée ; un exemplaire qui échoue au test est vendu au kilo
+#                     si son poids et le prix du recycleur acheteur sont connus (le temps de tri n'intervient pas :
+#                     l'exemplaire est déjà sorti du FRU), sinon il retourne à la benne du recycleur actuel.
 #                     Valeur = n × [p_réut × (valeur + délai évité) + (1 − p_réut) × kg × prix − transport]
 #                              − n × (extraction + test) × taux horaire
+#                     Le transport est compté pour chaque exemplaire extrait (n), comme dans le document du modèle.
 #   2 « recyclage » : tri de la pièce dans le bon flux → vendue au kg.  Valeur = n × kg × prix − n × tri × taux horaire
 #   3 « jeté »      : la pièce reste dans la FRU, qui part chez le recycleur actuel. Valeur 0 (référence).
 # Référence = situation actuelle : la FRU entière part dans la benne DEEE du recycleur actuel, au coût de traitement
 # ligne["cout_traitement_eur_kg"] (0 si le contrat est gratuit, négatif s'il paie). Chaque kg sorti de cette benne
 # par les options 1 et 2 évite ce coût : il est ajouté à leur valeur (« traitement évité »). Un exemplaire refusé au
 # test qui retourne à la benne n'est pas sorti de la benne : seule la part réutilisable (p_réut) est comptée.
+# Poids d'une pièce inconnu : aucun traitement évité n'est compté pour elle. C'est prudent tant que le coût de traitement
+# est positif ou nul ; s'il est négatif (le recycleur actuel paie), la valeur du réemploi est surestimée de ce que le
+# recycleur aurait payé pour la pièce : « Non compté faute de donnée » le signale (« traitement évité »).
 # Coût de traitement inconnu : aucune valeur n'est calculée (type de FRU « incomplet »).
 # Ouverture de la FRU, payée UNE fois : soignée (ouverture_min) dès qu'une pièce part en réemploi, sinon
 # sommaire (ouverture_tri_min, à défaut ouverture_min) dès qu'une pièce part au recyclage. Option 3 partout = pas d'ouverture.
@@ -160,8 +166,9 @@ OPTIONS = ("réemploi", "recyclage", "jeté")
 CHAMPS_REEMPLOI = ["n_par_fru", "extraction_min", "test_min", "p_reutilisable", "valeur_eur"]
 CHAMPS_RECYCLAGE = ["n_par_fru", "poids_kg", "prix_recycleur_eur_kg", "tri_min"]
 # Limite de calcul, pas une donnée : 3^8 = 6 561 combinaisons par type de FRU. Au-delà de 8 pièces, les pièces dont la
-# meilleure option seule vaut le moins (les inconnues d'abord) restent dans le FRU ; le plan les nomme dans
-# « Pièces non examinées ».
+# meilleure option seule vaut le moins (celles sans option calculable d'abord) restent dans le FRU. Le plan nomme dans
+# « Pièces non examinées » celles qui avaient une option calculable : pour ce type de FRU, le plan est alors un
+# minimum garanti et non plus l'optimum (une pièce écartée dont aucune option ne vaut plus que zéro ne change rien).
 MAX_PIECES_ENUM = 8
 COLONNES_DETAIL = ["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU rebutées / an", "Heures par FRU",
                    "Marge par FRU (€)", "Marge par heure (€)", "Heures / an", "Marge variable / an (€)", "Kg détournés / an",
@@ -226,7 +233,9 @@ def valeurs_options(fru: dict, taux_defaut) -> pd.DataFrame:
         n = d.get("n_par_fru")
         poids_connu = not _inconnu(d.get("poids_kg"))
         kg = d.get("poids_kg") if poids_connu else 0.0     # poids inconnu : aucun traitement évité compté
-        kgv = None if dispo[p]["recyclage"] else d["poids_kg"] * d["prix_recycleur_eur_kg"]
+        # Vente au kilo d'un exemplaire : son poids et le prix du recycleur acheteur suffisent. Le temps de tri et
+        # l'ouverture sommaire ne concernent que l'option 2 : un exemplaire refusé au test est déjà sorti du FRU.
+        kgv = d["poids_kg"] * d["prix_recycleur_eur_kg"] if poids_connu and not _inconnu(d.get("prix_recycleur_eur_kg")) else None
         k_re = k_rc = 0.0
         non_compte = []
         if dispo[p]["réemploi"]:
@@ -281,18 +290,20 @@ class Options:
     """Toutes les affectations pièce → option d'un type de FRU : heures, marge et kg détournés par FRU (tableaux numpy).
 
     Au plus MAX_PIECES_ENUM pièces sont examinées : celles dont la meilleure option seule vaut le plus (ex æquo dans
-    l'ordre de saisie, pièces sans option calculable en dernier). `noms_ignores` nomme les autres, laissées dans le FRU.
+    l'ordre de saisie, pièces sans option calculable en dernier). `noms_ignores` nomme, dans l'ordre de saisie, les
+    pièces écartées par cette limite alors qu'une de leurs options était calculable ; elles restent dans le FRU.
     """
 
     def __init__(self, fru: dict, taux_defaut):
         taux = fru.get("taux_horaire_eur", taux_defaut)
         t = valeurs_options(fru, taux_defaut)
-        toutes = list(t["Pièce"]) if len(t) else []
+        calculables = []
         if len(t):
-            t = t.assign(meilleur=t[["1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)"]].max(axis=1)).sort_values(
-                "meilleur", ascending=False, kind="mergesort").head(MAX_PIECES_ENUM)
+            t = t.assign(meilleur=t[["1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)"]].max(axis=1))
+            calculables = list(t.loc[t["meilleur"].notna(), "Pièce"])
+            t = t.sort_values("meilleur", ascending=False, kind="mergesort").head(MAX_PIECES_ENUM)
         self.noms = list(t["Pièce"]) if len(t) else []
-        self.noms_ignores = [p for p in toutes if p not in set(self.noms)]      # pièces au-delà de MAX_PIECES_ENUM : laissées dans le FRU
+        self.noms_ignores = [p for p in calculables if p not in set(self.noms)]
         self.ignorees = len(self.noms_ignores)
         C = _codes(len(self.noms))
         col = lambda c: t[c].to_numpy(float) if len(t) else np.zeros(0)
@@ -342,7 +353,10 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
     Relâché continu résolu par multiplicateur de Lagrange mu sur les heures : chaque type de FRU prend le plan qui
     maximise marge − mu × heures ; mu est trouvé par dichotomie. Au point de rupture, les heures restantes sont
     données aux types de FRU dont le plan change, dans l'ordre du gain par heure supplémentaire. Le résultat est
-    l'optimum du programme linéaire du document (vérifié contre un solveur exact dans tests/test_ligne.py).
+    l'optimum du programme linéaire du document (vérifié contre un solveur exact dans tests/test_ligne.py), sauf pour
+    un type de FRU de plus de MAX_PIECES_ENUM pièces calculables, où c'est un minimum garanti (« Pièces non examinées »).
+    Entre deux plans de même marge, le premier énuméré est retenu : la marge est la même, les heures peuvent différer.
+    Le multiplicateur rendu est la valeur d'une heure de plus (pente à droite de la marge) ; 0 si les heures suffisent.
     Heures opérateur inconnues = pas de limite ; négatives = aucune heure.
     """
     ligne, frus = _milieu(ligne or {}), _milieu(frus or {})
@@ -526,7 +540,8 @@ def resultat_par_periode(ligne: dict, frus: dict, flux: pd.DataFrame, periodes_p
     payé même si peu de FRU arrivent ; pas de stock d'une période à l'autre (hypothèse 10 du modèle).
     Une période présente dans le flux sans FRU du modèle compte pour zéro FRU. Si le flux a une colonne
     « Semaine complète », les semaines marquées incomplètes sont écartées : une semaine extraite à moitié n'est pas
-    une semaine creuse. Les FRU du flux absents du modèle sont ignorés.
+    une semaine creuse. De même, une semaine où le nombre de FRU rebutées d'un type du modèle est inconnu (vide ou
+    illisible) est écartée : un comptage manquant n'est pas un zéro. Les FRU du flux absents du modèle sont ignorés.
     Les attributs du tableau comparent avec le modèle annuel au flux moyen des mêmes périodes : l'écart est le
     COÛT DE LA VARIABILITÉ du flux (heures perdues les semaines creuses, FRU non traitées les semaines chargées).
     Il est positif ou nul, et nul quand le flux est constant ou les heures sans limite.
@@ -541,11 +556,16 @@ def resultat_par_periode(ligne: dict, frus: dict, flux: pd.DataFrame, periodes_p
         return pd.DataFrame(columns=COLONNES_PERIODE)
     if "Semaine complète" in flux.columns:
         flux = flux[~flux["Semaine complète"].map(_semaine_incomplete).astype(bool)]
-    total = {}
+    total, sans_comptage = {}, set()
     for sem, f, v in zip(flux["Semaine"], flux["FRU"], pd.to_numeric(flux["FRU rebutées"], errors="coerce")):
-        if f in fr and not np.isnan(v):
+        if f not in fr:
+            continue
+        if np.isnan(v):
+            sans_comptage.add(sem)
+        else:
             total[(sem, f)] = total.get((sem, f), 0.0) + float(v)
-    semaines = sorted(flux["Semaine"].dropna().unique())
+    # Mêmes objets que les clés de `total` : selon la version de pandas, unique() rend des dates numpy qui ne s'y retrouvent pas.
+    semaines = sorted({sem for sem in flux["Semaine"] if not _inconnu(sem)} - sans_comptage)
     lignes, cumul = [], 0.0
     for sem in semaines:
         fr_t = {f: dict(d or {}, rebut_an=total.get((sem, f), 0.0)) for f, d in fr.items()}

@@ -21,8 +21,10 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-RNG = np.random.default_rng(2026)
-N0 = 10            # force de l'a priori, en pièces équivalentes ; hyperparamètre réglé sur la log-perte prequentielle
+GRAINE = 2026
+RNG = np.random.default_rng(GRAINE)
+N0 = 10            # force de l'a priori, en pièces équivalentes. Valeur de travail fixée, PAS réglée : la table « Réglage de N0 »
+                   # (regler_n0) montre la log-perte obtenue pour d'autres valeurs sur l'audit disponible ; à revoir sur l'audit réel.
 CLES = ["Type de FRU", "Pièce"]
 
 
@@ -30,8 +32,9 @@ def posterieur(q0, bonnes, testees, n0=N0, n_tirages=20000):
     """Moyenne et intervalle à 90 % de q. q0 inconnu → a priori de Jeffreys Bêta(0,5 ; 0,5)."""
     a0, b0 = (0.5, 0.5) if q0 is None or not np.isfinite(q0) else (max(q0, 1e-3) * n0, max(1 - q0, 1e-3) * n0)
     a, b = a0 + bonnes, b0 + (testees - bonnes)
-    x = RNG.beta(a, b, n_tirages)
-    return {"q moyen": a / (a + b), "q bas (5 %)": float(np.quantile(x, 0.05)), "q haut (95 %)": float(np.quantile(x, 0.95)),
+    # Quantiles exacts de la loi Bêta : les bornes ne dépendent ni d'un tirage ni de ce qui a été calculé avant.
+    from .fiabilite import beta_quantile
+    return {"q moyen": a / (a + b), "q bas (5 %)": float(beta_quantile(0.05, a, b)), "q haut (95 %)": float(beta_quantile(0.95, a, b)),
             "Pièces testées": testees, "Poids des données": testees / (testees + a0 + b0), "a": a, "b": b}
 
 
@@ -62,6 +65,7 @@ def evaluer(audit: pd.DataFrame, a_priori: pd.DataFrame, n0=N0) -> dict:
       Couverture   : part des lots dont le nombre de pièces bonnes tombe dans l'intervalle prédictif à 90 % (cible ≈ 90 %)
     """
     q0 = a_priori.set_index(CLES)["q0"].to_dict()
+    rng = np.random.default_rng(GRAINE)          # générateur propre à l'évaluation : deux exécutions donnent les mêmes intervalles
     etat, lignes = {}, []
     for _, r in audit.sort_values("Date").iterrows():
         k, n, b = (r["Type de FRU"], r["Pièce"]), r["Pièces testées"], r["Pièces bonnes"]
@@ -74,7 +78,7 @@ def evaluer(audit: pd.DataFrame, a_priori: pd.DataFrame, n0=N0) -> dict:
                 "Fréquence observée": bb / nn if nn else 0.5}
         obs = b / n
         # Intervalle PRÉDICTIF du lot : incertitude sur q + hasard du tirage de n pièces (loi bêta-binomiale).
-        lo, hi = np.quantile(RNG.binomial(int(n), RNG.beta(post["a"], post["b"], 4000)), [0.05, 0.95])
+        lo, hi = np.quantile(rng.binomial(int(n), rng.beta(post["a"], post["b"], 4000)), [0.05, 0.95])
         for m, p in pred.items():
             pc = float(np.clip(p, 1e-6, 1 - 1e-6))
             lignes.append({"Modèle": m, "Date": r["Date"], "Type de FRU": k[0], "Pièce": k[1], "n": n, "Prédit": p, "Observé": obs,
@@ -86,9 +90,10 @@ def evaluer(audit: pd.DataFrame, a_priori: pd.DataFrame, n0=N0) -> dict:
     if not len(d):
         return {"detail": d, "metriques": pd.DataFrame()}
     w = lambda c: lambda g: np.average(g[c], weights=g["n"])
-    met = d.groupby("Modèle").apply(lambda g: pd.Series({"Lots": len(g), "Pièces": g["n"].sum(), "Brier": w("Brier")(g), "Log-perte": w("Log-perte")(g),
-                                                          "Écart absolu moyen": w("Écart absolu")(g), "Couverture IC90": g["Dans IC90"].astype(float).mean()}),
-                                    include_groups=False).reset_index().sort_values("Log-perte")
+    # Boucle explicite plutôt que groupby.apply : même résultat sur toutes les versions de pandas depuis 1.5.
+    met = pd.DataFrame([{"Modèle": m, "Lots": len(g), "Pièces": g["n"].sum(), "Brier": w("Brier")(g), "Log-perte": w("Log-perte")(g),
+                         "Écart absolu moyen": w("Écart absolu")(g), "Couverture IC90": g["Dans IC90"].astype(float).mean()}
+                        for m, g in d.groupby("Modèle", sort=True)]).sort_values("Log-perte").reset_index(drop=True)
     return {"detail": d, "metriques": met}
 
 
@@ -122,13 +127,14 @@ def plan_thompson(ligne: dict, frus: dict, post: pd.DataFrame, rng=RNG) -> dict:
     return elt.optimiser_ligne(elt._milieu(ligne), fr)
 
 
-def simuler_politiques(q_vrai, q0, gain_bonne, gain_mauvaise, gain_recyclage, n_pieces=400, n0=N0, n_sim=300, rng=RNG) -> pd.DataFrame:
+def simuler_politiques(q_vrai, q0, gain_bonne, gain_mauvaise, gain_recyclage, n_pieces=400, n0=N0, n_sim=300, rng=None) -> pd.DataFrame:
     """Banc d'essai SYNTHÉTIQUE du choix réemploi / recyclage pour une pièce, vérité q_vrai connue du simulateur seul.
 
     gain_bonne / gain_mauvaise : gain net du réemploi selon que la pièce passe ou non le test ; gain_recyclage : gain net du tri.
     Politiques : « A priori seul » (q0, jamais mis à jour), « Glouton » (moyenne a posteriori), « Thompson » (tirage).
     Métrique : regret cumulé = gain de l'oracle (qui connaît q_vrai) − gain espéré de la politique.
     """
+    rng = np.random.default_rng(GRAINE) if rng is None else rng      # banc d'essai reproductible d'une exécution à l'autre
     esp = lambda q: q * gain_bonne + (1 - q) * gain_mauvaise
     oracle = max(esp(q_vrai), gain_recyclage)
     a0, b0 = max(q0, 1e-3) * n0, max(1 - q0, 1e-3) * n0

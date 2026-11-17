@@ -1,20 +1,20 @@
 ﻿Référence;Description;Ateliers;Type de déchet;Benne;Poids unitaire (kg);Source poids;Niveau de preuve;Pièces;Kg (poids connus);Poids connu
-P-1004;Gate Driver Board;MR;Carte B;DEEE;0,4;pesée (démo);démo;86;34,4;True
-P-3002;Tête de joystick;TSUI;Plastique;DIB;0,05;pesée (démo);démo;268;13,4;True
-P-3001;Coque boîtier gris;TSUI;Plastique;DIB;0,6;pesée (démo);démo;115;69,0;True
-P-3005;Keypad controller board;TSUI;Carte C;DEEE;0,2;pesée (démo);démo;67;13,4;True
-P-2001;Power supply board;MR;Carte B;DEEE;0,6;pesée (démo);démo;52;31,2;True
-P-3004;Cable harness boîtier;TSUI;Câbles;DEEE;0,3;pesée (démo);démo;77;23,099999999999998;True
-P-1005;Control board assembly;MR;Carte B;DEEE;0,45;pesée (démo);démo;31;13,950000000000001;True
-P-6001;Mainboard station;(non rattaché);;;;;;17;;False
-P-1001;IGBT 400A 1200V;MR;Composant de puissance;DEEE;0,35;pesée (démo);démo;200;70,0;True
-P-1002;IGBT 400A 600V;MR;Composant de puissance;DEEE;0,35;pesée (démo);démo;244;85,39999999999999;True
-P-5001;Coil preamp board;Coils;Carte C;DEEE;0,1;pesée (démo);démo;54;5,4;True
-P-5002;Coil cable;Coils;Câbles;DEEE;0,2;pesée (démo);démo;30;6,0;True
-P-4001;Grille de protection;TSUI;Métal;Métal;0,3;pesée (démo);démo;43;12,9;True
-P-2002;Cooling fan 120mm;MR;Composant standard;DEEE;0,25;pesée (démo);démo;76;19,0;True
-P-3003;Soufflet caoutchouc;TSUI;Plastique;DIB;0,02;pesée (démo);démo;370;7,4;True
-P-6002;Cooling fan 80mm;(non rattaché);Composant standard;DEEE;0,12;pesée (démo);démo;60;7,199999999999999;True
-P-1006;Bus resistance 33k ohm 10W;MR;Composant standard;DEEE;0,05;pesée (démo);démo;119;5,95;True
-P-1007;Protection fuse 100A high speed;MR;Composant standard;DEEE;0,08;pesée (démo);démo;90;7,2;True
-P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;MR;Condensateur;DEEE;;;démo;277;;False
+P-1004;Gate Driver Board;MR;Carte B;DEEE;0,4;pesée (démo);démo;86,0;34,4;True
+P-3002;Tête de joystick;TSUI;Plastique;DIB;0,05;pesée (démo);démo;268,0;13,4;True
+P-3001;Coque boîtier gris;TSUI;Plastique;DIB;0,6;pesée (démo);démo;115,0;69,0;True
+P-3005;Keypad controller board;TSUI;Carte C;DEEE;0,2;pesée (démo);démo;67,0;13,4;True
+P-2001;Power supply board;MR;Carte B;DEEE;0,6;pesée (démo);démo;52,0;31,2;True
+P-3004;Cable harness boîtier;TSUI;Câbles;DEEE;0,3;pesée (démo);démo;77,0;23,099999999999998;True
+P-1005;Control board assembly;MR;Carte B;DEEE;0,45;pesée (démo);démo;31,0;13,950000000000001;True
+P-6001;Mainboard station;(non rattaché);;;;;;17,0;;False
+P-1001;IGBT 400A 1200V;MR;Composant de puissance;DEEE;0,35;pesée (démo);démo;200,0;70,0;True
+P-1002;IGBT 400A 600V;MR;Composant de puissance;DEEE;0,35;pesée (démo);démo;244,0;85,39999999999999;True
+P-5001;Coil preamp board;Coils;Carte C;DEEE;0,1;pesée (démo);démo;54,0;5,4;True
+P-5002;Coil cable;Coils;Câbles;DEEE;0,2;pesée (démo);démo;30,0;6,0;True
+P-4001;Grille de protection;TSUI;Métal;Métal;0,3;pesée (démo);démo;43,0;12,9;True
+P-2002;Cooling fan 120mm;MR;Composant standard;DEEE;0,25;pesée (démo);démo;76,0;19,0;True
+P-3003;Soufflet caoutchouc;TSUI;Plastique;DIB;0,02;pesée (démo);démo;370,0;7,4;True
+P-6002;Cooling fan 80mm;(non rattaché);Composant standard;DEEE;0,12;pesée (démo);démo;60,0;7,199999999999999;True
+P-1006;Bus resistance 33k ohm 10W;MR;Composant standard;DEEE;0,05;pesée (démo);démo;119,0;5,95;True
+P-1007;Protection fuse 100A high speed;MR;Composant standard;DEEE;0,08;pesée (démo);démo;90,0;7,2;True
+P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;MR;Condensateur;DEEE;;;démo;277,0;;False
