@@ -373,6 +373,10 @@ def _construire_outil(ctx: Contexte, donnees: dict):
     return chemin
 
 
+CLES_PIECE_MODELE = ["n_par_fru", "extraction_min", "test_min", "tri_min", "p_reutilisable", "valeur_eur", "delai_semaines",
+                     "valeur_semaine_eur", "transport_eur", "poids_kg", "prix_recycleur_eur_kg"]
+
+
 def _param(v, provenance: str = "") -> dict:
     """Paramètre pour l'outil : valeur centrale, bornes, loi de tirage (fixe, uniforme, triangulaire), provenance."""
     b = mod_par.bornes(v)
@@ -402,7 +406,7 @@ def donnees_outil(ctx: Contexte) -> dict:
             item = {"piece": pc, "description": desc, "type_piece": rm.get("Type de pièce", "Carcasse"),
                     "type_dechet": cl.at[pc, "Catégorie proposée"] if pc in cl.index else None, "benne": cl.at[pc, "Benne"] if pc in cl.index else None,
                     "risque_matiere": rm.get("Score risque matière (0-1)"), "crm": rm.get("CRM", "")}
-            for k in list(mod_par.P_PIECE):
+            for k in CLES_PIECE_MODELE:                        # seulement ce que le modèle de ligne lit
                 if k in e or pc != mod_par.CARCASSE:
                     item[k] = _param(e.get(k), pv.get((f, pc, k), ""))
             pieces.append(item)

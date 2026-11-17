@@ -1,6 +1,6 @@
 {
  "meta": {
-  "genere_le": "2026-11-17T14:42:34",
+  "genere_le": "2026-11-17T14:44:50",
   "donnees": "démonstration",
   "periode": "du 01/06/2026 au 01/11/2026, 154 jours extraits",
   "jours_extraits": 154,
@@ -144,19 +144,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.4,
-      "bas": 0.4,
-      "haut": 0.4,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 8.0,
-      "bas": 8.0,
-      "haut": 8.0,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Carte B)"
+     "p_reutilisable": {
+      "valeur": 0.36898092369477914,
+      "bas": 0.25989420249411327,
+      "haut": 0.4859436054272534,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (38 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 147.20000000000002,
@@ -186,33 +179,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.4,
+      "bas": 0.4,
+      "haut": 0.4,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.36898092369477914,
-      "bas": 0.25989420249411327,
-      "haut": 0.4859436054272534,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (38 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 8.0,
+      "bas": 8.0,
+      "haut": 8.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte B)"
      }
     },
     {
@@ -251,19 +230,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.45,
-      "bas": 0.45,
-      "haut": 0.45,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 8.0,
-      "bas": 8.0,
-      "haut": 8.0,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Carte B)"
+     "p_reutilisable": {
+      "valeur": 0.7166204819277109,
+      "bas": 0.4685528020347304,
+      "haut": 0.910663200883362,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 142.6,
@@ -293,33 +265,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.45,
+      "bas": 0.45,
+      "haut": 0.45,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.7166204819277109,
-      "bas": 0.4685528020347304,
-      "haut": 0.910663200883362,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 8.0,
+      "bas": 8.0,
+      "haut": 8.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte B)"
      }
     },
     {
@@ -358,19 +316,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.35,
-      "bas": 0.35,
-      "haut": 0.35,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 2.5,
-      "bas": 2.5,
-      "haut": 2.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant de puissance)"
+     "p_reutilisable": {
+      "valeur": 0.5465036617056461,
+      "bas": 0.43119306206260977,
+      "haut": 0.6583664969653091,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (41 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 14.72,
@@ -400,33 +351,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.35,
+      "bas": 0.35,
+      "haut": 0.35,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.5465036617056461,
-      "bas": 0.43119306206260977,
-      "haut": 0.6583664969653091,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (41 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 2.5,
+      "bas": 2.5,
+      "haut": 2.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant de puissance)"
      }
     },
     {
@@ -465,19 +402,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.35,
-      "bas": 0.35,
-      "haut": 0.35,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 2.5,
-      "bas": 2.5,
-      "haut": 2.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant de puissance)"
+     "p_reutilisable": {
+      "valeur": 0.627343373493976,
+      "bas": 0.3667341594524756,
+      "haut": 0.8523083645792162,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 11.5,
@@ -507,33 +437,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.35,
+      "bas": 0.35,
+      "haut": 0.35,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.627343373493976,
-      "bas": 0.3667341594524756,
-      "haut": 0.8523083645792162,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 2.5,
+      "bas": 2.5,
+      "haut": 2.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant de puissance)"
      }
     },
     {
@@ -572,19 +488,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.5,
-      "bas": 0.5,
-      "haut": 0.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant standard)"
+     "p_reutilisable": {
+      "valeur": 0.677933734939759,
+      "bas": 0.4254833183362979,
+      "haut": 0.8869566387780172,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 2.0700000000000003,
@@ -614,33 +523,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.677933734939759,
-      "bas": 0.4254833183362979,
-      "haut": 0.8869566387780172,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
      }
     },
     {
@@ -679,19 +574,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.08,
-      "bas": 0.08,
-      "haut": 0.08,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.5,
-      "bas": 0.5,
-      "haut": 0.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant standard)"
+     "p_reutilisable": {
+      "valeur": 0.7322439759036145,
+      "bas": 0.48764538714797584,
+      "haut": 0.9256769000204049,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 0.8280000000000001,
@@ -721,33 +609,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.08,
+      "bas": 0.08,
+      "haut": 0.08,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.7322439759036145,
-      "bas": 0.48764538714797584,
-      "haut": 0.9256769000204049,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
      }
     },
     {
@@ -786,19 +660,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.6,
-      "bas": 0.6,
-      "haut": 0.6,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Condensateur)"
+     "p_reutilisable": {
+      "valeur": 0.24917560240963854,
+      "bas": 0.1545663046856326,
+      "haut": 0.3536378223547302,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (40 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": null,
@@ -828,33 +695,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
+     "poids_kg": {
       "valeur": null,
       "bas": null,
       "haut": null,
       "loi": null,
       "provenance": "manquant"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.24917560240963854,
-      "bas": 0.1545663046856326,
-      "haut": 0.3536378223547302,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (40 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.6,
+      "bas": 0.6,
+      "haut": 0.6,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Condensateur)"
      }
     },
     {
@@ -972,19 +825,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.6,
-      "bas": 0.6,
-      "haut": 0.6,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 8.0,
-      "bas": 8.0,
-      "haut": 8.0,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Carte B)"
+     "p_reutilisable": {
+      "valeur": 0.3295636363636364,
+      "bas": 0.11762243766596686,
+      "haut": 0.5853181658329776,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 96.60000000000001,
@@ -1014,33 +860,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.6,
+      "bas": 0.6,
+      "haut": 0.6,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.3295636363636364,
-      "bas": 0.11762243766596686,
-      "haut": 0.5853181658329776,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 8.0,
+      "bas": 8.0,
+      "haut": 8.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte B)"
      }
     },
     {
@@ -1079,19 +911,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.35,
-      "bas": 0.35,
-      "haut": 0.35,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 2.5,
-      "bas": 2.5,
-      "haut": 2.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant de puissance)"
+     "p_reutilisable": {
+      "valeur": 0.6306790909090909,
+      "bas": 0.37580715948597027,
+      "haut": 0.8562575816371267,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 11.5,
@@ -1121,33 +946,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.35,
+      "bas": 0.35,
+      "haut": 0.35,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.6306790909090909,
-      "bas": 0.37580715948597027,
-      "haut": 0.8562575816371267,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 2.5,
+      "bas": 2.5,
+      "haut": 2.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant de puissance)"
      }
     },
     {
@@ -1186,19 +997,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.25,
-      "bas": 0.25,
-      "haut": 0.25,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.5,
-      "bas": 0.5,
-      "haut": 0.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant standard)"
+     "p_reutilisable": {
+      "valeur": 0.47102727272727274,
+      "bas": 0.22827985559780842,
+      "haut": 0.7237982585368566,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 8.280000000000001,
@@ -1228,33 +1032,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.25,
+      "bas": 0.25,
+      "haut": 0.25,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.47102727272727274,
-      "bas": 0.22827985559780842,
-      "haut": 0.7237982585368566,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
      }
     },
     {
@@ -1293,19 +1083,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.08,
-      "bas": 0.08,
-      "haut": 0.08,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.5,
-      "bas": 0.5,
-      "haut": 0.5,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Composant standard)"
+     "p_reutilisable": {
+      "valeur": 0.6781704545454545,
+      "bas": 0.42937578719058195,
+      "haut": 0.8883315950315324,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 0.8280000000000001,
@@ -1335,33 +1118,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.08,
+      "bas": 0.08,
+      "haut": 0.08,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.6781704545454545,
-      "bas": 0.42937578719058195,
-      "haut": 0.8883315950315324,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
      }
     },
     {
@@ -1479,19 +1248,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.6,
-      "bas": 0.6,
-      "haut": 0.6,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Plastique)"
+     "p_reutilisable": {
+      "valeur": 0.444929379376384,
+      "bas": 0.33144473362419374,
+      "haut": 0.5616141006555486,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (39 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 55.2,
@@ -1521,33 +1283,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.6,
+      "bas": 0.6,
+      "haut": 0.6,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.444929379376384,
-      "bas": 0.33144473362419374,
-      "haut": 0.5616141006555486,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (39 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
      }
     },
     {
@@ -1586,19 +1334,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Plastique)"
+     "p_reutilisable": {
+      "valeur": 0.6989962557603686,
+      "bas": 0.5962402463076093,
+      "haut": 0.7940706912098472,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (46 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 25.76,
@@ -1628,33 +1369,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.6989962557603686,
-      "bas": 0.5962402463076093,
-      "haut": 0.7940706912098472,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (46 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
      }
     },
     {
@@ -1693,19 +1420,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.3,
-      "bas": 0.3,
-      "haut": 0.3,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 1.8,
-      "bas": 1.8,
-      "haut": 1.8,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Câbles)"
+     "p_reutilisable": {
+      "valeur": 0.604016129032258,
+      "bas": 0.3486703966725123,
+      "haut": 0.8344867062890486,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 64.4,
@@ -1735,33 +1455,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.3,
+      "bas": 0.3,
+      "haut": 0.3,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.604016129032258,
-      "bas": 0.3486703966725123,
-      "haut": 0.8344867062890486,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 1.8,
+      "bas": 1.8,
+      "haut": 1.8,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Câbles)"
      }
     },
     {
@@ -1800,19 +1506,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.2,
-      "bas": 0.2,
-      "haut": 0.2,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 3.0,
-      "bas": 3.0,
-      "haut": 3.0,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Carte C)"
+     "p_reutilisable": {
+      "valeur": 0.6789853372434017,
+      "bas": 0.42601653762705893,
+      "haut": 0.8876491032330892,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 82.8,
@@ -1842,33 +1541,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.2,
+      "bas": 0.2,
+      "haut": 0.2,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.6789853372434017,
-      "bas": 0.42601653762705893,
-      "haut": 0.8876491032330892,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte C)"
      }
     },
     {
@@ -1907,19 +1592,12 @@
       "loi": "fixe",
       "provenance": "saisi"
      },
-     "poids_kg": {
-      "valeur": 0.02,
-      "bas": 0.02,
-      "haut": 0.02,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Plastique)"
+     "p_reutilisable": {
+      "valeur": 0.2519868035190616,
+      "bas": 0.06673572320725972,
+      "haut": 0.4920261200674518,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 0.6900000000000001,
@@ -1949,33 +1627,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.02,
+      "bas": 0.02,
+      "haut": 0.02,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.2519868035190616,
-      "bas": 0.06673572320725972,
-      "haut": 0.4920261200674518,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
      }
     },
     {
@@ -2093,19 +1757,12 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "poids_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.05,
-      "bas": 0.05,
-      "haut": 0.05,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Plastique)"
+     "p_reutilisable": {
+      "valeur": 0.595890410958904,
+      "bas": 0.3422352348024697,
+      "haut": 0.8249613804569993,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 25.76,
@@ -2135,33 +1792,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.595890410958904,
-      "bas": 0.3422352348024697,
-      "haut": 0.8249613804569993,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
      }
     },
     {
@@ -2200,19 +1843,12 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "poids_kg": {
-      "valeur": 0.2,
-      "bas": 0.2,
-      "haut": 0.2,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 3.0,
-      "bas": 3.0,
-      "haut": 3.0,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Carte C)"
+     "p_reutilisable": {
+      "valeur": 0.821917808219178,
+      "bas": 0.6019676890953417,
+      "haut": 0.9691415034414701,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 82.8,
@@ -2242,33 +1878,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.2,
+      "bas": 0.2,
+      "haut": 0.2,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.821917808219178,
-      "bas": 0.6019676890953417,
-      "haut": 0.9691415034414701,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte C)"
      }
     },
     {
@@ -2307,19 +1929,12 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "poids_kg": {
-      "valeur": 0.3,
-      "bas": 0.3,
-      "haut": 0.3,
-      "loi": "fixe",
-      "provenance": "auto : classement matière (pesée (démo))"
-     },
-     "prix_recycleur_eur_kg": {
-      "valeur": 0.25,
-      "bas": 0.25,
-      "haut": 0.25,
-      "loi": "fixe",
-      "provenance": "auto : référentiel des grades (Métal)"
+     "p_reutilisable": {
+      "valeur": 0.410958904109589,
+      "bas": 0.17744306136426236,
+      "haut": 0.6649264984679722,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
      },
      "valeur_eur": {
       "valeur": 18.400000000000002,
@@ -2349,33 +1964,19 @@
       "loi": null,
       "provenance": "manquant"
      },
-     "part_preventive": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
+     "poids_kg": {
+      "valeur": 0.3,
+      "bas": 0.3,
+      "haut": 0.3,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
      },
-     "casse_demontage": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "rendement_test": {
-      "valeur": null,
-      "bas": null,
-      "haut": null,
-      "loi": null,
-      "provenance": "manquant"
-     },
-     "p_reutilisable": {
-      "valeur": 0.410958904109589,
-      "bas": 0.17744306136426236,
-      "haut": 0.6649264984679722,
-      "loi": "triangulaire",
-      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.25,
+      "bas": 0.25,
+      "haut": 0.25,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Métal)"
      }
     },
     {

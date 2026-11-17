@@ -4,5 +4,5 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def construire(donnees: dict, chemin: Path) -> Path:
+def construire(donnees: dict, chemin: Path, fragment: bool = False) -> Path:
     raise NotImplementedError("outil des décideurs pas encore construit")
