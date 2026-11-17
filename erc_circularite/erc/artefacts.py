@@ -131,6 +131,7 @@ class Depot:
 
     def ecrire_manifeste(self) -> Path:
         f = self.racine / "manifeste.json"
+        self._entrees = {k: e for k, e in self._entrees.items() if (self.racine / e["fichier"]).is_file()}
         entrees = sorted(self._entrees.values(), key=lambda e: (DOSSIER_ETAPE.get(e["etape"], e["etape"]), e["type"], e["nom"]))
         f.write_text(json.dumps({"donnees": "démonstration" if self.demo else "réelles",
                                  "mis_a_jour": datetime.now().isoformat(timespec="seconds"), "artefacts": entrees},

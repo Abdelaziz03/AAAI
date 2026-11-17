@@ -343,63 +343,67 @@ def resoudre(cfg: Config, p: Parametres, src: Sources, couples: pd.DataFrame, re
     frus = {}
     for _, f in p.fru.iterrows():
         nom = f["FRU"]
+        src_f = f.get("Source") if isinstance(f.get("Source"), str) and f.get("Source").strip() else ""
+        saisi_f = "saisi" + (f" : {src_f}" if src_f else "")
         d = {"description": f.get("Description") if isinstance(f.get("Description"), str) else src.desc_fru.get(nom, ""),
              "atelier": src.atelier_fru.get(nom, f.get("Atelier") if isinstance(f.get("Atelier"), str) else "")}
         # FRU rebutées par an
-        v, o = milieu_ou_plage(f["rebut_an"]), "saisi"
+        v, o = milieu_ou_plage(f["rebut_an"]), saisi_f
         if v is None and len(ra) and nom in ra.index and not nul(ra.at[nom, "rebut_an"]):
             v, o = ra.at[nom, "rebut_an"], f"auto : suivi hebdomadaire ({int(ra.at[nom, 'Semaines complètes'])} semaines complètes)"
         if v is None and rebut is not None and len(rebut) and jours and nom in set(rebut["FRU"]):
             n = float(rebut.loc[rebut["FRU"].eq(nom), "FRU rebutées"].sum())
             v, o = n * 365.0 / jours, f"auto : {n:g} FRU rebutées sur {jours} jours, annualisé"
         d["rebut_an"] = note(nom, "", "rebut_an", v, o)
-        v, o = milieu_ou_plage(f["poids_fru_kg"]), "saisi"
+        v, o = milieu_ou_plage(f["poids_fru_kg"]), saisi_f
         if v is None and nom in src.poids_fru.index:
             v, o = float(src.poids_fru[nom]), "auto : fiche du FRU (Net weight)"
         d["poids_fru_kg"] = note(nom, "", "poids_fru_kg", v, o)
         for k in ("ouverture_min", "ouverture_tri_min"):
-            d[k] = note(nom, "", k, milieu_ou_plage(f[k]), "saisi")
+            d[k] = note(nom, "", k, milieu_ou_plage(f[k]), saisi_f)
         if d["ouverture_tri_min"] is None:
             del d["ouverture_tri_min"]                          # le modèle retombe sur l'ouverture soignée
         if not nul(f["taux_horaire_eur"]):
-            d["taux_horaire_eur"] = note(nom, "", "taux_horaire_eur", f["taux_horaire_eur"], "saisi")
+            d["taux_horaire_eur"] = note(nom, "", "taux_horaire_eur", f["taux_horaire_eur"], saisi_f)
         pieces, masse_pieces = {}, 0.0
         for _, r in p.pieces[p.pieces["FRU"].eq(nom)].iterrows():
             pc = r["Pièce"]
             if pc == CARCASSE:
                 continue
+            src_p = r.get("Source") if isinstance(r.get("Source"), str) and r.get("Source").strip() else ""
+            saisi_p = "saisi" + (f" : {src_p}" if src_p else "")
             e = {"description": r.get("Description") if isinstance(r.get("Description"), str) else src.desc_piece.get(pc, "")}
-            v, o = milieu_ou_plage(r["n_par_fru"]), "saisi"
+            v, o = milieu_ou_plage(r["n_par_fru"]), saisi_p
             if v is None and len(c) and (nom, pc) in c.index and pd.notna(c.at[(nom, pc), "Max par PO"]):
                 v, o = float(c.at[(nom, pc), "Max par PO"]), "auto : maximum observé sur un même PO (minimum, à confirmer par l'audit)"
             e["n_par_fru"] = note(nom, pc, "n_par_fru", v, o)
             for k in ("extraction_min", "test_min", "tri_min", "transport_eur"):
-                e[k] = note(nom, pc, k, milieu_ou_plage(r[k]), "saisi")
-            v, o = milieu_ou_plage(r["poids_kg"]), "saisi"
+                e[k] = note(nom, pc, k, milieu_ou_plage(r[k]), saisi_p)
+            v, o = milieu_ou_plage(r["poids_kg"]), saisi_p
             if v is None and pc in src.classification.index and pd.notna(src.classification.at[pc, "Poids unitaire (kg)"]):
                 v, o = float(src.classification.at[pc, "Poids unitaire (kg)"]), f"auto : classement matière ({src.classification.at[pc, 'Source poids']})"
             e["poids_kg"] = note(nom, pc, "poids_kg", v, o)
             if e["poids_kg"] is not None and e["n_par_fru"] is not None:
                 masse_pieces += milieu(e["poids_kg"]) * milieu(e["n_par_fru"])
-            v, o = milieu_ou_plage(r["prix_recycleur_eur_kg"]), "saisi"
+            v, o = milieu_ou_plage(r["prix_recycleur_eur_kg"]), saisi_p
             cat = src.classification.at[pc, "Catégorie proposée"] if pc in src.classification.index else None
             if v is None and isinstance(cat, str) and cat in src.prix_recycleur.index:
                 v, o = float(src.prix_recycleur[cat]), f"auto : référentiel des grades ({cat})"
             e["prix_recycleur_eur_kg"] = note(nom, pc, "prix_recycleur_eur_kg", v, o)
-            v, o = milieu_ou_plage(r["valeur_eur"]), "saisi"
+            v, o = milieu_ou_plage(r["valeur_eur"]), saisi_p
             if v is None and frac is not None and pc in src.mmicv.index:
                 v = produit(produit(float(src.mmicv[pc]), change if change is not None else 1.0), frac)
                 o = "auto : MMICV × fraction de réemploi" + ("" if change is not None else " (devise du MMICV non convertie : taux_change_mmicv à saisir)")
             e["valeur_eur"] = note(nom, pc, "valeur_eur", v, o)
-            v, o = milieu_ou_plage(r["delai_semaines"]), "saisi"
+            v, o = milieu_ou_plage(r["delai_semaines"]), saisi_p
             if v is None and pc in delais.index and pd.notna(delais[pc]):
                 v, o = float(delais[pc]), "auto : onglet Supply"
             e["delai_semaines"] = note(nom, pc, "delai_semaines", v, o)
-            v, o = milieu_ou_plage(r["valeur_semaine_eur"]), "saisi"
+            v, o = milieu_ou_plage(r["valeur_semaine_eur"]), saisi_p
             if v is None and ligne.get("valeur_semaine_eur") is not None:
                 v, o = ligne["valeur_semaine_eur"], "auto : défaut de la ligne"
             e["valeur_semaine_eur"] = note(nom, pc, "valeur_semaine_eur", v, o)
-            v, o = milieu_ou_plage(r["p_reutilisable"]), "saisi"
+            v, o = milieu_ou_plage(r["p_reutilisable"]), saisi_p
             if v is None and len(post) and (nom, pc) in post.index:
                 q = post.loc[(nom, pc)]
                 if q["Pièces testées"] > 0 or pd.notna(q.get("q0")):
@@ -410,18 +414,20 @@ def resoudre(cfg: Config, p: Parametres, src: Sources, couples: pd.DataFrame, re
         car = p.pieces[p.pieces["FRU"].eq(nom) & p.pieces["Pièce"].eq(CARCASSE)]
         if len(car):
             r = car.iloc[0]
+            src_c = r.get("Source") if isinstance(r.get("Source"), str) and r.get("Source").strip() else ""
+            saisi_c = "saisi" + (f" : {src_c}" if src_c else "")
             e = {"description": "Châssis et reste du FRU", "n_par_fru": 1.0}
-            v, o = milieu_ou_plage(r["poids_kg"]), "saisi"
+            v, o = milieu_ou_plage(r["poids_kg"]), saisi_c
             if v is None and d["poids_fru_kg"] is not None and milieu(d["poids_fru_kg"]) > masse_pieces:
                 v, o = milieu(d["poids_fru_kg"]) - masse_pieces, "auto : poids du FRU moins les pièces listées au poids connu"
             e["poids_kg"] = note(nom, CARCASSE, "poids_kg", v, o)
-            e["prix_recycleur_eur_kg"] = note(nom, CARCASSE, "prix_recycleur_eur_kg", milieu_ou_plage(r["prix_recycleur_eur_kg"]), "saisi")
-            e["tri_min"] = note(nom, CARCASSE, "tri_min", milieu_ou_plage(r["tri_min"]), "saisi")
+            e["prix_recycleur_eur_kg"] = note(nom, CARCASSE, "prix_recycleur_eur_kg", milieu_ou_plage(r["prix_recycleur_eur_kg"]), saisi_c)
+            e["tri_min"] = note(nom, CARCASSE, "tri_min", milieu_ou_plage(r["tri_min"]), saisi_c)
             pieces[CARCASSE] = e
         d["pieces"] = pieces
         frus[nom] = d
     prov = pd.DataFrame(prov, columns=["FRU", "Pièce", "Paramètre", "Valeur", "Provenance"])
-    prov["État"] = np.where(prov["Provenance"].eq("manquant"), "manquant", np.where(prov["Provenance"].str.startswith("auto"), "tiré des données", "saisi"))
+    prov["État"] = np.where(prov["Provenance"].eq("manquant"), "manquant", np.where(prov["Provenance"].astype(str).str.startswith("auto"), "tiré des données", "saisi"))
     return ligne, frus, prov
 
 

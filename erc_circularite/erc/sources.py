@@ -73,7 +73,7 @@ class Sources:
     desc_piece: pd.Series = field(default_factory=lambda: pd.Series(dtype=object))
     elf: pd.DataFrame = field(default_factory=pd.DataFrame)
     poses: pd.Series | None = None
-    pesees: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Semaine", "Flux", "Masse mesurée (kg)"]))
+    pesees: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Semaine", "Flux", "Masse mesurée (kg)", "Cause constatée"]))
     audit: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Date", "Type de FRU", "Pièce", "Pièces testées", "Pièces bonnes"]))
 
     @property
@@ -121,15 +121,15 @@ def _lire_extractions(s: Sources):
         try:
             m = re.search(r"(\d{8})_(\d{8})", f.stem)
             jours = set(pd.date_range(m.group(1), m.group(2)))
-            x = pd.ExcelFile(f)
-            if "Composants_jour" in x.sheet_names:
-                d = x.parse("Composants_jour")
-                d["Jour"] = pd.to_datetime(d["Jour"], errors="coerce").dt.normalize()
-                morceaux.append(d[d["Jour"].isin(jours - couverts)])      # l'extraction la plus récente gagne pour chaque jour
-            if "FRU_rebutees" in x.sheet_names:
-                rebuts.append(x.parse("FRU_rebutees"))
-            if "FRU_statut_cohorte" in x.sheet_names and not len(s.cohorte):
-                s.cohorte = x.parse("FRU_statut_cohorte")
+            with pd.ExcelFile(f) as x:
+                if "Composants_jour" in x.sheet_names:
+                    d = x.parse("Composants_jour")
+                    d["Jour"] = pd.to_datetime(d["Jour"], errors="coerce").dt.normalize()
+                    morceaux.append(d[d["Jour"].isin(jours - couverts)])      # l'extraction la plus récente gagne pour chaque jour
+                if "FRU_rebutees" in x.sheet_names:
+                    rebuts.append(x.parse("FRU_rebutees"))
+                if "FRU_statut_cohorte" in x.sheet_names and not len(s.cohorte):
+                    s.cohorte = x.parse("FRU_statut_cohorte")
             couverts |= jours
             s._note("Extraction R26", f.name, "chargé", len(morceaux[-1]) if morceaux else 0, f"{m.group(1)} → {m.group(2)}", "consommations, FRU rebutées")
         except Exception as e:
@@ -334,6 +334,8 @@ def charger(cfg: Config) -> Sources:
         if "Incertitude mesure (kg)" in pe:
             pe["Incertitude mesure (kg)"] = _num(pe["Incertitude mesure (kg)"]).values
         pe["Semaine"] = pd.to_datetime(pe["Semaine"], dayfirst=True, errors="coerce")
+        if "Cause constatée" not in pe:                           # colonne facultative, saisie par l'atelier après chaque pesée
+            pe["Cause constatée"] = None
         s.pesees = pe.dropna(subset=["Semaine", "Masse mesurée (kg)"])
     f = p / "Acquisition" / "audit_demontage.csv" if p else None
     au = _essayer(s, "Audit de démontage", f, "pièces testées et pièces bonnes (modèle de Rex)", lambda: _csv(f, dtype=str))

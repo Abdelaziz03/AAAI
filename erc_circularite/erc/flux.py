@@ -68,16 +68,18 @@ def estimation_hebdo(ev: pd.DataFrame, comp: pd.DataFrame, couverts: set, par="B
 
 def rapprocher(est: pd.DataFrame, mesures: pd.DataFrame) -> pd.DataFrame:
     """Estimé contre mesuré. `mesures` : colonnes Semaine (une date de la semaine), Flux, Masse mesurée (kg),
-    et facultatives Incertitude mesure (kg), Périmètre (ateliers dont les déchets sont dans cette pesée), Commentaire."""
+    et facultatives Incertitude mesure (kg), Périmètre (ateliers dont les déchets sont dans cette pesée), Commentaire,
+    Cause constatée (cause de l'écart observée sur place, reportée dans la dernière colonne du tableau)."""
     m = mesures.copy()
     m["Semaine"] = semaine(pd.to_datetime(m["Semaine"], dayfirst=True)) if len(m) else pd.to_datetime(m["Semaine"])
     m["Masse mesurée (kg)"] = pd.to_numeric(m["Masse mesurée (kg)"], errors="coerce")
-    for c in ("Incertitude mesure (kg)", "Périmètre", "Commentaire"):
+    for c in ("Incertitude mesure (kg)", "Périmètre", "Commentaire", "Cause constatée"):
         if c not in m:
             m[c] = np.nan
     m = m.groupby(["Semaine", "Flux"]).agg(**{"Masse mesurée (kg)": ("Masse mesurée (kg)", "sum"),
                                               "Incertitude mesure (kg)": ("Incertitude mesure (kg)", lambda s: np.sqrt((s.fillna(0) ** 2).sum())),
-                                              "Périmètre": ("Périmètre", "first"), "Commentaire": ("Commentaire", "first")}).reset_index()
+                                              "Périmètre": ("Périmètre", "first"), "Commentaire": ("Commentaire", "first"),
+                                              "Cause constatée": ("Cause constatée", "first")}).reset_index()
     m["Semaine"] = pd.to_datetime(m["Semaine"])
     t = est.merge(m, on=["Semaine", "Flux"], how="outer").sort_values(["Flux", "Semaine"])
     for c in ("Masse mesurée (kg)", "Incertitude mesure (kg)", "Estimé central (kg)", "Estimé bas (kg)", "Estimé haut (kg)"):
@@ -93,7 +95,9 @@ def rapprocher(est: pd.DataFrame, mesures: pd.DataFrame) -> pd.DataFrame:
     t["Cumul mesuré (kg)"] = t["Masse mesurée (kg)"].where(deux).groupby(t["Flux"]).cumsum()
     t["Écart cumulé (%)"] = (t["Cumul mesuré (kg)"] - t["Cumul estimé (kg)"]) / t["Cumul estimé (kg)"]
     t["Causes candidates de l'écart"] = t.apply(_causes, axis=1)
-    t["Cause constatée (à saisir)"] = ""
+    # Saisie par l'atelier dans la colonne facultative « Cause constatée » du fichier des pesées, reportée telle quelle.
+    t["Cause constatée (à saisir)"] = t["Cause constatée"].where(t["Cause constatée"].notna(), "") if "Cause constatée" in t else ""
+    t = t.drop(columns=["Cause constatée"], errors="ignore")
     return t
 
 

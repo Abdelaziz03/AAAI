@@ -15,7 +15,7 @@ def main():
     o = a.parse_args()
     cfg = charger(dossier=o.dossier, projet=o.projet, racine=o.racine, demo=True if o.demo else None)
     ctx = executer(o.jusqua, cfg=cfg)
-    print("Artefacts :", ctx.cfg.artefacts)
+    print("Dossier :", ctx.cfg.dossier, "| artefacts dans", ctx.cfg.artefacts.name + "/")
 
 
 if __name__ == "__main__":

@@ -79,7 +79,11 @@ def _a_des_extractions(p: Path | None) -> bool:
 def _chercher_projet(dossier: Path) -> Path | None:
     candidats = [Path.cwd(), *Path.cwd().parents, dossier, *dossier.parents]
     candidats += [c / NOM_PROJET for c in list(candidats)]
-    candidats += [Path.home() / d / NOM_PROJET for d in ("OneDrive - GE HealthCare", "OneDrive", "Documents")]
+    try:                                   # dossiers synchronisés du poste (« OneDrive », « OneDrive - <organisation> ») et Documents
+        candidats += [d / NOM_PROJET for d in sorted(Path.home().glob("OneDrive*")) if d.is_dir()]
+    except OSError:
+        pass
+    candidats.append(Path.home() / "Documents" / NOM_PROJET)
     for c in candidats:
         try:
             if _a_des_extractions(c):

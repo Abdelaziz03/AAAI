@@ -143,7 +143,8 @@ def etape_flux(ctx: Contexte) -> dict:
     comp_fru = ctx.essayer(E, "composant x FRU x type de déchet", lambda: _composant_fru(s, tous), _vide("FRU", "Référence"))
     synthese = ctx.essayer(E, "synthèse par benne", lambda: comp.groupby(["Benne", "Type de déchet"], dropna=False).agg(
         Références=("Référence", "nunique"), Pièces=("Pièces", "sum"), **{"Références au poids connu": ("Poids connu", "sum"),
-                                                                        "Kg (poids connus)": ("Kg (poids connus)", "sum")}).reset_index(), _vide("Benne"))
+            # min_count=1 : un type de déchet dont aucun poids n'est connu a une masse inconnue, pas une masse nulle
+            "Kg (poids connus)": ("Kg (poids connus)", lambda x: x.sum(min_count=1))}).reset_index(), _vide("Benne"))
     flux_fru = ctx.essayer(E, "FRU rebutées par semaine", lambda: mod_flux.flux_fru_hebdo(s.fru_rebutees, s.couverts, s.poids_fru)
                            if len(s.fru_rebutees) else _vide("Semaine", "FRU", "FRU rebutées", "Jours extraits", "Semaine complète"),
                            _vide("Semaine", "FRU", "FRU rebutées", "Jours extraits", "Semaine complète"))
@@ -362,6 +363,10 @@ def etape_synthese(ctx: Contexte) -> dict:
                             "Données de l'outil": "Tout ce que l'outil des décideurs affiche et recalcule"})
     chemin = ctx.essayer(E, "outil des décideurs", lambda: _construire_outil(ctx, donnees), None)
     tables["Outil"] = {"chemin": str(chemin) if chemin else None}
+    # Une anomalie survenue pendant les figures ou la construction de l'outil doit aussi être dans la table déposée.
+    tables["Anomalies"] = pd.DataFrame(ctx.anomalies, columns=["Étape", "Calcul", "Erreur", "Détail"])
+    ctx.depot.table(E, "Anomalies", tables["Anomalies"], "Calculs qui ont échoué pendant l'exécution (table vide = aucun)")
+    ctx.depot.classeur(E)
     ctx.depot.ecrire_manifeste()
     return tables
 
@@ -387,7 +392,10 @@ def _param(v, provenance: str = "") -> dict:
 
 
 def donnees_outil(ctx: Contexte) -> dict:
-    """Contrat de données de l'outil des décideurs (voir docs/Contrat_outil.md)."""
+    """Données de l'outil des décideurs. Chaque paramètre du modèle est un dictionnaire
+    {valeur (centre), bas, haut, loi (fixe, uniforme, triangulaire ou None), provenance} ; valeur None = inconnu.
+    Clés : meta, ligne, frus (avec leurs pièces), reference (résultats Python au centre des plages), monte_carlo,
+    periodes, flux, priorisation, rex, a_obtenir, sources, anomalies."""
     cfg, s = ctx.cfg, ctx.src
     lg = ctx.res["ligne"]
     modele = lg["Modèle"]
@@ -460,7 +468,7 @@ def executer(jusqua: str = "synthese", cfg: Config | None = None, silencieux: bo
         FONCTIONS[e](ctx)
         if not silencieux:
             n = sum(1 for (et, _, t) in ctx.depot._entrees if et == e and t in ("table", "json", "figure"))
-            print(f"  étape {e:<11} {n:>3} artefacts → {ctx.depot.dossier(e)}")
+            print(f"  étape {e:<11} {n:>3} artefacts → {ctx.depot.dossier(e).relative_to(cfg.dossier).as_posix()}/")
     if ctx.anomalies and not silencieux:
         print(f"  {len(ctx.anomalies)} anomalie(s) : voir la table « Anomalies » de la synthèse")
     return ctx

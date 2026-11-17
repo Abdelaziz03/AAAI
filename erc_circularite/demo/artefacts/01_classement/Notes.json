@@ -1,6 +1,6 @@
 {
  "source_fru_rebutees": "onglet FRU_rebutees des extractions ; date de rebut : plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer",
- "classeur_parametres_cree": true,
+ "classeur_parametres_cree": false,
  "criteres_actifs": [
   "MMICV total (USD)",
   "FRU rebutées (nomenclature)",

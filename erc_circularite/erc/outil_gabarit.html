@@ -1,0 +1,2025 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Outil de décision ERC</title>
+<style>
+/* Jetons de couleur : thème clair par défaut, thème sombre selon le système ou l'attribut data-theme. */
+:root {
+  color-scheme: light;
+  --fond: #f2f4f7;
+  --surface: #fbfcfd;
+  --surface-2: #eceff3;
+  --trait: #d6dce3;
+  --trait-fort: #818d9c;
+  --encre: #151c26;
+  --encre-2: #445061;
+  --encre-3: #5f6b7a;
+  --accent: #1b5aa3;
+  --accent-fond: #e2ecf8;
+  --accent-trait: #9dbde3;
+  --sur-accent: #fbfcfd;
+  --bon: #0d5f24;
+  --bon-fond: #e1f2e4;
+  --bon-trait: #8cc79a;
+  --alerte: #6a4700;
+  --alerte-fond: #fdefc8;
+  --alerte-trait: #dfb84f;
+  --critique: #8e1d1d;
+  --critique-fond: #fbe3e1;
+  --critique-trait: #e2a09b;
+  --neutre: #3a4553;
+  --neutre-fond: #e6eaef;
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+  --negatif: #e34948;
+  --marque-neutre: #8a94a0;
+  --grille: #e2e6eb;
+  --axe: #b3bcc7;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --fond: #0e1217;
+    --surface: #161b22;
+    --surface-2: #1e252e;
+    --trait: #2b343f;
+    --trait-fort: #5b6877;
+    --encre: #e8ecf1;
+    --encre-2: #b5bfcb;
+    --encre-3: #8f9aa8;
+    --accent: #7fb2f0;
+    --accent-fond: #172d49;
+    --accent-trait: #2f5788;
+    --sur-accent: #0e1217;
+    --bon: #86d99a;
+    --bon-fond: #12301c;
+    --bon-trait: #2c6b3e;
+    --alerte: #f0c75e;
+    --alerte-fond: #392b08;
+    --alerte-trait: #7a5e17;
+    --critique: #f3a1a1;
+    --critique-fond: #3d1717;
+    --critique-trait: #8a3535;
+    --neutre: #c3ccd7;
+    --neutre-fond: #242c36;
+    --serie-1: #3987e5;
+    --serie-2: #d95926;
+    --negatif: #e66767;
+    --marque-neutre: #7b8591;
+    --grille: #252c35;
+    --axe: #3f4955;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fond: #0e1217;
+  --surface: #161b22;
+  --surface-2: #1e252e;
+  --trait: #2b343f;
+  --trait-fort: #5b6877;
+  --encre: #e8ecf1;
+  --encre-2: #b5bfcb;
+  --encre-3: #8f9aa8;
+  --accent: #7fb2f0;
+  --accent-fond: #172d49;
+  --accent-trait: #2f5788;
+  --sur-accent: #0e1217;
+  --bon: #86d99a;
+  --bon-fond: #12301c;
+  --bon-trait: #2c6b3e;
+  --alerte: #f0c75e;
+  --alerte-fond: #392b08;
+  --alerte-trait: #7a5e17;
+  --critique: #f3a1a1;
+  --critique-fond: #3d1717;
+  --critique-trait: #8a3535;
+  --neutre: #c3ccd7;
+  --neutre-fond: #242c36;
+  --serie-1: #3987e5;
+  --serie-2: #d95926;
+  --negatif: #e66767;
+  --marque-neutre: #7b8591;
+  --grille: #252c35;
+  --axe: #3f4955;
+}
+
+/* Base */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-block: 0 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3, h4, p, ul, ol, dl, dd, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+h1 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; font-weight: 650; letter-spacing: -0.01em; }
+h2 { font-size: 21px; line-height: 1.25; font-weight: 650; letter-spacing: -0.005em; }
+h3 { font-size: 16px; line-height: 1.3; font-weight: 650; }
+h4 { font-size: 14px; line-height: 1.3; font-weight: 650; }
+a { color: var(--accent); text-underline-offset: 2px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+[hidden] { display: none !important; }
+.chiffres, td.n, th.n, input.nombre { font-variant-numeric: tabular-nums; }
+.discret { color: var(--encre-3); }
+.second { color: var(--encre-2); }
+.petit { font-size: 13px; }
+.mini { font-size: 12px; }
+.evitement { position: absolute; left: 8px; top: -60px; background: var(--surface); color: var(--accent); padding: 8px 12px; border: 1px solid var(--accent); border-radius: 6px; z-index: 30; }
+.evitement:focus { top: 8px; }
+
+/* Bandeau d'état */
+.bandeau {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
+  margin-top: 12px; padding: 10px 14px;
+  border: 1px solid var(--trait); border-radius: 8px; background: var(--surface);
+  font-size: 13px; color: var(--encre-2);
+}
+.bandeau > * { min-width: 0; }
+.bandeau.demo { background: var(--alerte-fond); border-color: var(--alerte-trait); color: var(--alerte); }
+.bandeau .mode { font-size: 15px; font-weight: 700; letter-spacing: 0.01em; display: inline-flex; align-items: center; gap: 8px; }
+.bandeau .mode::before { content: ""; width: 10px; height: 10px; flex: none; background: currentColor; border-radius: 50%; }
+.bandeau.demo .mode::before { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); width: 12px; height: 11px; }
+
+/* En-tête et sommaire */
+.entete { padding-block: 28px 18px; }
+.sur-titre { font-size: 13px; font-weight: 650; color: var(--encre-3); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+.chapeau { margin-top: 10px; max-width: 76ch; color: var(--encre-2); }
+.sommaire {
+  position: sticky; top: 0; z-index: 20;
+  background: var(--fond);
+  border-bottom: 1px solid var(--trait);
+  overflow-x: auto; scrollbar-width: thin;
+}
+.sommaire ul { display: flex; gap: 2px; white-space: nowrap; padding-block: 6px; }
+.sommaire a { display: block; padding: 6px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--encre-2); text-decoration: none; }
+.sommaire a:hover { background: var(--surface-2); color: var(--encre); }
+.sommaire a[aria-current="true"] { background: var(--accent-fond); color: var(--accent); }
+
+/* Sections */
+section { padding-block: 34px 6px; scroll-margin-top: 48px; }
+section + section { border-top: 1px solid var(--trait); margin-top: 28px; }
+.tete-section { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 6px; }
+.tete-section > * { min-width: 0; }
+.intro { max-width: 82ch; color: var(--encre-2); margin-bottom: 18px; }
+.sous-titre { margin-block: 26px 4px; }
+.note { font-size: 13px; color: var(--encre-2); max-width: 86ch; margin-top: 10px; }
+.espace { margin-top: 10px; }
+.espace-petit { margin-top: 8px; }
+th.col-intervalle { min-width: 180px; }
+.vide { padding: 18px; border: 1px dashed var(--trait-fort); border-radius: 8px; color: var(--encre-2); background: var(--surface); font-size: 14px; }
+
+/* Puces d'état : la forme porte l'état autant que la couleur */
+.puce {
+  display: inline-flex; align-items: center; gap: 6px; vertical-align: middle;
+  padding: 1px 9px; border-radius: 999px; border: 1px solid var(--trait-fort);
+  background: var(--neutre-fond); color: var(--neutre);
+  font-size: 12px; font-weight: 650; line-height: 18px; white-space: nowrap;
+}
+.puce::before { content: ""; width: 7px; height: 7px; flex: none; border-radius: 50%; background: currentColor; }
+.puce.bon { background: var(--bon-fond); color: var(--bon); border-color: var(--bon-trait); }
+.puce.alerte { background: var(--alerte-fond); color: var(--alerte); border-color: var(--alerte-trait); }
+.puce.alerte::before { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); width: 9px; height: 8px; }
+.puce.critique { background: var(--critique-fond); color: var(--critique); border-color: var(--critique-trait); }
+.puce.critique::before { border-radius: 1px; transform: rotate(45deg); }
+.puce.sans::before { display: none; }
+.puce.accent { background: var(--accent-fond); color: var(--accent); border-color: var(--accent-trait); }
+.puce.plein { background: var(--accent); color: var(--sur-accent); border-color: var(--accent); }
+.puce.contour { background: transparent; color: var(--accent); border-color: var(--accent); }
+.puce.contour::before { background: transparent; border: 1.5px solid currentColor; }
+.puce.grand { font-size: 14px; line-height: 22px; padding: 2px 12px; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Bloc de décision */
+.decision {
+  display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 0;
+  background: var(--surface); border: 1px solid var(--trait); border-radius: 10px; overflow: hidden;
+}
+.decision > * { min-width: 0; }
+.verdict { padding: 24px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid var(--trait); }
+.verdict .phrase { font-size: 18px; line-height: 1.4; font-weight: 600; }
+.verdict .complement { font-size: 14px; color: var(--encre-2); }
+.verdict .complement li + li { margin-top: 4px; }
+.hero-libelle { font-size: 13px; color: var(--encre-2); font-weight: 600; }
+.hero { font-size: clamp(34px, 5.4vw, 50px); line-height: 1.05; font-weight: 680; letter-spacing: -0.02em; }
+.hero .inconnu { font-size: 0.7em; letter-spacing: 0; }
+.hero small { font-size: 0.42em; font-weight: 600; letter-spacing: 0; color: var(--encre-2); margin-left: 4px; }
+.reperes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.repere { padding: 18px 20px; border-top: 1px solid var(--trait); border-left: 1px solid var(--trait); min-width: 0; margin: -1px 0 0 -1px; }
+.repere dt { font-size: 13px; color: var(--encre-2); font-weight: 600; }
+.repere dd.valeur { font-size: 22px; line-height: 1.25; font-weight: 650; margin-top: 4px; overflow-wrap: anywhere; }
+.repere dd.valeur small { font-size: 13px; font-weight: 600; color: var(--encre-2); }
+.repere dd.lecture { font-size: 12px; color: var(--encre-3); margin-top: 4px; }
+.repere.perime dd.valeur { color: var(--encre-3); }
+.jauge { display: block; height: 6px; border-radius: 3px; background: var(--neutre-fond); overflow: hidden; margin-top: 8px; }
+.jauge > span { display: block; height: 100%; border-radius: 3px; background: var(--serie-1); }
+.jauge.pleine > span { background: var(--alerte-trait); }
+
+/* Hypothèses */
+.hyp-barre { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 8px; }
+.hyp-barre > * { min-width: 0; }
+.hyp-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 40px; }
+.hyp { padding-block: 14px; border-top: 1px solid var(--trait); min-width: 0; }
+.hyp-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.hyp-tete > * { min-width: 0; }
+.hyp-tete label { font-weight: 650; }
+.hyp-saisie { display: grid; grid-template-columns: minmax(0, 1fr) 104px auto auto; align-items: center; gap: 10px; margin-top: 8px; }
+.hyp-saisie > * { min-width: 0; }
+.hyp-saisie input[type="range"] { width: 100%; accent-color: var(--accent); margin: 0; height: 24px; }
+.unite { font-size: 13px; color: var(--encre-2); white-space: nowrap; }
+.hyp-prov { font-size: 12px; color: var(--encre-3); margin-top: 6px; overflow-wrap: anywhere; }
+input.nombre, input.texte, select, textarea {
+  background: var(--surface); border: 1px solid var(--trait-fort); border-radius: 6px; padding: 5px 8px; min-height: 32px; max-width: 100%;
+}
+input.nombre { width: 100%; text-align: right; }
+input.nombre::placeholder { color: var(--encre-3); font-style: italic; text-align: left; opacity: 1; }
+input.a-saisir { border-color: var(--alerte-trait); background: var(--alerte-fond); }
+input.a-saisir::placeholder { color: var(--alerte); }
+input.modifie { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+input[aria-invalid="true"] { border-color: var(--critique); box-shadow: inset 0 0 0 1px var(--critique); background: var(--critique-fond); }
+.bouton {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 5px 12px;
+  border: 1px solid var(--trait-fort); border-radius: 6px; background: var(--surface); color: var(--encre);
+  font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: none;
+}
+.bouton:hover { background: var(--surface-2); }
+.bouton.principal { background: var(--accent); border-color: var(--accent); color: var(--sur-accent); }
+.bouton.principal:hover { filter: brightness(1.08); }
+.bouton.lien { border-color: transparent; background: transparent; color: var(--accent); padding-inline: 4px; }
+.bouton:disabled { opacity: 0.55; cursor: default; }
+
+/* Tableaux */
+.tableau-zone { overflow-x: auto; border: 1px solid var(--trait); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+caption { text-align: left; padding: 10px 12px 4px; font-size: 13px; color: var(--encre-2); caption-side: top; }
+th, td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--trait); }
+thead th { font-size: 12px; font-weight: 650; color: var(--encre-2); background: var(--surface-2); border-bottom: 1px solid var(--trait-fort); white-space: nowrap; vertical-align: bottom; }
+tbody tr:last-child > td, tbody tr:last-child > th { border-bottom: 0; }
+tbody + tbody tr:first-child > td, tbody + tbody tr:first-child > th { border-top: 1px solid var(--trait); }
+tfoot td, tfoot th { font-weight: 650; border-top: 1px solid var(--trait-fort); border-bottom: 0; background: var(--surface-2); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+tbody th { font-weight: 650; }
+td.large { min-width: 200px; }
+table.souple thead th { white-space: normal; min-width: 88px; }
+table.souple th.ref .puce { margin-top: 4px; }
+tr.total td, tr.total th { font-weight: 650; border-top: 1px solid var(--trait-fort); }
+.ref { font-weight: 650; white-space: nowrap; }
+.inconnu { color: var(--encre-3); font-style: italic; }
+.barre-mini { display: inline-block; vertical-align: middle; width: 64px; height: 6px; border-radius: 3px; background: var(--neutre-fond); overflow: hidden; margin-right: 8px; }
+.barre-mini > span { display: block; height: 100%; background: var(--serie-1); border-radius: 3px; }
+
+/* Plan par type de FRU */
+.deplier { display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 2px 4px; margin: -2px -4px; cursor: pointer; font-weight: 650; color: var(--accent); border-radius: 4px; white-space: nowrap; }
+.deplier::before { content: ""; width: 0; height: 0; border-left: 6px solid currentColor; border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; transition: transform 0.12s; }
+.deplier[aria-expanded="true"]::before { transform: rotate(90deg); }
+.manque { color: var(--alerte); font-size: 13px; }
+td.detail { background: var(--surface-2); padding: 16px; }
+.detail-grille { display: grid; gap: 18px; }
+/* Le détail d'un FRU reste dans la largeur visible, même quand le tableau défile sur le côté. */
+.zone-plan { container-type: inline-size; }
+@supports (width: 1cqw) {
+  .detail-grille { position: sticky; left: 16px; width: calc(100cqw - 34px); }
+}
+.detail-grille > * { min-width: 0; }
+.champs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 14px; }
+.champ { min-width: 0; }
+.champ label { display: block; font-size: 12px; color: var(--encre-2); margin-bottom: 3px; }
+.piece { padding-block: 14px; border-top: 1px solid var(--trait); }
+.piece-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-bottom: 8px; }
+.piece-tete > * { min-width: 0; }
+.options3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.option { min-width: 0; padding: 8px 10px; border: 1px solid var(--trait); border-radius: 6px; background: var(--surface); }
+.option.retenue { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.option .nom { font-size: 12px; color: var(--encre-2); font-weight: 600; }
+.option .val { font-size: 15px; font-weight: 650; }
+.option .pourquoi { font-size: 12px; color: var(--alerte); overflow-wrap: anywhere; }
+
+/* Graphiques */
+.graphe { position: relative; min-width: 0; }
+.graphe svg { display: block; width: 100%; height: auto; overflow: visible; }
+.graphe svg:focus-visible { outline-offset: 4px; }
+.graphe text { font-family: inherit; font-size: 12px; fill: var(--encre-2); font-variant-numeric: tabular-nums; }
+.graphe text.fort { fill: var(--encre); font-weight: 650; }
+.graphe text.doux { fill: var(--encre-3); }
+.g-grille { stroke: var(--grille); stroke-width: 1; fill: none; }
+.g-axe { stroke: var(--axe); stroke-width: 1; fill: none; }
+.g-zero { stroke: var(--trait-fort); stroke-width: 1; fill: none; }
+.g-repere { stroke: var(--encre-2); stroke-width: 1; fill: none; }
+.g-viseur { stroke: var(--encre-3); stroke-width: 1; fill: none; }
+.g-ligne { stroke: var(--serie-1); stroke-width: 2; fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.g-aire { fill: var(--serie-1); fill-opacity: 0.12; stroke: none; }
+.g-s1 { fill: var(--serie-1); }
+.g-s2 { fill: var(--serie-2); }
+.g-neg { fill: var(--negatif); }
+.g-neutre { fill: var(--marque-neutre); }
+.g-point { fill: var(--serie-1); stroke: var(--surface); stroke-width: 2; }
+.g-point2 { fill: var(--serie-2); stroke: var(--surface); stroke-width: 2; }
+.g-lien { stroke: var(--axe); stroke-width: 1; fill: none; }
+.g-actif { opacity: 0.72; }
+.g-fond { fill: var(--surface); }
+.g-zone { fill: var(--surface); fill-opacity: 0; }
+.cadre { background: var(--surface); border: 1px solid var(--trait); border-radius: 8px; padding: 14px 14px 10px; min-width: 0; }
+.cadre figcaption, .legende-titre { font-size: 13px; font-weight: 650; margin-bottom: 2px; }
+.legende { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--encre-2); margin-bottom: 6px; }
+.legende span { display: inline-flex; align-items: center; gap: 6px; }
+.legende i { width: 12px; height: 10px; border-radius: 2px; flex: none; }
+.legende i.l-s1 { background: var(--serie-1); }
+.legende i.l-s2 { background: var(--serie-2); }
+.legende i.l-neg { background: var(--negatif); }
+.legende i.l-neutre { background: var(--marque-neutre); }
+.legende i.l-trait { height: 2px; background: var(--serie-1); }
+.legende i.l-bande { background: var(--serie-1); opacity: 0.25; }
+.legende i.l-rond { width: 9px; height: 9px; border-radius: 50%; background: var(--serie-2); }
+.bulle {
+  position: absolute; z-index: 5; pointer-events: none; min-width: 120px; max-width: 260px;
+  background: var(--surface); color: var(--encre); border: 1px solid var(--trait-fort); border-radius: 6px; padding: 7px 10px;
+  font-size: 12px; line-height: 1.4;
+}
+.bulle .b-titre { color: var(--encre-2); margin-bottom: 2px; }
+.bulle .b-ligne { display: flex; justify-content: space-between; gap: 12px; }
+.bulle .b-ligne b { font-weight: 650; font-variant-numeric: tabular-nums; white-space: nowrap; }
+details.valeurs { margin-top: 8px; font-size: 13px; }
+details.valeurs summary { cursor: pointer; color: var(--accent); font-weight: 600; width: fit-content; padding: 2px 4px; margin-left: -4px; border-radius: 4px; }
+details.valeurs .tableau-zone { margin-top: 8px; max-height: 340px; overflow-y: auto; }
+.deux { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.deux > * { min-width: 0; }
+.multiples { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.multiples > * { min-width: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 28px; margin-block: 6px 12px; }
+.stats > div { min-width: 0; }
+.stats dt { font-size: 12px; color: var(--encre-2); font-weight: 600; }
+.stats dd { font-size: 18px; font-weight: 650; }
+.commandes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-block: 12px; }
+.commandes > * { min-width: 0; }
+progress { accent-color: var(--accent); width: 160px; max-width: 100%; height: 8px; }
+
+/* Intervalle du modèle de Rex */
+.intervalle { position: relative; display: block; width: 100%; min-width: 120px; height: 16px; }
+.intervalle::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--grille); }
+.intervalle .bande { position: absolute; top: 5px; height: 6px; border-radius: 3px; background: var(--serie-1); opacity: 0.35; }
+.intervalle .centre { position: absolute; top: 3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--serie-1); border: 2px solid var(--surface); box-sizing: border-box; }
+.intervalle .apriori { position: absolute; top: 1px; width: 2px; height: 14px; margin-left: -1px; background: var(--encre-2); }
+.echelle-pct { display: flex; justify-content: space-between; font-size: 11px; color: var(--encre-3); font-weight: 400; }
+
+/* Export */
+textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.45; white-space: pre; resize: vertical; }
+.pied { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--trait); font-size: 12px; color: var(--encre-3); }
+.pied p + p { margin-top: 4px; }
+
+/* Écrans étroits */
+@media (max-width: 900px) {
+  .decision { grid-template-columns: minmax(0, 1fr); }
+  .verdict { border-right: 0; }
+  .hyp-grille { grid-template-columns: minmax(0, 1fr); }
+  .deux { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  body { font-size: 14.5px; }
+  .reperes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .repere { padding: 14px; }
+  .repere dd.valeur { font-size: 19px; }
+  .verdict { padding: 18px 16px; }
+  .verdict .phrase { font-size: 16.5px; }
+  .hyp-saisie { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .hyp-saisie input[type="range"] { grid-column: 1 / -1; }
+  .options3 { grid-template-columns: minmax(0, 1fr); }
+  section { padding-top: 26px; }
+  td.detail { padding: 12px; }
+  th, td { padding: 7px 10px; }
+  td.large { min-width: 150px; }
+  @supports (width: 1cqw) { .detail-grille { left: 12px; width: calc(100cqw - 26px); } }
+  #plan-table thead th:first-child, #plan-table tbody th[scope="row"] { position: sticky; left: 0; z-index: 1; }
+  #plan-table tbody th[scope="row"] { background: var(--surface); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<a class="evitement" href="#decision" id="lien-evitement">Aller à la décision</a>
+<div class="page">
+  <div class="bandeau" id="etat" role="status">
+    <span class="mode" id="etat-mode">Chargement des données</span>
+    <span id="etat-periode"></span>
+    <span id="etat-date"></span>
+    <span id="etat-controle"></span>
+  </div>
+
+  <header class="entete">
+    <p class="sur-titre">Outil de décision ERC</p>
+    <h1>Ligne de démontage et de tri des FRU rebutées</h1>
+    <p class="chapeau">Faut-il installer la ligne, et que faire de chaque type de FRU rebuté : réemployer ses pièces, les trier pour un recycleur, ou le laisser au recycleur actuel ? La page recalcule le modèle du dossier dès qu'une hypothèse change. Tous les montants sont des estimations tirées des hypothèses, pas des résultats mesurés.</p>
+  </header>
+
+  <nav class="sommaire" aria-label="Sections de l'outil" id="sommaire">
+    <ul>
+      <li><a href="#decision">Décision</a></li>
+      <li><a href="#hypotheses">Hypothèses</a></li>
+      <li><a href="#comparaison">Actuel contre ligne</a></li>
+      <li><a href="#plan">Plan par FRU</a></li>
+      <li><a href="#sensibilite">Sensibilité</a></li>
+      <li><a href="#incertitude">Incertitude</a></li>
+      <li><a href="#flux">Flux d'entrée</a></li>
+      <li><a href="#preselection">Pré-sélection</a></li>
+      <li><a href="#rex">Modèle de Rex</a></li>
+      <li><a href="#a-obtenir">Données à obtenir</a></li>
+      <li><a href="#export">Export</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <section id="decision" aria-labelledby="t-decision">
+      <div class="tete-section"><h2 id="t-decision" tabindex="-1">La décision</h2><span class="puces" id="decision-puces"></span></div>
+      <div class="decision">
+        <div class="verdict">
+          <p class="phrase" id="decision-phrase" aria-live="polite"></p>
+          <div>
+            <p class="hero-libelle" id="decision-hero-libelle">Gain annuel par rapport à la situation actuelle</p>
+            <p class="hero" id="decision-hero"></p>
+          </div>
+          <ul class="complement" id="decision-complement"></ul>
+        </div>
+        <dl class="reperes" id="decision-reperes"></dl>
+      </div>
+    </section>
+
+    <section id="hypotheses" aria-labelledby="t-hypotheses">
+      <div class="tete-section"><h2 id="t-hypotheses" tabindex="-1">Hypothèses</h2></div>
+      <p class="intro">Déplacez un curseur ou saisissez une valeur : tout se recalcule. Une case vide veut dire « inconnu » : le calcul qui en dépend reste vide tant qu'elle n'est pas remplie. Les valeurs saisies ici servent à explorer ; elles ne modifient pas le dossier.</p>
+      <div class="hyp-barre">
+        <span class="puce sans" id="hyp-compteur">Aucune hypothèse modifiée</span>
+        <button type="button" class="bouton" id="hyp-retablir" disabled>Rétablir les hypothèses du dossier</button>
+      </div>
+      <h3 class="sous-titre">La ligne</h3>
+      <div class="hyp-grille" id="hyp-ligne"></div>
+      <h3 class="sous-titre">Variantes d'ensemble</h3>
+      <p class="note">Chaque curseur multiplie toutes les valeurs correspondantes du dossier ; 1 les laisse telles quelles.</p>
+      <div class="hyp-grille" id="hyp-mult"></div>
+    </section>
+
+    <section id="comparaison" aria-labelledby="t-comparaison">
+      <div class="tete-section"><h2 id="t-comparaison" tabindex="-1">Actuel contre ligne</h2></div>
+      <p class="intro">Aujourd'hui, chaque FRU rebuté part entier chez le recycleur actuel. Avec la ligne, une partie de la masse quitte cette benne, les pièces réemployées ou vendues au kilo rapportent, et la ligne a ses coûts fixes. Montants par an ; un coût est négatif.</p>
+      <div class="deux">
+        <figure class="cadre">
+          <figcaption>De la situation actuelle à la ligne, poste par poste</figcaption>
+          <div class="legende" aria-hidden="true"><span><i class="l-neutre"></i>Total</span><span><i class="l-s1"></i>Gain</span><span><i class="l-neg"></i>Coût</span></div>
+          <div class="graphe" id="g-comparaison"></div>
+        </figure>
+        <div>
+          <div class="tableau-zone"><table id="t-comparaison-table">
+            <thead><tr><th>Poste (par an)</th><th class="n">Actuel</th><th class="n">Avec la ligne</th><th class="n">Écart</th></tr></thead>
+            <tbody id="comparaison-corps"></tbody>
+          </table></div>
+          <p class="note" id="comparaison-note"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="plan" aria-labelledby="t-plan">
+      <div class="tete-section"><h2 id="t-plan" tabindex="-1">Plan par type de FRU</h2></div>
+      <p class="intro">Pour chaque type de FRU rebuté : le traiter sur la ligne ou le laisser au recycleur actuel, et quelles pièces réemployer ou trier. Ouvrez un type pour voir la valeur des trois devenirs de chaque pièce et corriger ses paramètres.</p>
+      <div class="tableau-zone zone-plan"><table id="plan-table">
+        <thead><tr>
+          <th>Type de FRU</th><th>Description</th><th class="n">Rebutés / an</th><th>Décision</th><th>Pièces réemployées</th><th>Pièces recyclées</th>
+          <th class="n">FRU traités / an</th><th class="n">Heures / an</th><th class="n">Marge par FRU</th><th class="n">Marge / an</th>
+        </tr></thead>
+        <tfoot id="plan-pied"></tfoot>
+      </table></div>
+      <p class="note" id="plan-note"></p>
+    </section>
+
+    <section id="sensibilite" aria-labelledby="t-sensibilite">
+      <div class="tete-section"><h2 id="t-sensibilite" tabindex="-1">Sensibilité aux heures opérateur</h2></div>
+      <p class="intro" id="sensibilite-phrase">Résultat annuel de la ligne selon les heures opérateur disponibles, les autres hypothèses restant celles de la page.</p>
+      <figure class="cadre">
+        <figcaption id="sensibilite-titre">Résultat annuel selon les heures opérateur disponibles</figcaption>
+        <div class="graphe" id="g-sensibilite"></div>
+        <details class="valeurs" id="sensibilite-valeurs"><summary>Voir les valeurs</summary>
+          <div class="tableau-zone"><table><thead><tr><th class="n">Heures / an</th><th class="n">Résultat / an</th><th class="n">Marge variable / an</th><th class="n">FRU traités / an</th><th class="n">Valeur d'une heure en plus</th></tr></thead><tbody id="sensibilite-corps"></tbody></table></div>
+        </details>
+      </figure>
+    </section>
+
+    <section id="incertitude" aria-labelledby="t-incertitude">
+      <div class="tete-section"><h2 id="t-incertitude" tabindex="-1">Incertitude</h2><span class="puces" id="mc-puces"></span></div>
+      <p class="intro">Plusieurs hypothèses sont des plages, pas des valeurs sûres. Chaque tirage choisit une valeur dans chaque plage et refait le plan ; l'histogramme montre les résultats annuels obtenus.</p>
+      <dl class="stats" id="mc-stats"></dl>
+      <figure class="cadre">
+        <figcaption id="mc-titre">Répartition du résultat annuel de la ligne (nombre de tirages par tranche)</figcaption>
+        <div class="legende" aria-hidden="true"><span><i class="l-s1"></i>Tirages où la ligne gagne</span><span><i class="l-neg"></i>Tirages où elle perd</span></div>
+        <div class="graphe" id="g-incertitude"></div>
+        <details class="valeurs"><summary>Voir les valeurs</summary>
+          <div class="tableau-zone"><table><thead><tr><th>Résultat annuel</th><th class="n">Tirages</th><th class="n">Part</th></tr></thead><tbody id="mc-corps"></tbody></table></div>
+        </details>
+      </figure>
+      <div class="commandes">
+        <button type="button" class="bouton principal" id="mc-lancer">Recalculer l'incertitude avec ces hypothèses</button>
+        <label class="petit second" for="mc-n">Tirages</label>
+        <select id="mc-n"><option value="200">200</option><option value="400" selected>400</option><option value="1000">1 000</option></select>
+        <button type="button" class="bouton" id="mc-arreter" hidden>Arrêter</button>
+        <progress id="mc-progres" max="1" value="0" hidden></progress>
+        <span class="petit second" id="mc-message" role="status"></span>
+      </div>
+      <p class="note" id="mc-note"></p>
+      <h3 class="sous-titre">Fréquence de traitement par type de FRU</h3>
+      <p class="note">Part des tirages où le type de FRU est traité sur la ligne : proche de 100 %, la décision tient malgré l'incertitude ; vers 50 %, elle dépend des hypothèses.</p>
+      <div class="tableau-zone espace"><table><thead><tr><th>Type de FRU</th><th>Traité dans</th></tr></thead><tbody id="mc-frequences"></tbody></table></div>
+    </section>
+
+    <section id="flux" aria-labelledby="t-flux">
+      <div class="tete-section"><h2 id="t-flux" tabindex="-1">Flux d'entrée</h2></div>
+      <p class="intro" id="flux-intro">Le modèle part du nombre de FRU rebutés chaque semaine. Ces chiffres viennent des extractions ; ils ne changent pas avec les hypothèses de la page.</p>
+      <figure class="cadre">
+        <figcaption>FRU rebutés par semaine, tous types confondus</figcaption>
+        <div class="legende" id="flux-legende" aria-hidden="true" hidden><span><i class="l-s1"></i>Semaine complète</span><span><i class="l-neutre"></i>Semaine incomplète dans l'extraction</span></div>
+        <div class="graphe" id="g-flux"></div>
+        <details class="valeurs"><summary>Voir les valeurs</summary>
+          <div class="tableau-zone"><table><thead><tr><th>Semaine du</th><th class="n">FRU rebutés</th><th>Semaine complète dans l'extraction</th></tr></thead><tbody id="flux-corps"></tbody></table></div>
+        </details>
+      </figure>
+      <h3 class="sous-titre">Par type de FRU</h3>
+      <div class="tableau-zone espace"><table><thead><tr><th>Type de FRU</th><th>Semaine par semaine</th><th class="n">Moyenne / semaine</th><th class="n">Par an : bas</th><th class="n">moyen</th><th class="n">haut</th><th>Dans le modèle</th></tr></thead><tbody id="flux-types"></tbody></table></div>
+      <p class="note" id="flux-regle"></p>
+
+      <h3 class="sous-titre">Masse estimée contre masse pesée</h3>
+      <p class="note">La masse estimée (consommations × poids unitaires) est comparée aux pesées des bennes. Un flux est jugé utilisable par le modèle quand l'écart cumulé reste faible sur au moins trois semaines pesées.</p>
+      <div class="legende espace" aria-hidden="true"><span><i class="l-trait"></i>Masse estimée</span><span><i class="l-bande"></i>Marge d'erreur de l'estimation</span><span><i class="l-rond"></i>Masse pesée</span></div>
+      <div class="multiples" id="flux-rapprochement"></div>
+      <p class="note" id="flux-ecartes"></p>
+      <details class="valeurs" id="flux-pesees"><summary>Voir les semaines pesées et les causes d'écart</summary>
+        <div class="tableau-zone"><table><thead><tr><th>Flux</th><th>Semaine du</th><th class="n">Estimée (kg)</th><th class="n">Marge (± kg)</th><th class="n">Pesée (kg)</th><th class="n">Écart</th><th>Dans la marge</th><th>Causes possibles de l'écart</th></tr></thead><tbody id="flux-pesees-corps"></tbody></table></div>
+      </details>
+
+      <h3 class="sous-titre">La ligne rejouée semaine par semaine</h3>
+      <p class="note" id="periodes-phrase"></p>
+      <figure class="cadre espace">
+        <figcaption>Résultat de la ligne chaque semaine (marge de la semaine moins coût fixe de la semaine)</figcaption>
+        <div class="legende" aria-hidden="true"><span><i class="l-s1"></i>Semaine en gain</span><span><i class="l-neg"></i>Semaine en perte</span></div>
+        <div class="graphe" id="g-periodes"></div>
+        <details class="valeurs"><summary>Voir les valeurs</summary>
+          <div class="tableau-zone"><table><thead><tr><th>Semaine du</th><th class="n">FRU arrivés</th><th class="n">FRU traités</th><th class="n">Heures utilisées</th><th class="n">Marge</th><th class="n">Coût fixe</th><th class="n">Résultat</th><th class="n">Cumul</th></tr></thead><tbody id="periodes-corps"></tbody></table></div>
+        </details>
+      </figure>
+      <div class="commandes">
+        <button type="button" class="bouton" id="periodes-rejouer">Rejouer les semaines avec ces hypothèses</button>
+        <span class="petit second" id="periodes-message" role="status"></span>
+      </div>
+    </section>
+
+    <section id="preselection" aria-labelledby="t-preselection">
+      <div class="tete-section"><h2 id="t-preselection" tabindex="-1">Pré-sélection des pièces</h2></div>
+      <p class="intro">Les pièces consommées classées selon plusieurs critères à la fois : valeur, gisement dans les FRU rebutés, risque sur les matières, risque d'approvisionnement. Une pièce est sur le front de Pareto quand aucune autre ne fait mieux sur tous les critères : ce sont les premières à étudier.</p>
+      <div class="tableau-zone"><table class="souple"><thead id="preselection-tete"></thead><tbody id="preselection-corps"></tbody></table></div>
+      <p class="note">MMICV : coût standard de la pièce, repère provisoire ; ce n'est ni un prix de revente ni une valeur de réemploi. Risque matière : présence de matières premières critiques, listées sous la barre. Fiabilité du réemploi : 1 = autant de défaillances précoces qu'une pièce neuve ; plus grand = moins de défaillances.</p>
+    </section>
+
+    <section id="rex" aria-labelledby="t-rex">
+      <div class="tete-section"><h2 id="t-rex" tabindex="-1">Modèle de Rex</h2></div>
+      <p class="intro">Le modèle de Rex estime la probabilité qu'une pièce extraite d'un FRU rebuté soit réutilisable. Il part de la consommation (a priori) et se corrige avec les pièces testées lors de l'audit de démontage. Plus il y a de pièces testées, plus l'intervalle se resserre.</p>
+      <div class="tableau-zone"><table><thead><tr><th>Type de FRU</th><th>Pièce</th><th class="col-intervalle">Probabilité réutilisable<span class="echelle-pct" aria-hidden="true"><span>0 %</span><span>50 %</span><span>100 %</span></span></th><th class="n">Estimation</th><th class="n">Intervalle à 90 %</th><th class="n">A priori</th><th class="n">Pièces testées</th><th class="n">dont bonnes</th></tr></thead><tbody id="rex-corps"></tbody></table></div>
+      <p class="note">Point : estimation. Bande : intervalle à 90 %. Trait vertical : a priori tiré de la consommation, avant tout test.</p>
+      <h3 class="sous-titre">Qualité des prévisions</h3>
+      <p class="note">Chaque lot de l'audit est prédit avant d'être appris. Brier : 0 = parfait, 0,25 = pile ou face. Couverture : part des lots tombés dans l'intervalle annoncé à 90 %.</p>
+      <div class="tableau-zone espace"><table><thead id="rex-metriques-tete"></thead><tbody id="rex-metriques"></tbody></table></div>
+      <h3 class="sous-titre">Banc d'essai des règles de décision</h3>
+      <p class="note" id="rex-banc-phrase">Ce banc d'essai est une simulation synthétique : il compare des règles de décision sur des pièces fictives pour démontrer la méthode. Il ne décrit pas l'atelier.</p>
+      <div class="tableau-zone espace"><table><thead id="rex-banc-tete"></thead><tbody id="rex-banc"></tbody></table></div>
+    </section>
+
+    <section id="a-obtenir" aria-labelledby="t-a-obtenir">
+      <div class="tete-section"><h2 id="t-a-obtenir" tabindex="-1">Données à obtenir</h2></div>
+      <p class="intro">Ce qui manque au dossier pour calculer, et à qui le demander. Cette liste vient du dossier : les valeurs essayées dans cette page ne la raccourcissent pas.</p>
+      <div class="tableau-zone"><table><thead><tr><th>Donnée</th><th class="n">Valeurs manquantes</th><th class="n">Types de FRU concernés</th><th>À demander à</th></tr></thead><tbody id="obtenir-corps"></tbody></table></div>
+      <h3 class="sous-titre">État des sources</h3>
+      <div class="tableau-zone espace"><table><thead><tr><th>Source</th><th>Fichier</th><th>État</th><th class="n">Lignes</th><th>Sert à</th></tr></thead><tbody id="sources-corps"></tbody></table></div>
+      <h3 class="sous-titre">Anomalies de calcul</h3>
+      <div id="anomalies"></div>
+    </section>
+
+    <section id="export" aria-labelledby="t-export">
+      <div class="tete-section"><h2 id="t-export" tabindex="-1">Exporter les hypothèses</h2></div>
+      <p class="intro">Le texte ci-dessous reprend toutes les hypothèses de la page (valeur du dossier, valeur actuelle, provenance) et les résultats principaux. Copiez-le dans un tableur ou un message pour garder la trace d'un scénario.</p>
+      <div class="commandes">
+        <label class="petit second" for="export-format">Format</label>
+        <select id="export-format"><option value="csv" selected>Tableur (CSV, séparateur « ; »)</option><option value="json">JSON</option></select>
+        <button type="button" class="bouton principal" id="export-copier">Mettre à jour et copier</button>
+        <a class="bouton" id="export-telecharger" href="#export" download="ERC_hypotheses.csv">Télécharger le fichier</a>
+        <span class="petit second" id="export-message" role="status"></span>
+      </div>
+      <label class="petit second" for="export-texte">Hypothèses et résultats de la page</label>
+      <textarea id="export-texte" readonly spellcheck="false" wrap="off"></textarea>
+      <p class="note">Si le téléchargement ne démarre pas (page consultée dans une visionneuse), sélectionnez le texte et copiez-le.</p>
+    </section>
+  </main>
+
+  <footer class="pied">
+    <p id="pied-source"></p>
+    <p>Une valeur inconnue reste inconnue : elle n'est jamais remplacée par zéro. Les valeurs potentielles sont des estimations, distinctes des recettes réelles.</p>
+  </footer>
+</div>
+
+<script type="application/json" id="donnees">__ERC_DONNEES__</script>
+<script>
+/*__ERC_MODELE__*/
+</script>
+<script>
+/* Affichage de l'outil des décideurs. Le calcul est dans ERCModele (erc/outil_modele.js) ; ici : état, saisie, tableaux, graphiques. */
+(function () {
+  "use strict";
+  var M = window.ERCModele;
+  var $ = function (id) { return document.getElementById(id); };
+  var D = null;
+  try { D = JSON.parse($("donnees").textContent); } catch (e) { D = null; }
+  if (!D || typeof D !== "object" || !M) {
+    $("etat-mode").textContent = "Données illisibles : la page n'a pas pu être construite. Relancez le pipeline (python -m erc).";
+    $("etat").className = "bandeau demo";
+    return;
+  }
+  D.meta = D.meta || {}; D.ligne = D.ligne || {}; D.frus = D.frus || [];
+  D.reference = D.reference || {}; D.monte_carlo = D.monte_carlo || {}; D.periodes = D.periodes || {};
+  D.flux = D.flux || {}; D.rex = D.rex || {};
+
+  // ------------------------------------------------------------------ petits outils
+  function possede(o, k) { return Object.prototype.hasOwnProperty.call(o, k); }
+  function inc(v) { return v === null || v === undefined || typeof v !== "number" || !isFinite(v); }
+  function liste(x) { return Array.isArray(x) ? x : []; }
+  function ajouter(el, c) {
+    if (c === null || c === undefined || c === false) return;
+    if (Array.isArray(c)) { c.forEach(function (x) { ajouter(el, x); }); return; }
+    el.appendChild(typeof c === "object" ? c : document.createTextNode(String(c)));
+  }
+  /** Crée un élément ; le texte passe toujours par textContent (les libellés viennent des données). */
+  function h(tag, attrs) {
+    var el = document.createElement(tag), k, v;
+    if (attrs) {
+      for (k in attrs) {
+        if (!possede(attrs, k)) continue;
+        v = attrs[k];
+        if (v === null || v === undefined || v === false) continue;
+        if (k === "class") el.className = v;
+        else if (k === "text") el.textContent = v;
+        else if (k === "hidden") el.hidden = true;
+        else if (k === "style") el.style.cssText = v;
+        else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+        else el.setAttribute(k, v === true ? "" : v);
+      }
+    }
+    for (var i = 2; i < arguments.length; i++) ajouter(el, arguments[i]);
+    return el;
+  }
+  function vider(el) { while (el.firstChild) el.removeChild(el.firstChild); return el; }
+  function remplir(el) { vider(el); for (var i = 1; i < arguments.length; i++) ajouter(el, arguments[i]); return el; }
+  var NS = "http://www.w3.org/2000/svg";
+  function s(tag, attrs, parent, texte) {
+    var el = document.createElementNS(NS, tag);
+    for (var k in attrs) if (possede(attrs, k)) el.setAttribute(k, attrs[k]);
+    if (texte !== undefined && texte !== null) el.textContent = texte;
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+  function puce(texte, classe) { return h("span", { class: "puce" + (classe ? " " + classe : ""), text: texte }); }
+
+  // ------------------------------------------------------------------ nombres et dates à la française
+  var FORMATS = {};
+  function format(dec) {
+    if (!FORMATS[dec]) FORMATS[dec] = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    return FORMATS[dec];
+  }
+  var INCONNU = "inconnu";
+  function nb(v, dec) {
+    if (inc(v)) return INCONNU;
+    dec = dec || 0;
+    if (Math.abs(v) < 0.5 * Math.pow(10, -dec)) v = 0;
+    return format(dec).format(v).replace(/^-/, "−");
+  }
+  function eur(v, dec) { return inc(v) ? INCONNU : nb(v, dec) + "\u00a0€"; }
+  function unite(v, u, dec) { return inc(v) ? INCONNU : nb(v, dec) + "\u00a0" + u; }
+  function pct(v, dec) { return inc(v) ? INCONNU : nb(100 * v, dec) + "\u00a0%"; }
+  function signe(v, dec) { return inc(v) ? INCONNU : (v > 0 ? "+" : "") + nb(v, dec) + "\u00a0€"; }
+  /** Nombre → texte d'une case de saisie : virgule décimale, espace des milliers, sans zéros inutiles. */
+  function versCase(v, dec) {
+    if (inc(v)) return "";
+    var t = v.toFixed(dec === undefined ? 3 : dec);
+    if (t.indexOf(".") >= 0) t = t.replace(/0+$/, "").replace(/\.$/, "");
+    if (t === "-0") t = "0";
+    var p = t.split(".");
+    p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, "\u202f");
+    return p.join(",");
+  }
+  /** Texte saisi → {ok, valeur} ; vide = inconnu (null). Accepte « 1 234,5 » comme « 1234.5 ». */
+  function lireCase(texte) {
+    var t = String(texte).replace(/[\s\u00a0\u202f]/g, "").replace("−", "-").replace(",", ".");
+    if (t === "") return { ok: true, valeur: null };
+    if (!/^[-+]?(\d+\.?\d*|\.\d+)$/.test(t)) return { ok: false, valeur: null };
+    var v = parseFloat(t);
+    return { ok: isFinite(v), valeur: isFinite(v) ? v : null };
+  }
+  var MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  function dateCourte(iso) {
+    var m = /^(\d{4})-(\d\d)-(\d\d)/.exec(String(iso || ""));
+    return m ? (+m[3]) + (+m[3] === 1 ? "er" : "") + " " + MOIS[+m[2] - 1] : String(iso || "");
+  }
+  function dateComplete(iso) {
+    var m = /^(\d{4})-(\d\d)-(\d\d)(?:T(\d\d):(\d\d))?/.exec(String(iso || ""));
+    return m ? m[3] + "/" + m[2] + "/" + m[1] + (m[4] ? " à " + m[4] + " h " + m[5] : "") : String(iso || "");
+  }
+  /** Nombre avec au plus `maxDec` décimales, sans zéros inutiles. */
+  function nbLibre(v, maxDec) {
+    if (inc(v)) return INCONNU;
+    var d = 0;
+    while (d < (maxDec === undefined ? 3 : maxDec) && Math.abs(v * Math.pow(10, d) - Math.round(v * Math.pow(10, d))) > 1e-9) d++;
+    return nb(v, d);
+  }
+  function pluriel(n, un, plusieurs) { return nb(n) + " " + (Math.abs(n) < 2 ? un : plusieurs); }
+
+  // ------------------------------------------------------------------ libellés
+  var NOMS = {
+    rebut_an: "FRU rebutés par an", poids_fru_kg: "poids du FRU", ouverture_min: "temps d'ouverture soignée",
+    ouverture_tri_min: "temps d'ouverture sommaire", taux_horaire_eur: "coût horaire d'un opérateur", n_par_fru: "nombre par FRU",
+    extraction_min: "temps d'extraction", test_min: "temps de test", tri_min: "temps de tri", p_reutilisable: "probabilité réutilisable",
+    valeur_eur: "valeur de réemploi", poids_kg: "poids de la pièce", prix_recycleur_eur_kg: "prix du recycleur",
+    delai_semaines: "délai d'approvisionnement", valeur_semaine_eur: "valeur d'une semaine de délai", transport_eur: "transport",
+    heures_operateur_an: "heures opérateur par an", cout_traitement_eur_kg: "coût de traitement du recycleur actuel",
+    cout_installation_eur: "investissement d'installation", amortissement_ans: "durée d'amortissement", couts_fixes_annuels_eur: "coûts fixes annuels"
+  };
+  var ORDRE_LIGNE = ["heures_operateur_an", "taux_horaire_eur", "cout_traitement_eur_kg", "cout_installation_eur", "amortissement_ans", "couts_fixes_annuels_eur"];
+  var CONF_LIGNE = {
+    heures_operateur_an: { court: "Heures opérateur disponibles par an", min: 0, max: 4000, pas: 10, dec: 0, unite: "h/an" },
+    taux_horaire_eur: { court: "Coût horaire d'un opérateur", min: 0, max: 120, pas: 0.5, dec: 2, unite: "€/h" },
+    cout_traitement_eur_kg: { court: "Coût de traitement du recycleur actuel", min: -0.5, max: 1.5, pas: 0.01, dec: 3, unite: "€/kg", negatif: true },
+    cout_installation_eur: { court: "Investissement d'installation de la ligne", min: 0, max: 150000, pas: 500, dec: 0, unite: "€" },
+    amortissement_ans: { court: "Durée d'amortissement de l'installation", min: 1, max: 15, pas: 1, dec: 1, unite: "ans" },
+    couts_fixes_annuels_eur: { court: "Coûts fixes annuels de la ligne", min: 0, max: 50000, pas: 250, dec: 0, unite: "€/an" }
+  };
+  var CONF_MULT = {
+    prix: { court: "Prix payés par les recycleurs", aide: "Multiplie le prix au kilo de toutes les pièces triées et des carcasses." },
+    valeur: { court: "Valeur de réemploi des pièces", aide: "Multiplie la valeur de toutes les pièces réemployées." },
+    temps: { court: "Temps de démontage, de test et de tri", aide: "Multiplie les temps d'ouverture, d'extraction, de test et de tri." }
+  };
+  var CHAMPS_FRU = [
+    { k: "rebut_an", lib: "FRU rebutés par an", dec: 1, min: 0, bloquant: true },
+    { k: "poids_fru_kg", lib: "Poids du FRU (kg)", dec: 2, min: 0, bloquant: true },
+    { k: "ouverture_min", lib: "Ouverture soignée (min)", dec: 1, min: 0, bloquant: true },
+    { k: "ouverture_tri_min", lib: "Ouverture sommaire, pour trier (min)", dec: 1, min: 0, vide: "= ouverture soignée" },
+    { k: "taux_horaire_eur", lib: "Coût horaire propre à ce FRU (€/h)", dec: 2, min: 0, vide: "taux de la ligne" }
+  ];
+  var CHAMPS_PIECE = [
+    { k: "n_par_fru", lib: "Nombre par FRU", dec: 0, min: 0 },
+    { k: "extraction_min", lib: "Extraction (min)", dec: 1, min: 0 },
+    { k: "test_min", lib: "Test (min)", dec: 1, min: 0 },
+    { k: "tri_min", lib: "Tri (min)", dec: 1, min: 0 },
+    { k: "p_reutilisable", lib: "Probabilité réutilisable (%)", dec: 1, min: 0, max: 100, facteur: 100 },
+    { k: "valeur_eur", lib: "Valeur de réemploi (€)", dec: 2 },
+    { k: "prix_recycleur_eur_kg", lib: "Prix du recycleur (€/kg)", dec: 3 },
+    { k: "poids_kg", lib: "Poids (kg)", dec: 3, min: 0 },
+    { k: "delai_semaines", lib: "Délai d'approvisionnement (semaines)", dec: 1, min: 0, vide: "facultatif" }
+  ];
+  var BLOQUANTS_PIECE = {};
+  M.CHAMPS_REEMPLOI.concat(M.CHAMPS_RECYCLAGE).forEach(function (k) { BLOQUANTS_PIECE[k] = true; });
+
+  // ------------------------------------------------------------------ état de la page
+  function preparerParam(p) {
+    if (!p || typeof p !== "object") p = { valeur: null };
+    p.valeur = inc(p.valeur) ? null : p.valeur;
+    p.bas = inc(p.bas) ? null : p.bas;
+    p.haut = inc(p.haut) ? null : p.haut;
+    p.origine = p.valeur; p.bas0 = p.bas; p.haut0 = p.haut; p.loi0 = p.loi || null;
+    return p;
+  }
+  var etat = { ligne: {}, frus: [], mult: { prix: 1, valeur: 1, temps: 1 }, version: 0 };
+  ORDRE_LIGNE.forEach(function (k) { etat.ligne[k] = preparerParam(JSON.parse(JSON.stringify(D.ligne[k] || { valeur: null }))); });
+  etat.frus = JSON.parse(JSON.stringify(D.frus)).map(function (f) {
+    M.CLES_FRU.forEach(function (k) { f[k] = preparerParam(f[k]); });
+    f.pieces = liste(f.pieces).map(function (pc) {
+      M.CLES_PIECE.forEach(function (k) { if (possede(pc, k)) pc[k] = preparerParam(pc[k]); });
+      return pc;
+    });
+    return f;
+  });
+  /** Change la valeur d'un paramètre. Sa plage d'incertitude suit, à largeur relative égale ; sans plage d'origine, la valeur est fixe. */
+  function fixer(p, v) {
+    p.valeur = v;
+    if (v === null) { p.bas = p.haut = null; return; }
+    if (v === p.origine) { p.bas = p.bas0; p.haut = p.haut0; p.loi = p.loi0; return; }
+    if (p.origine !== null && p.origine !== 0 && p.bas0 !== null && p.haut0 !== null && p.haut0 > p.bas0) {
+      var r = v / p.origine;
+      p.bas = Math.min(p.bas0 * r, p.haut0 * r); p.haut = Math.max(p.bas0 * r, p.haut0 * r); p.loi = p.loi0;
+    } else { p.bas = p.haut = v; p.loi = "fixe"; }
+  }
+  function modifie(p) { return p.valeur !== p.origine; }
+  function tousParams(visite) {
+    ORDRE_LIGNE.forEach(function (k) { visite(etat.ligne[k], "ligne", null, null, k); });
+    etat.frus.forEach(function (f) {
+      M.CLES_FRU.forEach(function (k) { visite(f[k], "fru", f, null, k); });
+      f.pieces.forEach(function (pc) { M.CLES_PIECE.forEach(function (k) { if (possede(pc, k)) visite(pc[k], "piece", f, pc, k); }); });
+    });
+  }
+  function nbModifs() {
+    var n = 0;
+    tousParams(function (p) { if (modifie(p)) n++; });
+    ["prix", "valeur", "temps"].forEach(function (k) { if (etat.mult[k] !== 1) n++; });
+    return n;
+  }
+
+  var calc = {};
+  var mc = { tirages: liste(D.monte_carlo.tirages), p: D.monte_carlo.p_rentable, q: liste(D.monte_carlo.p5_mediane_p95), n: D.monte_carlo.n,
+             freq: D.monte_carlo.frequence_traitement || {}, origine: "dossier", version: 0, encours: false };
+  var periodes = { lignes: liste(D.periodes.table), attrs: D.periodes.resume || {}, origine: "dossier", version: 0 };
+  function aJour(x) { return x.origine === "dossier" ? nbModifs() === 0 : x.version === etat.version; }
+
+  // ------------------------------------------------------------------ graphiques : échelles et interaction
+  function largeur(hote) { return Math.max(260, Math.floor(hote.clientWidth || hote.getBoundingClientRect().width || 640)); }
+  function pasJoli(brut) {
+    if (!(brut > 0)) return 1;
+    var p = Math.pow(10, Math.floor(Math.log(brut) / Math.LN10)), r = brut / p;
+    return (r <= 1 ? 1 : r <= 2 ? 2 : r <= 2.5 ? 2.5 : r <= 5 ? 5 : 10) * p;
+  }
+  /** Graduations rondes couvrant [min, max]. */
+  function graduer(min, max, n) {
+    if (!(max > min)) { max = min + 1; }
+    var pas = pasJoli((max - min) / Math.max(1, n)), a = Math.floor(min / pas + 1e-9) * pas, b = Math.ceil(max / pas - 1e-9) * pas, v = [];
+    for (var i = 0, x = a; x <= b + pas * 1e-6 && i < 200; i++, x = a + i * pas) v.push(Math.abs(x) < pas * 1e-9 ? 0 : x);
+    return { min: a, max: b, pas: pas, valeurs: v };
+  }
+  function echelle(d0, d1, r0, r1) { return function (v) { return r0 + (v - d0) / (d1 - d0) * (r1 - r0); }; }
+  /** Étiquettes d'un axe en euros : en entier sous 10 000, en milliers (k€) au-delà ; un seul style par axe. */
+  function formatAxeEuro(g) {
+    var m = Math.max(Math.abs(g.min), Math.abs(g.max));
+    if (m >= 10000) { var d = g.pas % 1000 === 0 ? 0 : 1; return function (v) { return v === 0 ? "0" : nb(v / 1000, d) + "\u00a0k€"; }; }
+    var d2 = g.pas >= 1 ? 0 : g.pas >= 0.1 ? 1 : 2;
+    return function (v) { return nb(v, d2) + "\u00a0€"; };
+  }
+  function formatAxeNombre(g, u) {
+    var d = g.pas >= 1 ? 0 : g.pas >= 0.1 ? 1 : 2;
+    return function (v) { return nb(v, d) + (u ? "\u00a0" + u : ""); };
+  }
+  /** Marge gauche d'un graphique : la place de la plus longue étiquette de l'axe vertical (chiffres de 12 px). */
+  function margeGauche(g, f) {
+    var n = 1;
+    g.valeurs.forEach(function (v) { n = Math.max(n, f(v).length); });
+    return Math.ceil(n * 6.9) + 12;
+  }
+  /** Ancrage d'une étiquette d'axe horizontal pour qu'elle reste dans le dessin. */
+  function ancre(x, W) { return x < 26 ? "start" : x > W - 26 ? "end" : "middle"; }
+  function colonne(parent, x, y0, y1, w, classe) {
+    // colonne de y0 (base) à y1 (valeur) : bout arrondi côté valeur, carré côté base
+    var haut = Math.min(y0, y1), bas = Math.max(y0, y1), r = Math.min(4, w / 2, (bas - haut)), d;
+    if (bas - haut < 0.5) return null;
+    if (y1 <= y0) d = "M" + x + "," + bas + "V" + (haut + r) + "Q" + x + "," + haut + " " + (x + r) + "," + haut + "H" + (x + w - r) + "Q" + (x + w) + "," + haut + " " + (x + w) + "," + (haut + r) + "V" + bas + "Z";
+    else d = "M" + x + "," + haut + "V" + (bas - r) + "Q" + x + "," + bas + " " + (x + r) + "," + bas + "H" + (x + w - r) + "Q" + (x + w) + "," + bas + " " + (x + w) + "," + (bas - r) + "V" + haut + "Z";
+    return s("path", { d: d, class: classe }, parent);
+  }
+  function toile(hote, W, H, description) {
+    vider(hote);
+    var svg = s("svg", { viewBox: "0 0 " + W + " " + H, width: W, height: H, role: "img", "aria-label": description, focusable: "true" }, hote);
+    s("rect", { x: 0, y: 0, width: W, height: H, class: "g-zone" }, svg);
+    return svg;
+  }
+  /** Survol et clavier : le point le plus proche montre sa bulle ; flèches gauche et droite pour lire au clavier. */
+  function interaction(hote, svg, W, points, opt) {
+    opt = opt || {};
+    if (!points.length) return;
+    var bulle = h("div", { class: "bulle", hidden: true });
+    hote.appendChild(bulle);
+    var viseur = opt.viseur ? s("line", { class: "g-viseur", x1: 0, x2: 0, y1: opt.viseur[0], y2: opt.viseur[1], visibility: "hidden" }, svg) : null;
+    var actif = -1;
+    function montrer(i) {
+      if (i < 0 || i >= points.length) return;
+      if (actif >= 0 && points[actif].el) points[actif].el.classList.remove("g-actif");
+      actif = i;
+      var p = points[i];
+      if (p.el) p.el.classList.add("g-actif");
+      if (viseur) { viseur.setAttribute("x1", p.x); viseur.setAttribute("x2", p.x); viseur.setAttribute("visibility", "visible"); }
+      vider(bulle);
+      if (p.titre) bulle.appendChild(h("div", { class: "b-titre", text: p.titre }));
+      p.lignes.forEach(function (l) { bulle.appendChild(h("div", { class: "b-ligne" }, h("span", { text: l[0] }), h("b", { text: l[1] }))); });
+      bulle.hidden = false;
+      var r = svg.getBoundingClientRect(), rh = hote.getBoundingClientRect(), k = r.width / W, lb = bulle.offsetWidth, hb = bulle.offsetHeight;
+      var gx = p.x * k + (r.left - rh.left), gy = p.y * k + (r.top - rh.top);
+      var x = gx + 12;
+      if (x + lb > hote.clientWidth) x = gx - 12 - lb;
+      if (x < 0) x = Math.max(0, Math.min(hote.clientWidth - lb, gx - lb / 2));
+      var y = gy - hb - 10;
+      if (y < 0) y = Math.min(gy + 14, Math.max(0, r.height - hb));
+      bulle.style.left = x + "px"; bulle.style.top = y + "px";
+    }
+    function cacher() {
+      if (actif >= 0 && points[actif].el) points[actif].el.classList.remove("g-actif");
+      actif = -1; bulle.hidden = true;
+      if (viseur) viseur.setAttribute("visibility", "hidden");
+    }
+    function proche(ev) {
+      var r = svg.getBoundingClientRect(), k = W / r.width, px = (ev.clientX - r.left) * k, py = (ev.clientY - r.top) * k, mi = 0, md = Infinity;
+      points.forEach(function (p, i) { var d = opt.vertical ? Math.abs(p.y - py) : Math.abs(p.x - px); if (d < md) { md = d; mi = i; } });
+      return mi;
+    }
+    svg.addEventListener("pointermove", function (ev) { montrer(proche(ev)); });
+    svg.addEventListener("pointerdown", function (ev) { montrer(proche(ev)); });
+    svg.addEventListener("pointerleave", cacher);
+    svg.setAttribute("tabindex", "0");
+    svg.addEventListener("focus", function () { if (actif < 0) montrer(opt.depart === undefined ? 0 : opt.depart); });
+    svg.addEventListener("blur", cacher);
+    svg.addEventListener("keydown", function (ev) {
+      var i = actif < 0 ? 0 : actif;
+      if (ev.key === "ArrowRight" || ev.key === "ArrowDown") i = Math.min(points.length - 1, i + 1);
+      else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") i = Math.max(0, i - 1);
+      else if (ev.key === "Home") i = 0;
+      else if (ev.key === "End") i = points.length - 1;
+      else if (ev.key === "Escape") { cacher(); return; }
+      else return;
+      ev.preventDefault();
+      montrer(i);
+    });
+  }
+  function grapheVide(hote, texte) { remplir(hote, h("p", { class: "vide", text: texte })); }
+
+  // ------------------------------------------------------------------ graphique : de l'actuel à la ligne (cascade)
+  function dessinerCascade(hote, scen) {
+    var l = scen.lignes, A = l[3]["Actuel"], B = l[3]["Avec la ligne"], e = [l[0]["Écart"], l[1]["Écart"], l[2]["Écart"]];
+    if ([A, B].concat(e).some(inc)) {
+      grapheVide(hote, "Comparaison non calculable avec ces hypothèses : voir ce qui manque dans « La décision ».");
+      return;
+    }
+    var etapes = [
+      { nom: "Situation actuelle", detail: "tout part chez le recycleur actuel", de: 0, a: A, total: true },
+      { nom: "Traitement évité", detail: "masse sortie de la benne actuelle", de: A, a: A + e[0] },
+      { nom: "Marge de la ligne", detail: "réemploi + vente au kilo − main-d'œuvre", de: A + e[0], a: A + e[0] + e[1] },
+      { nom: "Coûts fixes de la ligne", detail: "installation amortie + coûts annuels", de: A + e[0] + e[1], a: B },
+      { nom: "Avec la ligne", detail: "total des postes ci-dessus", de: 0, a: B, total: true }
+    ];
+    var W = largeur(hote), large = W >= 500, colonneNoms = large ? Math.min(250, Math.round(W * 0.44)) : 0;
+    var mG = large ? colonneNoms : 6, mD = 88, pasY = large ? 44 : 46, haut = 4, yBarre = large ? 13 : 21, H = haut + etapes.length * pasY + 26;
+    var vals = [0];
+    etapes.forEach(function (x) { vals.push(x.de, x.a); });
+    var g = graduer(Math.min.apply(null, vals), Math.max.apply(null, vals), W - mG - mD < 300 ? 3 : 5), fx = formatAxeEuro(g);
+    var x = echelle(g.min, g.max, mG, W - mD);
+    var svg = toile(hote, W, H, "Passage de la situation actuelle à la ligne : " + etapes.map(function (t) {
+      return t.nom + " " + (t.total ? eur(t.a) : signe(t.a - t.de)); }).join(" ; ") + ". Flèches pour lire les valeurs.");
+    var basPlot = haut + etapes.length * pasY;
+    g.valeurs.forEach(function (v) {
+      etapes.forEach(function (t, i) {                          // la grille ne passe que derrière les barres, jamais sous un libellé
+        var y = haut + i * pasY + yBarre;
+        s("line", { x1: x(v), x2: x(v), y1: large ? haut + i * pasY : y - 3, y2: large ? haut + (i + 1) * pasY : y + 19, class: v === 0 ? "g-zero" : "g-grille" }, svg);
+      });
+      s("text", { x: x(v), y: basPlot + 16, "text-anchor": ancre(x(v), W), class: "doux" }, svg, fx(v));
+    });
+    var points = [];
+    etapes.forEach(function (t, i) {
+      var y = haut + i * pasY, x0 = Math.min(x(t.de), x(t.a)), x1 = Math.max(x(t.de), x(t.a)), delta = t.a - t.de;
+      if (large) {
+        s("text", { x: 0, y: y + yBarre + 6, class: "fort" }, svg, t.nom);
+        s("text", { x: 0, y: y + yBarre + 21, class: "doux" }, svg, t.detail);
+      } else s("text", { x: mG, y: y + 13, class: "fort" }, svg, t.nom);
+      var el = s("rect", { x: x0, y: y + yBarre, width: Math.max(1.5, x1 - x0), height: 16, rx: 3, class: t.total ? "g-neutre" : delta >= 0 ? "g-s1" : "g-neg" }, svg);
+      s("text", { x: x1 + 7, y: y + yBarre + 12, class: "fort" }, svg, t.total ? eur(t.a) : signe(delta));
+      if (large && i < etapes.length - 1) s("line", { x1: x(t.a), x2: x(t.a), y1: y + yBarre + 16, y2: y + pasY + yBarre, class: "g-lien" }, svg);
+      points.push({ x: x1, y: y + yBarre + 8, el: el, titre: t.nom + " : " + t.detail, lignes: [[t.total ? "Total par an" : delta >= 0 ? "Gain par an" : "Coût par an", t.total ? eur(t.a) : signe(delta)]] });
+    });
+    interaction(hote, svg, W, points, { vertical: true });
+  }
+
+  // ------------------------------------------------------------------ graphique : résultat selon les heures
+  function dessinerSensibilite(hote, pts, cap, cle) {
+    var ok = pts.filter(function (p) { return !inc(p[cle]); });
+    if (ok.length < 2) { grapheVide(hote, "Courbe non calculable : aucun type de FRU n'a encore toutes ses données."); return; }
+    var W = largeur(hote), etroit = W < 520, m = { g: 50, d: 18, h: 30, b: 46 }, H = etroit ? 270 : 330;
+    var xs = ok.map(function (p) { return p["Heures / an"]; }), ys = ok.map(function (p) { return p[cle]; });
+    var gx = graduer(0, Math.max.apply(null, xs), etroit ? 4 : 8), gy = graduer(Math.min(0, Math.min.apply(null, ys)), Math.max(0, Math.max.apply(null, ys)), 5);
+    var fy = formatAxeEuro(gy), fxx = formatAxeNombre(gx, "");
+    m.g = margeGauche(gy, fy);
+    var x = echelle(gx.min, gx.max, m.g, W - m.d), y = echelle(gy.min, gy.max, H - m.b, m.h);
+    var svg = toile(hote, W, H, "Résultat annuel de la ligne selon les heures opérateur disponibles, de 0 à " + nb(gx.max) + " heures. Flèches pour lire les valeurs.");
+    gy.valeurs.forEach(function (v) {
+      s("line", { x1: m.g, x2: W - m.d, y1: y(v), y2: y(v), class: v === 0 ? "g-zero" : "g-grille" }, svg);
+      s("text", { x: m.g - 8, y: y(v) + 4, "text-anchor": "end", class: "doux" }, svg, fy(v));
+    });
+    gx.valeurs.forEach(function (v) { s("text", { x: x(v), y: H - m.b + 18, "text-anchor": ancre(x(v), W), class: "doux" }, svg, fxx(v)); });
+    s("text", { x: (m.g + W - m.d) / 2, y: H - 8, "text-anchor": "middle" }, svg, "Heures opérateur disponibles par an");
+    s("path", { class: "g-ligne", d: ok.map(function (p, i) { return (i ? "L" : "M") + x(p["Heures / an"]).toFixed(1) + "," + y(p[cle]).toFixed(1); }).join("") }, svg);
+    var depart = 0;
+    if (!inc(cap) && cap >= gx.min && cap <= gx.max) {
+      var xc = x(cap), aDroite = xc > (m.g + W - m.d) / 2;
+      s("line", { x1: xc, x2: xc, y1: m.h - 8, y2: H - m.b, class: "g-repere" }, svg);
+      s("text", { x: xc + (aDroite ? -7 : 7), y: m.h - 12, "text-anchor": aDroite ? "end" : "start", class: "fort" }, svg, "Capacité actuelle : " + nb(cap) + "\u00a0h");
+      var pc = null;
+      ok.forEach(function (p, i) { if (p["Heures / an"] === cap) { pc = p; depart = i; } });
+      if (pc) s("circle", { cx: xc, cy: y(pc[cle]), r: 5, class: "g-point" }, svg);
+    }
+    interaction(hote, svg, W, ok.map(function (p) {
+      return { x: x(p["Heures / an"]), y: y(p[cle]), titre: nb(p["Heures / an"]) + " heures par an",
+               lignes: [[cle === "Résultat / an (€)" ? "Résultat par an" : "Marge variable par an", eur(p[cle])], ["FRU traités par an", nb(p["FRU traitées / an"])],
+                        ["Une heure de plus", eur(p["Valeur d'une heure opérateur en plus (€ net)"], 2)]] };
+    }), { viseur: [m.h, H - m.b], depart: depart });
+  }
+
+  // ------------------------------------------------------------------ graphique : histogramme des tirages
+  function classesHistogramme(tirages, nClasses) {
+    var v = tirages.filter(function (t) { return !inc(t); });
+    if (!v.length) return null;
+    var min = Math.min.apply(null, v), max = Math.max.apply(null, v);
+    if (max - min < 1) { min -= 1; max += 1; }
+    var pas = pasJoli((max - min) / (nClasses || 20)), b0 = Math.floor(min / pas) * pas, n = Math.max(1, Math.ceil((max - b0) / pas + 1e-9)), c = [];
+    for (var i = 0; i < n; i++) c.push({ de: b0 + i * pas, a: b0 + (i + 1) * pas, n: 0 });
+    v.forEach(function (t) { c[Math.min(n - 1, Math.max(0, Math.floor((t - b0) / pas)))].n++; });
+    return { classes: c, total: v.length, pas: pas, min: b0, max: b0 + n * pas };
+  }
+  function dessinerHistogramme(hote, hist, mediane) {
+    if (!hist) { grapheVide(hote, "Aucun tirage calculable : il manque des données pour évaluer la ligne (voir « La décision »)."); return; }
+    var W = largeur(hote), etroit = W < 520, m = { g: 44, d: 14, h: 28, b: 44 }, H = etroit ? 240 : 290;
+    var gx = graduer(hist.min, hist.max, etroit ? 3 : 7), fx = formatAxeEuro(gx);
+    var gy = graduer(0, Math.max.apply(null, hist.classes.map(function (c) { return c.n; })), 4);
+    m.g = margeGauche(gy, function (v) { return nb(v); });
+    var x = echelle(hist.min, hist.max, m.g, W - m.d), y = echelle(0, gy.max, H - m.b, m.h);
+    var svg = toile(hote, W, H, "Histogramme de " + nb(hist.total) + " résultats annuels tirés, de " + eur(hist.min) + " à " + eur(hist.max) + ". Flèches pour lire les classes.");
+    gy.valeurs.forEach(function (v) {
+      if (v % 1) return;
+      s("line", { x1: m.g, x2: W - m.d, y1: y(v), y2: y(v), class: v === 0 ? "g-axe" : "g-grille" }, svg);
+      s("text", { x: m.g - 8, y: y(v) + 4, "text-anchor": "end", class: "doux" }, svg, nb(v));
+    });
+    gx.valeurs.forEach(function (v) {
+      if (v < hist.min - 1e-9 || v > hist.max + 1e-9) return;
+      s("text", { x: x(v), y: H - m.b + 18, "text-anchor": ancre(x(v), W), class: "doux" }, svg, fx(v));
+    });
+    s("text", { x: (m.g + W - m.d) / 2, y: H - 8, "text-anchor": "middle" }, svg, "Résultat annuel de la ligne");
+    var points = [];
+    hist.classes.forEach(function (c) {
+      var x0 = x(c.de) + 1, w = Math.max(1, x(c.a) - x(c.de) - 2);
+      var el = colonne(svg, x0, y(0), y(c.n), w, (c.de + c.a) / 2 < 0 ? "g-neg" : "g-s1");
+      points.push({ x: x0 + w / 2, y: y(c.n), el: el, titre: "De " + eur(c.de) + " à " + eur(c.a), lignes: [["Tirages", nb(c.n)], ["Part", pct(c.n / hist.total, 1)]] });
+    });
+    if (hist.min < 0 && hist.max > 0) s("line", { x1: x(0), x2: x(0), y1: m.h - 4, y2: H - m.b, class: "g-zero" }, svg);
+    if (!inc(mediane) && mediane >= hist.min && mediane <= hist.max) {
+      var xm = x(mediane), droite = xm > (m.g + W - m.d) / 2;
+      s("line", { x1: xm, x2: xm, y1: m.h - 8, y2: H - m.b, class: "g-repere" }, svg);
+      s("text", { x: xm + (droite ? -7 : 7), y: m.h - 12, "text-anchor": droite ? "end" : "start", class: "fort" }, svg, "Médiane : " + eur(mediane));
+    }
+    interaction(hote, svg, W, points, {});
+  }
+
+  // ------------------------------------------------------------------ graphique : colonnes par semaine
+  function dessinerColonnes(hote, items, opt) {
+    if (!items.length) { grapheVide(hote, opt.vide || "Aucune donnée."); return; }
+    var W = largeur(hote), etroit = W < 520, m = { g: 36, d: 10, h: 14, b: 30 }, H = etroit ? 200 : 240;
+    var vals = items.map(function (it) { return inc(it.v) ? 0 : it.v; });
+    var gy = graduer(Math.min(0, Math.min.apply(null, vals)), Math.max(0, Math.max.apply(null, vals)), 4);
+    var fy = opt.euro ? formatAxeEuro(gy) : formatAxeNombre(gy, "");
+    m.g = margeGauche(gy, fy);
+    var y = echelle(gy.min, gy.max, H - m.b, m.h), bande = (W - m.g - m.d) / items.length, wb = Math.max(2, Math.min(24, bande - 2));
+    var svg = toile(hote, W, H, opt.description + " Flèches pour lire les valeurs.");
+    gy.valeurs.forEach(function (v) {
+      s("line", { x1: m.g, x2: W - m.d, y1: y(v), y2: y(v), class: v === 0 ? "g-zero" : "g-grille" }, svg);
+      s("text", { x: m.g - 8, y: y(v) + 4, "text-anchor": "end", class: "doux" }, svg, fy(v));
+    });
+    var chaque = Math.max(1, Math.ceil(56 / bande)), points = [];
+    items.forEach(function (it, i) {
+      var xc = m.g + bande * (i + 0.5);
+      var el = inc(it.v) ? null : colonne(svg, xc - wb / 2, y(0), y(it.v), wb, it.classe);
+      if (i % chaque === 0 && xc + 24 < W) s("text", { x: xc, y: H - 10, "text-anchor": "middle", class: "doux" }, svg, it.t);
+      points.push({ x: xc, y: inc(it.v) ? y(0) : y(Math.max(0, it.v)), el: el, titre: it.titre, lignes: it.lignes });
+    });
+    interaction(hote, svg, W, points, {});
+  }
+
+  // ------------------------------------------------------------------ graphique : masse estimée contre masse pesée (un flux)
+  function dessinerRapprochement(hote, lignes, nom) {
+    var W = largeur(hote), m = { g: 44, d: 12, h: 12, b: 28 }, H = 190, n = lignes.length;
+    var tout = [];
+    lignes.forEach(function (r) { ["Estimé bas (kg)", "Estimé central (kg)", "Estimé haut (kg)", "Masse mesurée (kg)"].forEach(function (c) { if (!inc(r[c])) tout.push(r[c]); }); });
+    if (!tout.length) { grapheVide(hote, "Ni estimation ni pesée pour ce flux."); return; }
+    var gy = graduer(0, Math.max.apply(null, tout), 4), fy = formatAxeNombre(gy, "kg");
+    m.g = margeGauche(gy, fy);
+    var x = function (i) { return n > 1 ? m.g + 6 + (W - m.g - m.d - 12) * i / (n - 1) : (m.g + W - m.d) / 2; }, y = echelle(0, gy.max, H - m.b, m.h);
+    var svg = toile(hote, W, H, "Flux " + nom + " : masse estimée et masse pesée par semaine. Flèches pour lire les valeurs.");
+    gy.valeurs.forEach(function (v) {
+      s("line", { x1: m.g, x2: W - m.d, y1: y(v), y2: y(v), class: v === 0 ? "g-axe" : "g-grille" }, svg);
+      s("text", { x: m.g - 8, y: y(v) + 4, "text-anchor": "end", class: "doux" }, svg, fy(v));
+    });
+    var suite = [], trait = "";
+    function fermer() {
+      if (suite.length > 1) {
+        s("path", { class: "g-aire", d: suite.map(function (i, k) { return (k ? "L" : "M") + x(i).toFixed(1) + "," + y(lignes[i]["Estimé haut (kg)"]).toFixed(1); }).join("") +
+          suite.slice().reverse().map(function (i) { return "L" + x(i).toFixed(1) + "," + y(lignes[i]["Estimé bas (kg)"]).toFixed(1); }).join("") + "Z" }, svg);
+      }
+      suite = [];
+    }
+    var dessin = false;
+    lignes.forEach(function (r, i) {
+      if (inc(r["Estimé bas (kg)"]) || inc(r["Estimé haut (kg)"])) fermer(); else suite.push(i);
+      if (inc(r["Estimé central (kg)"])) dessin = false;
+      else { trait += (dessin ? "L" : "M") + x(i).toFixed(1) + "," + y(r["Estimé central (kg)"]).toFixed(1); dessin = true; }
+    });
+    fermer();
+    if (trait) s("path", { class: "g-ligne", d: trait }, svg);
+    var points = [];
+    lignes.forEach(function (r, i) {
+      if (!inc(r["Masse mesurée (kg)"])) s("circle", { cx: x(i), cy: y(r["Masse mesurée (kg)"]), r: 4.5, class: "g-point2" }, svg);
+      var yy = !inc(r["Masse mesurée (kg)"]) ? r["Masse mesurée (kg)"] : !inc(r["Estimé central (kg)"]) ? r["Estimé central (kg)"] : 0;
+      var l = [["Estimée", unite(r["Estimé central (kg)"], "kg", 1)], ["Plage", inc(r["Estimé bas (kg)"]) || inc(r["Estimé haut (kg)"]) ? INCONNU : nb(r["Estimé bas (kg)"], 1) + " à " + unite(r["Estimé haut (kg)"], "kg", 1)],
+               ["Pesée", inc(r["Masse mesurée (kg)"]) ? "pas de pesée" : unite(r["Masse mesurée (kg)"], "kg", 1)]];
+      if (!inc(r["Écart (%)"])) l.push(["Écart", (r["Écart (%)"] > 0 ? "+" : "") + pct(r["Écart (%)"])]);
+      points.push({ x: x(i), y: y(yy), titre: "Semaine du " + dateCourte(r.Semaine), lignes: l });
+    });
+    [0, n - 1].forEach(function (i, k) {
+      if (k && n < 2) return;
+      s("text", { x: x(i), y: H - 8, "text-anchor": k ? "end" : "start", class: "doux" }, svg, dateCourte(lignes[i].Semaine));
+    });
+    interaction(hote, svg, W, points, { viseur: [m.h, H - m.b] });
+  }
+  function miniColonnes(valeurs) {
+    var n = valeurs.length, w = 4, H = 22, max = Math.max.apply(null, valeurs.concat([1]));
+    var svg = s("svg", { viewBox: "0 0 " + (n * w) + " " + H, width: n * w, height: H, role: "img", "aria-label": "FRU rebutés chaque semaine, de " + nb(Math.min.apply(null, valeurs)) + " à " + nb(max) });
+    s("rect", { x: 0, y: H - 1, width: n * w, height: 1, class: "g-neutre" }, svg);
+    valeurs.forEach(function (v, i) { if (v > 0) s("rect", { x: i * w, y: H - 1 - (H - 2) * v / max, width: w - 1, height: (H - 2) * v / max, class: "g-s1" }, svg); });
+    return svg;
+  }
+
+  // ------------------------------------------------------------------ 1. bandeau d'état
+  function rendreEtat() {
+    var demo = D.meta.donnees === "démonstration";
+    $("etat").className = "bandeau" + (demo ? " demo" : "");
+    $("etat-mode").textContent = demo ? "Démonstration : données fictives" : "Données réelles";
+    $("etat-periode").textContent = D.meta.periode ? "Période : " + D.meta.periode : "";
+    $("etat-date").textContent = D.meta.genere_le ? "Généré le " + dateComplete(D.meta.genere_le) : "";
+    $("pied-source").textContent = "Outil construit par le pipeline ERC circularité" + (D.meta.genere_le ? " le " + dateComplete(D.meta.genere_le) : "") +
+      (demo ? " à partir du jeu de démonstration (références, quantités et coûts inventés)." : ".") + " La page est autonome : aucun échange avec l'extérieur.";
+  }
+  /** Le recalcul de la page, hypothèses du dossier inchangées, doit redonner les résultats du dossier. */
+  function controler() {
+    var ref = D.reference.resume || {}, r = calc.res.resume, ecarts = [];
+    Object.keys(ref).forEach(function (k) {
+      var a = ref[k], b = r[k];
+      if (inc(a) !== inc(b)) { if (!(k === "Capacité (h/an)" && a === null && b === Infinity)) ecarts.push(k); }
+      else if (!inc(a) && Math.abs(a - b) > 1e-6 * Math.max(1, Math.abs(a))) ecarts.push(k);
+    });
+    if (!Object.keys(ref).length) return;
+    if (ecarts.length) remplir($("etat-controle"), puce("Écart avec le calcul du dossier : " + ecarts.slice(0, 3).join(", "), "critique"));
+    else $("pied-source").textContent += " Contrôle : le recalcul de la page redonne les résultats du dossier.";
+  }
+
+  // ------------------------------------------------------------------ 2. la décision
+  /** Ce qui empêche de calculer, en clair, du plus bloquant au moins bloquant. */
+  /** Entrées qui empêchent de calculer les pièces d'un type de FRU. Une pièce sans paramètre de réemploi dans le dossier
+   *  (la carcasse, qui ne se réemploie pas) n'est comptée que pour le recyclage. */
+  function manquesPieces(f) {
+    var r = { ouverture: false, comptes: {}, ordre: [] };
+    M.optionsDisponibles(f).forEach(function (o, j) {
+      var pc = f.pieces[j], cles = o.recyclage.slice(), vus = {};
+      if (possede(pc, "extraction_min") || possede(pc, "p_reutilisable")) cles = o["réemploi"].concat(cles);
+      cles.forEach(function (k) {
+        if (k === "ouverture_min" || k === "ouverture_tri_min") { r.ouverture = true; return; }
+        if (vus[k]) return;
+        vus[k] = true;
+        if (!possede(r.comptes, k)) { r.comptes[k] = 0; r.ordre.push(k); }
+        r.comptes[k]++;
+      });
+    });
+    return r;
+  }
+  function ceQuiManque() {
+    var lg = calc.modele.ligne, frus = calc.modele.frus, m = [];
+    var sansTaux = frus.filter(function (f) { return !possede(f, "taux_horaire_eur") || f.taux_horaire_eur === null; }).length;
+    if (inc(lg.taux_horaire_eur) && (sansTaux || !frus.length)) m.push("le coût horaire d'un opérateur");
+    var comptes = {}, ordre = [];
+    function noter(k, n) { if (!possede(comptes, k)) { comptes[k] = 0; ordre.push(k); } comptes[k] += n; }
+    frus.forEach(function (f) {
+      var man = M.manques(f, lg.taux_horaire_eur);
+      if (!man.length) return;
+      if (inc(f.rebut_an)) noter("rebut_an", 1);
+      if (!man.some(function (x) { return x.indexOf("aucune option calculable") === 0; })) return;
+      var mp = manquesPieces(f);
+      if (mp.ouverture) noter("ouverture_min", 1);
+      mp.ordre.forEach(function (k) { noter(k, mp.comptes[k]); });
+    });
+    ordre.forEach(function (k) {
+      var fruNiveau = k === "rebut_an" || k === "ouverture_min";
+      m.push(NOMS[k] + " (" + (fruNiveau ? pluriel(comptes[k], "type de FRU", "types de FRU") : pluriel(comptes[k], "pièce", "pièces")) + ")");
+    });
+    if (inc(lg.cout_installation_eur)) m.push("l'investissement d'installation");
+    if (inc(lg.couts_fixes_annuels_eur)) m.push("les coûts fixes annuels de la ligne");
+    if (inc(lg.cout_traitement_eur_kg)) m.push("le coût de traitement du recycleur actuel");
+    var sansPoids = frus.filter(function (f) { return inc(f.poids_fru_kg); }).length;
+    if (sansPoids) m.push("le poids de " + pluriel(sansPoids, "type de FRU", "types de FRU"));
+    return m;
+  }
+  function inconnuEl() { return h("span", { class: "inconnu", text: INCONNU }); }
+  function repere(libelle, valeur, lecture, extra) {
+    var dd = h("dd", { class: "valeur" });
+    ajouter(dd, valeur);
+    return h("div", { class: "repere" + (extra && extra.perime ? " perime" : "") }, h("dt", { text: libelle }), dd, extra && extra.jauge ? extra.jauge : null,
+             h("dd", { class: "lecture" }, lecture));
+  }
+  function rendreDecision() {
+    var r = calc.res.resume, total = calc.scen.lignes[3], gain = total["Écart"], res = r["Résultat / an (€)"], marge = r["Marge variable / an (€)"];
+    var nTypes = calc.modele.frus.length, nInc = r["Types de FRU incomplets"], manque = ceQuiManque();
+    var phrase, etatLigne, hero = gain, heroLib = "Gain annuel par rapport à la situation actuelle";
+    if (!nTypes) {
+      phrase = "Le gain ne peut pas être calculé : le dossier ne contient aucun type de FRU rebuté."; etatLigne = "incomplet";
+    } else if (nInc === nTypes) {
+      phrase = "Le gain ne peut pas être calculé : aucun type de FRU n'a encore toutes ses données."; etatLigne = "incomplet";
+    } else if (inc(res)) {
+      phrase = "Le résultat de la ligne ne peut pas être calculé : il manque ses coûts fixes. Avant coûts fixes, la ligne dégagerait " + eur(marge) + " de marge par an.";
+      etatLigne = "incomplet"; hero = NaN;
+    } else if (inc(gain)) {
+      phrase = "La ligne dégagerait " + eur(res) + " par an, sans compter le traitement évité : le coût de traitement du recycleur actuel n'est pas renseigné.";
+      etatLigne = res > 0 ? "rentable" : "non rentable"; hero = res; heroLib = "Résultat annuel de la ligne, hors traitement évité";
+    } else if (gain > 0) {
+      phrase = "Avec ces hypothèses, la ligne rapporte " + eur(gain) + " par an de plus que la situation actuelle."; etatLigne = "rentable";
+    } else if (marge > 0) {
+      phrase = "Avec ces hypothèses, la ligne ne couvre pas ses coûts fixes : " + eur(marge) + " de marge par an pour " + eur(r["Coûts fixes annualisés (€)"]) +
+               " de coûts fixes, soit " + eur(-gain) + " de moins que la situation actuelle.";
+      etatLigne = "non rentable";
+    } else {
+      phrase = "Avec ces hypothèses, aucun type de FRU n'est rentable à traiter : la ligne coûterait ses coûts fixes, " + eur(-gain) + " par an.";
+      etatLigne = "non rentable";
+    }
+    $("decision-phrase").textContent = phrase;
+    $("decision-hero-libelle").textContent = heroLib;
+    remplir($("decision-hero"), inc(hero) ? h("span", { class: "inconnu", text: INCONNU }) : [(hero > 0 ? "+" : "") + nb(hero) + "\u00a0€", h("small", { text: "par an" })]);
+    var notes = [];
+    if (manque.length) notes.push((etatLigne === "incomplet" ? "Il manque : " : "Il manque encore : ") + manque.join(" ; ") + ".");
+    if (nInc && nInc < nTypes) notes.push(pluriel(nInc, "type de FRU sur ", "types de FRU sur ") + nb(nTypes) + (nInc < 2 ? " est exclu" : " sont exclus") + " du calcul faute de données : voir le plan par type de FRU.");
+    if (inc(calc.modele.ligne.heures_operateur_an)) notes.push("Les heures opérateur ne sont pas renseignées : le calcul suppose qu'elles ne limitent pas la ligne.");
+    notes.push("Estimation au centre des plages d'hypothèses ; l'incertitude est chiffrée plus bas.");
+    remplir($("decision-complement"), notes.map(function (t) { return h("li", { text: t }); }));
+    var puces = [puce(etatLigne === "rentable" ? "Rentable" : etatLigne === "non rentable" ? "Non rentable" : "Incomplet",
+                      (etatLigne === "rentable" ? "bon" : etatLigne === "non rentable" ? "critique" : "alerte") + " grand")];
+    if (nInc && etatLigne !== "incomplet") puces.push(puce(pluriel(nInc, "type incomplet", "types incomplets"), "alerte grand"));
+    var nm = nbModifs();
+    if (nm) puces.push(puce(pluriel(nm, "hypothèse modifiée ici", "hypothèses modifiées ici"), "accent grand"));
+    remplir($("decision-puces"), puces);
+
+    // Chiffres clés
+    var cap = r["Capacité (h/an)"], hUtil = r["Heures utilisées / an"], occ = r["Taux d'occupation"], mu = r["Valeur d'une heure opérateur en plus (€ net)"];
+    var masse = r["Masse des FRU rebutées (kg/an)"], det = r["Masse détournée de la benne (kg/an)"], seuil = r["Seuil de rentabilité (FRU / an)"], roi = r["Retour sur investissement (ans)"];
+    var mcOk = aJour(mc), jauge = null, sansCouts = inc(calc.modele.ligne.cout_installation_eur) || inc(calc.modele.ligne.couts_fixes_annuels_eur);
+    if (!inc(occ)) jauge = h("span", { class: "jauge" + (occ >= 0.995 ? " pleine" : ""), "aria-hidden": "true" }, h("span", { style: "width:" + Math.max(0, Math.min(100, occ * 100)).toFixed(1) + "%" }));
+    remplir($("decision-reperes"),
+      repere("Probabilité que la ligne soit rentable", [inc(mc.p) ? inconnuEl() : pct(mc.p), mcOk ? null : [" ", puce("à recalculer", "alerte")]],
+             inc(mc.p) ? "Aucun tirage calculable." : nb(mc.n) + " tirages des plages d'hypothèses" + (mc.origine === "dossier" ? " du dossier" : " de la page") + (mcOk ? "." : " : les hypothèses ont changé depuis."), { perime: !mcOk }),
+      repere("Seuil de rentabilité", !inc(seuil) ? [nb(seuil), h("small", { text: " FRU / an" })] : inc(r["Coûts fixes annualisés (€)"]) || inc(marge) ? inconnuEl() : "aucun",
+             inc(seuil) ? (inc(r["Coûts fixes annualisés (€)"]) ? "Coûts fixes non renseignés." : inc(marge) ? "Aucun type de FRU calculable." : "Aucun FRU traité avec une marge positive : pas de seuil.")
+                        : "Coûts fixes ÷ marge moyenne par FRU ; " + nb(r["FRU traitées / an"]) + " FRU traités par an dans le plan."),
+      repere("Retour sur investissement", !inc(roi) ? [nb(roi, 1), h("small", { text: roi < 2 ? " an" : " ans" })] : sansCouts || inc(marge) ? inconnuEl() : "aucun",
+             inc(roi) ? (sansCouts ? "Investissement ou coûts fixes non renseignés." : inc(marge) ? "Aucun type de FRU calculable." : "Pas de retour : la marge ne dépasse pas les coûts fixes annuels.") : "Investissement ÷ (marge − coûts fixes annuels)."),
+      repere("Heures utilisées / capacité", [inc(hUtil) ? inconnuEl() : [nb(hUtil), h("small", { text: " h" })], " / ", cap === Infinity ? h("small", { text: "sans limite" }) : [nb(cap), h("small", { text: " h" })]],
+             cap === Infinity ? "Capacité non renseignée : supposée illimitée." : inc(occ) ? "Aucune heure disponible." : occ >= 0.995 ? "Capacité saturée : des FRU rentables ne sont pas traités." : pct(occ) + " de la capacité utilisée.", { jauge: jauge }),
+      repere("Valeur d'une heure opérateur en plus", inc(mu) ? h("span", { class: "inconnu", text: INCONNU }) : eur(mu, mu && mu < 100 ? 2 : 0),
+             inc(mu) ? "Aucun type de FRU calculable." : mu > 0 ? "Marge nette qu'apporterait une heure de plus : argument pour négocier des heures." : "0 : la capacité n'est pas saturée."),
+      repere("Masse détournée de la benne actuelle", inc(det) ? h("span", { class: "inconnu", text: INCONNU }) : [nb(det), h("small", { text: " kg / an" })],
+             inc(det) ? "Aucun type de FRU calculable." : inc(masse) || !masse ? "Masse totale rebutée inconnue (poids d'un FRU manquant)." : pct(det / masse) + " des " + unite(masse, "kg", 0) + " rebutés par an, réemployés ou triés.")
+    );
+  }
+
+  // ------------------------------------------------------------------ 3. hypothèses
+  var controles = [];
+  function bornesGlissiere(conf, v) {
+    var min = conf.min, max = conf.max;
+    if (!inc(v)) {
+      if (v < min) min = Math.floor(v * 1.5 / conf.pas) * conf.pas;
+      if (v > max * 0.6) max = Math.ceil(pasJoli(v * 2.5) / conf.pas) * conf.pas;
+    }
+    return [min, max];
+  }
+  function ligneHypothese(cle, conf, lit, ecrit, infos) {
+    var idN = "num-" + cle, idG = "glis-" + cle, idR = "raz-" + cle;
+    var b = bornesGlissiere(conf, infos.origine);
+    var glis = h("input", { type: "range", id: idG, min: b[0], max: b[1], step: conf.pas, "aria-label": conf.court + " (curseur)" });
+    var num = h("input", { type: "text", inputmode: "decimal", class: "nombre", id: idN, autocomplete: "off", placeholder: infos.obligatoire ? "" : "à saisir" });
+    var raz = h("button", { type: "button", class: "bouton lien", id: idR, text: "Rétablir", hidden: true });
+    var etatPuce = h("span");
+    var prov = h("p", { class: "hyp-prov" });
+    var el = h("div", { class: "hyp", id: "hyp-" + cle },
+      h("div", { class: "hyp-tete" }, h("label", { for: idN, text: conf.court }), etatPuce),
+      h("div", { class: "hyp-saisie" }, glis, num, h("span", { class: "unite", text: conf.unite }), raz), prov);
+    function maj(source) {
+      var v = lit();
+      if (source !== "num") { num.value = versCase(v, conf.dec); num.removeAttribute("aria-invalid"); }
+      if (source !== "glis") {
+        if (!inc(v)) {
+          if (v > +glis.max) glis.max = Math.ceil(pasJoli(v * 1.5) / conf.pas) * conf.pas;
+          if (v < +glis.min) glis.min = Math.floor(v * 1.5 / conf.pas) * conf.pas;
+          glis.value = v;
+        } else glis.value = glis.min;
+      }
+      var change = v !== infos.origine;
+      num.classList.toggle("a-saisir", v === null);
+      num.classList.toggle("modifie", change && v !== null);
+      raz.hidden = !change;
+      remplir(etatPuce, v === null ? puce("à saisir", "alerte") : change ? puce("modifié ici", "accent") : null);
+      remplir(prov, infos.texte(v));
+    }
+    glis.addEventListener("input", function () { ecrit(+glis.value); maj("glis"); planifier(); });
+    num.addEventListener("input", function () {
+      var l = lireCase(num.value), bon = l.ok && !(l.valeur === null && infos.obligatoire) && !(l.valeur !== null && !conf.negatif && l.valeur < 0) &&
+                !(l.valeur !== null && conf.plafond !== undefined && l.valeur > conf.plafond);
+      if (!bon) { num.setAttribute("aria-invalid", "true"); return; }
+      num.removeAttribute("aria-invalid");
+      ecrit(l.valeur); maj("num"); planifier();
+    });
+    num.addEventListener("blur", function () { maj(); });
+    raz.addEventListener("click", function () { ecrit(infos.origine); maj(); planifier(); num.focus(); });
+    controles.push(maj);
+    maj();
+    return el;
+  }
+  function construireHypotheses() {
+    var hl = $("hyp-ligne"), hm = $("hyp-mult");
+    ORDRE_LIGNE.forEach(function (k) {
+      var p = etat.ligne[k], conf = CONF_LIGNE[k];
+      hl.appendChild(ligneHypothese(k, conf, function () { return p.valeur; }, function (v) { fixer(p, v); }, {
+        origine: p.origine,
+        texte: function (v) {
+          var t = [];
+          if (p.origine === null) t.push("Absent du dossier" + (p.a_demander_a ? " ; à demander à : " + p.a_demander_a : "") + ".");
+          else {
+            t.push("Dossier : " + nbLibre(p.origine, conf.dec) + "\u00a0" + conf.unite +
+                   (p.bas0 !== null && p.haut0 > p.bas0 ? " (plage " + nbLibre(p.bas0, conf.dec) + " à " + nbLibre(p.haut0, conf.dec) + ")" : "") + ".");
+            if (p.provenance) t.push("Provenance : " + p.provenance + ".");
+          }
+          if (k === "heures_operateur_an" && v === null) t.push("Sans valeur, la capacité est supposée illimitée.");
+          if (k === "amortissement_ans") t.push("Moins d'un an compte pour un an.");
+          if (k === "cout_traitement_eur_kg") t.push("0 si l'enlèvement est gratuit, négatif si le recycleur paie.");
+          return t.join(" ");
+        }
+      }));
+    });
+    ["prix", "valeur", "temps"].forEach(function (k) {
+      var conf = { court: CONF_MULT[k].court, min: 0.25, max: 3, pas: 0.05, dec: 2, unite: "× dossier", plafond: 100 };
+      hm.appendChild(ligneHypothese("mult-" + k, conf, function () { return etat.mult[k]; }, function (v) { etat.mult[k] = v === null ? 1 : v; }, {
+        origine: 1, obligatoire: true,
+        texte: function (v) { return CONF_MULT[k].aide + (v !== 1 ? " Ici : " + (v > 1 ? "+" : "") + nb((v - 1) * 100) + "\u00a0% par rapport au dossier." : ""); }
+      }));
+    });
+    $("hyp-retablir").addEventListener("click", function () {
+      tousParams(function (p) { fixer(p, p.origine); });
+      etat.mult = { prix: 1, valeur: 1, temps: 1 };
+      controles.forEach(function (m) { m(); });
+      vues.forEach(function (v) { v.champs.forEach(function (c) { c.maj(); }); });
+      recalculer();
+    });
+  }
+  function majHypotheses() {
+    var n = nbModifs();
+    $("hyp-compteur").textContent = n ? pluriel(n, "hypothèse modifiée", "hypothèses modifiées") + " par rapport au dossier" : "Aucune hypothèse modifiée : valeurs du dossier";
+    $("hyp-compteur").className = "puce " + (n ? "accent" : "sans");
+    $("hyp-retablir").disabled = !n;
+  }
+
+  // ------------------------------------------------------------------ 4. actuel contre ligne
+  function rendreComparaison() {
+    var corps = vider($("comparaison-corps"));
+    calc.scen.lignes.forEach(function (l) {
+      var total = l["Poste (€/an)"] === "TOTAL";
+      corps.appendChild(h("tr", { class: total ? "total" : null },
+        h("th", { scope: "row", text: total ? "Total" : l["Poste (€/an)"] }),
+        h("td", { class: "n", text: eur(l["Actuel"]) }), h("td", { class: "n", text: eur(l["Avec la ligne"]) }), h("td", { class: "n", text: signe(l["Écart"]) })));
+    });
+    var a = calc.scen.attrs;
+    $("comparaison-note").textContent = inc(a["Masse rebutée (kg/an)"]) ? "Masse rebutée par an inconnue : il manque le poids ou le nombre de FRU rebutés d'au moins un type."
+      : inc(a["Masse détournée (kg/an)"]) ? "Masse rebutée : " + unite(a["Masse rebutée (kg/an)"], "kg", 0) + " par an. La masse sortie de la benne actuelle n'est pas calculable tant qu'aucun type de FRU n'est complet."
+      : "Masse rebutée : " + unite(a["Masse rebutée (kg/an)"], "kg", 0) + " par an, dont " + unite(a["Masse détournée (kg/an)"], "kg", 0) + " sortis de la benne actuelle" +
+        (inc(a["Part détournée"]) ? "" : " (" + pct(a["Part détournée"]) + ")") + ". L'écart total est le gain annuel de la ligne.";
+    dessinerCascade($("g-comparaison"), calc.scen);
+  }
+
+  // ------------------------------------------------------------------ 5. plan par type de FRU
+  var vues = [];
+  function champ(p, meta, id, bloquant) {
+    var f = meta.facteur || 1;
+    var entree = h("input", { type: "text", inputmode: "decimal", class: "nombre", id: id, autocomplete: "off" });
+    var el = h("div", { class: "champ" }, h("label", { for: id, text: meta.lib }), entree);
+    function maj(source) {
+      if (source !== "saisie") { entree.value = versCase(p.valeur === null ? null : p.valeur * f, meta.dec); entree.removeAttribute("aria-invalid"); }
+      entree.classList.toggle("a-saisir", p.valeur === null && bloquant);
+      entree.classList.toggle("modifie", modifie(p) && p.valeur !== null);
+      entree.placeholder = p.valeur === null ? (bloquant ? "à saisir" : meta.vide || "facultatif") : "";
+      entree.title = (p.provenance ? "Provenance : " + p.provenance + ". " : "") + (p.origine === null ? "Absent du dossier." : "Dossier : " + versCase(p.origine * f, meta.dec) + ".");
+    }
+    entree.addEventListener("input", function () {
+      var l = lireCase(entree.value);
+      if (!l.ok || (l.valeur !== null && ((meta.min !== undefined && l.valeur < meta.min) || (meta.max !== undefined && l.valeur > meta.max)))) { entree.setAttribute("aria-invalid", "true"); return; }
+      entree.removeAttribute("aria-invalid");
+      fixer(p, l.valeur === null ? null : l.valeur / f);
+      if (l.valeur !== null && Math.abs(l.valeur / f - (p.origine === null ? NaN : p.origine)) < 1e-12) fixer(p, p.origine);
+      maj("saisie"); planifier();
+    });
+    entree.addEventListener("blur", function () { maj(); });
+    maj();
+    return { el: el, maj: maj };
+  }
+  function construirePlan() {
+    var table = $("plan-table"), pied = $("plan-pied");
+    etat.frus.forEach(function (f, i) {
+      var bouton = h("button", { type: "button", class: "deplier", id: "plan-ouvrir-" + i, "aria-expanded": "false", "aria-controls": "plan-detail-" + i, text: f.fru });
+      var tr = h("tr", null, h("th", { scope: "row" }, bouton), h("td", { class: "large", text: f.description || "" }));
+      var cellule = h("td", { colspan: 10, class: "detail" });
+      var trD = h("tr", { id: "plan-detail-" + i, hidden: true }, cellule);
+      var vue = { tr: tr, trD: trD, cellule: cellule, ouvert: false, construit: false, champs: [], pieces: [] };
+      bouton.addEventListener("click", function () {
+        vue.ouvert = !vue.ouvert;
+        bouton.setAttribute("aria-expanded", vue.ouvert ? "true" : "false");
+        if (vue.ouvert && !vue.construit) construireDetail(i);
+        trD.hidden = !vue.ouvert;
+        if (vue.ouvert) majDetail(i);
+      });
+      vues.push(vue);
+      table.insertBefore(h("tbody", { id: "plan-fru-" + i }, tr, trD), pied);
+    });
+    if (!etat.frus.length) table.insertBefore(h("tbody", null, h("tr", null, h("td", { colspan: 10, class: "inconnu", text: "Le dossier ne contient aucun type de FRU rebuté." }))), pied);
+  }
+  function construireDetail(i) {
+    var f = etat.frus[i], vue = vues[i];
+    var champsFru = h("div", { class: "champs" });
+    CHAMPS_FRU.forEach(function (meta) {
+      var c = champ(f[meta.k], meta, "f-" + i + "-" + meta.k, !!meta.bloquant);
+      vue.champs.push(c); champsFru.appendChild(c.el);
+    });
+    vue.ouverture = h("p", { class: "note" });
+    vue.plans = h("div");
+    var blocPieces = h("div");
+    f.pieces.forEach(function (pc, j) {
+      var grille = h("div", { class: "champs" });
+      CHAMPS_PIECE.forEach(function (meta) {
+        if (!possede(pc, meta.k)) return;
+        var c = champ(pc[meta.k], meta, "p-" + i + "-" + j + "-" + meta.k, !!BLOQUANTS_PIECE[meta.k]);
+        vue.champs.push(c); grille.appendChild(c.el);
+      });
+      var devenir = h("span"), options = h("div", { class: "options3" });
+      vue.pieces.push({ devenir: devenir, options: options });
+      blocPieces.appendChild(h("div", { class: "piece", id: "piece-" + i + "-" + j },
+        h("div", { class: "piece-tete" }, h("span", { class: "ref", text: pc.piece }), h("span", { class: "second", text: pc.description || "" }), devenir),
+        options, grille));
+    });
+    remplir(vue.cellule, h("div", { class: "detail-grille" },
+      h("div", null, h("h4", { text: "Paramètres du type de FRU" }), h("div", { class: "espace-petit" }, champsFru), vue.ouverture),
+      vue.plans,
+      h("div", null, h("h4", { text: "Pièces : valeur des trois devenirs, par FRU traité" }),
+        h("p", { class: "note", text: "Valeurs nettes par FRU, hors ouverture du FRU (payée une fois, partagée entre les pièces). Référence : la pièce laissée dans le FRU vaut 0. Une case orange est une donnée manquante qui empêche de calculer un devenir." }),
+        blocPieces)));
+    vue.construit = true;
+  }
+  function decrireManques(f) {
+    var lg = calc.modele.ligne, t = [];
+    if (inc(f.rebut_an)) t.push("le nombre de FRU rebutés par an");
+    if (inc(possede(f, "taux_horaire_eur") ? f.taux_horaire_eur : lg.taux_horaire_eur)) t.push("le coût horaire d'un opérateur");
+    var dispo = M.optionsDisponibles(f);
+    if (!dispo.some(function (o) { return !o["réemploi"].length || !o.recyclage.length; })) {
+      if (!dispo.length) t.push("la liste des pièces du FRU");
+      else {
+        var mp = manquesPieces(f);
+        if (mp.ouverture) t.push("le temps d'ouverture du FRU");
+        mp.ordre.forEach(function (k) { t.push(NOMS[k] + " (" + pluriel(mp.comptes[k], "pièce", "pièces") + ")"); });
+      }
+    }
+    return t;
+  }
+  function majPlan() {
+    var lignes = calc.res.detail, tot = { n: 0, h: 0, m: 0, reb: 0, ok: 0 };
+    etat.frus.forEach(function (f, i) {
+      var vue = vues[i], fm = calc.modele.frus[i], L = lignes.filter(function (r) { return r["Type de FRU"] === f.fru; });
+      while (vue.tr.children.length > 2) vue.tr.removeChild(vue.tr.lastChild);
+      var rebut = h("td", { class: "n", text: nb(fm.rebut_an, fm.rebut_an !== null && fm.rebut_an % 1 ? 1 : 0) });
+      if (!L.length || L[0]["Décision"] === "incomplet") {
+        ajouter(vue.tr, [rebut, h("td", null, puce("incomplet", "alerte")),
+          h("td", { colspan: 6, class: "manque", text: "Il manque : " + decrireManques(fm).join(" ; ") + "." })]);
+      } else {
+        var n = 0, hh = 0, mm = 0;
+        L.forEach(function (r) { n += r["FRU traitées / an"]; hh += r["Heures / an"]; mm += r["Marge variable / an (€)"]; });
+        var traite = L.some(function (r) { return r["Décision"] === "traiter"; }), P = L[0];
+        tot.n += n; tot.h += hh; tot.m += mm; tot.ok++;
+        var dec = h("td", null, traite ? puce("traiter", "plein") : puce("laisser", ""));
+        if (traite && L.length > 1) dec.appendChild(h("div", { class: "mini discret", text: "2 plans : capacité saturée" }));
+        else if (traite && n < fm.rebut_an - 1e-6) dec.appendChild(h("div", { class: "mini discret", text: "en partie : capacité saturée" }));
+        var re = h("td", { text: traite ? (P.reemploi.join(", ") || "aucune") : "" }), rc = h("td", { text: traite ? (P.recyclage.join(", ") || "aucune") : "" });
+        if (traite && L.length > 1) {
+          re.appendChild(h("div", { class: "mini discret", text: "pour " + nb(P["FRU traitées / an"]) + " FRU ; pour " + nb(L[1]["FRU traitées / an"]) + " autres : " + (L[1].reemploi.join(", ") || "aucune") }));
+          if (L[1].recyclage.join() !== P.recyclage.join()) rc.appendChild(h("div", { class: "mini discret", text: "autres : " + (L[1].recyclage.join(", ") || "aucune") }));
+        }
+        ajouter(vue.tr, [rebut, dec, re, rc, h("td", { class: "n", text: nb(n) }), h("td", { class: "n", text: nb(hh) }),
+          h("td", { class: "n", text: traite && n ? eur(mm / n, 2) : "" }), h("td", { class: "n", text: eur(mm) })]);
+      }
+      if (!inc(fm.rebut_an)) tot.reb += fm.rebut_an;
+      if (vue.ouvert) majDetail(i);
+    });
+    remplir($("plan-pied"), etat.frus.length ? h("tr", null, h("th", { scope: "row", text: "Total" }), h("td", { text: pluriel(tot.ok, "type calculé", "types calculés") + " sur " + nb(etat.frus.length) }),
+      h("td", { class: "n", text: nb(tot.reb) }), h("td"), h("td"), h("td"), h("td", { class: "n", text: tot.ok ? nb(tot.n) : INCONNU }),
+      h("td", { class: "n", text: tot.ok ? nb(tot.h) : INCONNU }), h("td"), h("td", { class: "n", text: tot.ok ? eur(tot.m) : INCONNU })) : null);
+    var gros = etat.frus.filter(function (f) { return f.pieces.length > M.MAX_PIECES_ENUM; }).length;
+    $("plan-note").textContent = "« Traiter » : le FRU passe sur la ligne. « Laisser » : il part entier chez le recycleur actuel, aucun devenir de ses pièces ne paie le temps passé. Marge = valeur tirée des pièces + traitement évité − main-d'œuvre, avant coûts fixes de la ligne." +
+      (gros ? " Au-delà de " + M.MAX_PIECES_ENUM + " pièces par type, seules les " + M.MAX_PIECES_ENUM + " pièces de plus forte valeur sont étudiées ; les autres restent dans le FRU." : "");
+  }
+  function majDetail(i) {
+    var vue = vues[i], f = etat.frus[i], fm = calc.modele.frus[i], lg = calc.modele.ligne;
+    if (!vue.construit) return;
+    var copie = {};
+    for (var k in fm) if (possede(fm, k)) copie[k] = fm[k];
+    copie._c_trait = lg.cout_traitement_eur_kg;
+    var vo = M.valeursOptions(copie, lg.taux_horaire_eur);
+    var L = calc.res.detail.filter(function (r) { return r["Type de FRU"] === f.fru && r["Décision"] !== "incomplet"; });
+    var traites = 0;
+    L.forEach(function (r) { if (r["Décision"] === "traiter") traites += r["FRU traitées / an"]; });
+    var mults = [];
+    if (etat.mult.prix !== 1) mults.push("prix des recycleurs × " + nb(etat.mult.prix, 2));
+    if (etat.mult.valeur !== 1) mults.push("valeur de réemploi × " + nb(etat.mult.valeur, 2));
+    if (etat.mult.temps !== 1) mults.push("temps × " + nb(etat.mult.temps, 2));
+    vue.ouverture.textContent = "Coût d'ouverture par FRU : " + eur(vo["Ouverture soignée (€/FRU)"], 2) + " en ouverture soignée (dès qu'une pièce est réemployée), " +
+      eur(vo["Ouverture sommaire (€/FRU)"], 2) + " en ouverture sommaire (tri seul)." + (mults.length ? " Variantes d'ensemble appliquées en plus des valeurs ci-dessous : " + mults.join(", ") + "." : "");
+    if (L.length > 1) {
+      remplir(vue.plans, h("h4", { text: "Deux plans, parce que la capacité est saturée" }), h("div", { class: "tableau-zone espace-petit" },
+        h("table", null, h("thead", null, h("tr", null, h("th", { text: "Plan" }), h("th", { class: "n", text: "FRU / an" }), h("th", { text: "Pièces réemployées" }), h("th", { text: "Pièces recyclées" }),
+          h("th", { class: "n", text: "Heures par FRU" }), h("th", { class: "n", text: "Marge par FRU" }))),
+          h("tbody", null, L.map(function (r, q) {
+            return h("tr", null, h("th", { scope: "row", text: q ? "Plan allégé" : "Plan complet" }), h("td", { class: "n", text: nb(r["FRU traitées / an"], 1) }), h("td", { text: r.reemploi.join(", ") || "aucune" }),
+              h("td", { text: r.recyclage.join(", ") || "aucune" }), h("td", { class: "n", text: nb(r["Heures par FRU"], 2) }), h("td", { class: "n", text: eur(r["Marge par FRU (€)"], 2) }));
+          })))));
+    } else vider(vue.plans);
+    f.pieces.forEach(function (pc, j) {
+      var o = vo.lignes[j], pv = vue.pieces[j], nRe = 0, nRc = 0;
+      L.forEach(function (r) {
+        if (r["Décision"] !== "traiter") return;
+        if (r.reemploi.indexOf(pc.piece) >= 0) nRe += r["FRU traitées / an"];
+        if (r.recyclage.indexOf(pc.piece) >= 0) nRc += r["FRU traitées / an"];
+      });
+      var partiel = function (n) { return traites && n < traites - 1e-6 ? " sur " + nb(n) + " FRU" : ""; };
+      var retenu = nRe >= nRc && nRe > 0 ? "re" : nRc > 0 ? "rc" : "non";
+      remplir(pv.devenir, !L.length ? puce("type incomplet", "alerte") : retenu === "re" ? puce("réemploi" + partiel(nRe), "plein") : retenu === "rc" ? puce("recyclage trié" + partiel(nRc), "contour") : puce("laissée dans le FRU", ""));
+      function carte(nom, v, heures, manque, cle) {
+        var c = h("div", { class: "option" + (retenu === cle && L.length ? " retenue" : "") }, h("div", { class: "nom", text: nom }));
+        if (isNaN(v)) {
+          c.appendChild(h("div", { class: "val inconnu", text: "non calculable" }));
+          var noms = manque.map(function (k) { return NOMS[k] || k; });
+          if (!manque.length) noms = ["coût horaire d'un opérateur"];
+          c.appendChild(h("div", { class: "pourquoi", text: "Il manque : " + noms.join(", ") + "." }));
+        } else {
+          c.appendChild(h("div", { class: "val chiffres", text: eur(v, 2) }));
+          if (heures !== null) c.appendChild(h("div", { class: "mini discret", text: nb(heures * 60, 1) + " min de main-d'œuvre" }));
+        }
+        return c;
+      }
+      remplir(pv.options, carte("Réemploi", o["1 Réemploi (€/FRU)"], o["Heures réemploi"], o.manque_reemploi, "re"),
+        carte("Recyclage trié", o["2 Recyclage (€/FRU)"], o["Heures recyclage"], o.manque_recyclage, "rc"),
+        h("div", { class: "option" + (retenu === "non" && L.length ? " retenue" : "") }, h("div", { class: "nom", text: "Laissée dans le FRU" }), h("div", { class: "val chiffres", text: eur(0, 2) }), h("div", { class: "mini discret", text: "référence" })));
+    });
+  }
+
+  // ------------------------------------------------------------------ 6. sensibilité aux heures
+  var sens = { jeton: 0, pts: [], cle: "Résultat / an (€)" };
+  function planifierSensibilite() {
+    var jeton = ++sens.jeton, lg = calc.modele.ligne, frus = calc.modele.frus, prep = calc.prep, cap = lg.heures_operateur_an;
+    var libre = M.optimiserLigne(Object.assign({}, lg, { heures_operateur_an: null }), frus, prep).resume;
+    var hLibre = libre["Heures utilisées / an"];
+    if (inc(hLibre)) { sens.pts = []; rendreSensibilite(null, libre); return; }
+    var max = pasJoli(Math.max(hLibre * 1.25, inc(cap) ? 0 : cap * 1.2, 50) / 4) * 4, n = 36, grille = [], i;
+    for (i = 0; i <= n; i++) grille.push(max * i / n);
+    if (!inc(cap) && cap <= max) grille.push(cap);
+    if (hLibre <= max) grille.push(hLibre);
+    grille = grille.sort(function (a, b) { return a - b; }).filter(function (v, q, t) { return !q || v - t[q - 1] > max * 1e-9; });
+    var pts = [];
+    (function lot() {
+      if (jeton !== sens.jeton) return;
+      var t0 = Date.now();
+      while (pts.length < grille.length && Date.now() - t0 < 30) pts.push(M.sensibiliteHeures(lg, frus, [grille[pts.length]], prep)[0]);
+      if (pts.length < grille.length) { setTimeout(lot, 0); return; }
+      sens.pts = pts;
+      rendreSensibilite(cap, libre);
+    })();
+  }
+  function rendreSensibilite(cap, libre) {
+    var pts = sens.pts, r = calc.res.resume;
+    var cle = pts.some(function (p) { return !inc(p["Résultat / an (€)"]); }) ? "Résultat / an (€)" : "Marge variable / an (€)";
+    sens.cle = cle; sens.cap = cap;
+    $("sensibilite-titre").textContent = cle === "Résultat / an (€)" || !pts.length ? "Résultat annuel de la ligne selon les heures opérateur disponibles"
+      : "Marge variable annuelle selon les heures opérateur disponibles (coûts fixes non renseignés)";
+    dessinerSensibilite($("g-sensibilite"), pts, inc(cap) ? null : cap, cle);
+    remplir($("sensibilite-corps"), pts.map(function (p) {
+      return h("tr", null, h("td", { class: "n", text: nb(p["Heures / an"]) }), h("td", { class: "n", text: eur(p["Résultat / an (€)"]) }), h("td", { class: "n", text: eur(p["Marge variable / an (€)"]) }),
+        h("td", { class: "n", text: nb(p["FRU traitées / an"]) }), h("td", { class: "n", text: eur(p["Valeur d'une heure opérateur en plus (€ net)"], 2) }));
+    }));
+    var t = [], hLibre = libre["Heures utilisées / an"], mu = r["Valeur d'une heure opérateur en plus (€ net)"];
+    if (!pts.length) t.push("Aucun type de FRU n'a encore toutes ses données : la courbe apparaîtra dès qu'un type sera calculable.");
+    else {
+      t.push("Résultat annuel de la ligne selon les heures opérateur disponibles, les autres hypothèses restant celles de la page.");
+      if (!inc(mu) && mu > 0) t.push("Aujourd'hui la capacité est saturée : une heure de plus rapporterait " + eur(mu, 2) + " net.");
+      if (!inc(hLibre)) t.push(hLibre > 0 ? "Au-delà de " + unite(hLibre, "heures", 0) + " par an, des heures supplémentaires n'apportent plus rien : tous les FRU rentables sont traités" +
+        (inc(libre["Résultat / an (€)"]) ? "." : " (" + eur(libre["Résultat / an (€)"]) + " par an).") : "Aucun type de FRU n'est rentable à traiter, quel que soit le nombre d'heures.");
+      var seuil = null;
+      for (var i = 1; i < pts.length; i++) {
+        var a = pts[i - 1], b = pts[i];
+        if (!inc(a[cle]) && !inc(b[cle]) && a[cle] < 0 && b[cle] >= 0) { seuil = a["Heures / an"] + (b["Heures / an"] - a["Heures / an"]) * (0 - a[cle]) / (b[cle] - a[cle]); break; }
+      }
+      if (seuil !== null && cle === "Résultat / an (€)") t.push("La ligne couvre ses coûts fixes à partir d'environ " + unite(seuil, "heures", 0) + " par an.");
+    }
+    $("sensibilite-phrase").textContent = t.join(" ");
+  }
+
+  // ------------------------------------------------------------------ 7. incertitude (Monte-Carlo)
+  function rendreIncertitude() {
+    var ok = aJour(mc), hist = classesHistogramme(mc.tirages, largeur($("g-incertitude")) < 520 ? 12 : 28);
+    remplir($("mc-puces"), ok ? null : puce("à recalculer : les hypothèses ont changé", "alerte"));
+    remplir($("mc-stats"),
+      h("div", null, h("dt", { text: "Probabilité que la ligne soit rentable" }), h("dd", { text: pct(mc.p) })),
+      h("div", null, h("dt", { text: "Résultat bas (5 % des tirages en dessous)" }), h("dd", { text: eur(mc.q[0]) })),
+      h("div", null, h("dt", { text: "Résultat médian" }), h("dd", { text: eur(mc.q[1]) })),
+      h("div", null, h("dt", { text: "Résultat haut (5 % des tirages au-dessus)" }), h("dd", { text: eur(mc.q[2]) })));
+    dessinerHistogramme($("g-incertitude"), hist, mc.q[1]);
+    remplir($("mc-corps"), hist ? hist.classes.map(function (c) {
+      return h("tr", null, h("td", { text: "de " + eur(c.de) + " à " + eur(c.a) }), h("td", { class: "n", text: nb(c.n) }), h("td", { class: "n", text: pct(c.n / hist.total, 1) }));
+    }) : null);
+    var calcules = mc.tirages.filter(function (t) { return !inc(t); }).length;
+    $("mc-note").textContent = (mc.origine === "dossier" ? "Tirages calculés par le pipeline avec les hypothèses du dossier" : "Tirages calculés dans cette page avec ses hypothèses") +
+      " : " + nb(calcules) + " calculables sur " + nb(mc.tirages.length) + "." + (ok ? "" : " Ils ne reflètent plus les hypothèses affichées : relancez le calcul.") +
+      " Une hypothèse modifiée ici garde une plage de même largeur relative ; une valeur saisie là où le dossier n'en avait pas est tenue pour fixe.";
+    remplir($("mc-frequences"), etat.frus.map(function (f, i) {
+      var v = possede(mc.freq, f.fru) ? mc.freq[f.fru] : (calcules ? 0 : NaN);
+      var incomplet = !v && M.manques(calc.modele.frus[i], calc.modele.ligne.taux_horaire_eur).length > 0;
+      return h("tr", null, h("th", { scope: "row", class: "ref", text: f.fru }), h("td", null, incomplet ? h("span", { class: "manque", text: "type incomplet : jamais calculé" }) : inc(v) ? h("span", { class: "inconnu", text: INCONNU }) :
+        [h("span", { class: "barre-mini", "aria-hidden": "true" }, h("span", { style: "width:" + (100 * v).toFixed(1) + "%" })), h("span", { class: "chiffres", text: pct(v) + " des tirages" })]));
+    }));
+  }
+  function lancerMonteCarlo() {
+    if (mc.encours) return;
+    var n = +$("mc-n").value || 400, version = etat.version, alea = M.creerAlea(2026), i = 0, arret = false;
+    var instantane = JSON.parse(JSON.stringify({ ligne: etat.ligne, frus: etat.frus })), mult = { prix: etat.mult.prix, valeur: etat.mult.valeur, temps: etat.mult.temps };
+    var tirages = [], freq = {};
+    mc.encours = true;
+    $("mc-lancer").disabled = true; $("mc-arreter").hidden = false; $("mc-progres").hidden = false; $("mc-progres").value = 0;
+    $("mc-arreter").onclick = function () { arret = true; };
+    (function lot() {
+      var t0 = Date.now();
+      while (i < n && !arret && Date.now() - t0 < 28) {
+        var t = M.tirage(instantane, alea, mult);
+        tirages.push(t.resume["Résultat / an (€)"]);
+        t.traites.forEach(function (f) { freq[f] = (freq[f] || 0) + 1; });
+        i++;
+      }
+      $("mc-progres").value = i / n;
+      $("mc-message").textContent = "Tirage " + nb(i) + " sur " + nb(n);
+      if (i < n && !arret) { setTimeout(lot, 0); return; }
+      mc.encours = false;
+      $("mc-lancer").disabled = false; $("mc-arreter").hidden = true; $("mc-progres").hidden = true;
+      if (!tirages.length) { $("mc-message").textContent = "Calcul arrêté."; return; }
+      var r = M.resumerTirages(tirages);
+      Object.keys(freq).forEach(function (f) { freq[f] = freq[f] / tirages.length; });
+      mc.tirages = tirages.map(function (v) { return inc(v) ? null : v; }); mc.p = r.p_rentable; mc.q = r.p5_mediane_p95; mc.n = tirages.length; mc.freq = freq;
+      mc.origine = "page"; mc.version = version;
+      $("mc-message").textContent = (arret ? "Calcul arrêté après " : "Terminé : ") + nb(tirages.length) + " tirages.";
+      rendreIncertitude(); rendreDecision(); majExport();
+    })();
+  }
+
+  // ------------------------------------------------------------------ 8. flux d'entrée
+  function rendreFlux() {
+    var hebdo = liste(D.flux.fru_hebdo), parSemaine = {}, semaines = [], parFru = {};
+    hebdo.forEach(function (r) {
+      var sem = r.Semaine;
+      if (!parSemaine[sem]) { parSemaine[sem] = { n: 0, complete: true, detail: [] }; semaines.push(sem); }
+      var v = inc(r["FRU rebutées"]) ? 0 : r["FRU rebutées"];
+      parSemaine[sem].n += v;
+      if (r["Semaine complète"] === false) parSemaine[sem].complete = false;
+      (parFru[r.FRU] = parFru[r.FRU] || {})[sem] = v;
+    });
+    semaines.sort();
+    var incompletes = semaines.some(function (x) { return !parSemaine[x].complete; });
+    $("flux-legende").hidden = !incompletes;
+    dessinerColonnes($("g-flux"), semaines.map(function (x) {
+      var p = parSemaine[x];
+      return { t: dateCourte(x), v: p.n, classe: p.complete ? "g-s1" : "g-neutre", titre: "Semaine du " + dateCourte(x) + (p.complete ? "" : " (incomplète)"), lignes: [["FRU rebutés", nb(p.n)]] };
+    }), { description: "FRU rebutés par semaine sur " + nb(semaines.length) + " semaines.", vide: "Aucun FRU rebuté daté dans les extractions." });
+    remplir($("flux-corps"), semaines.map(function (x) {
+      return h("tr", null, h("td", { text: dateCourte(x) }), h("td", { class: "n", text: nb(parSemaine[x].n) }), h("td", { text: parSemaine[x].complete ? "oui" : "non" }));
+    }));
+    var dansModele = {};
+    etat.frus.forEach(function (f) { dansModele[f.fru] = true; });
+    var ra = liste(D.flux.rebut_annuel);
+    remplir($("flux-types"), ra.length ? ra.map(function (r) {
+      var serie = semaines.map(function (x) { return (parFru[r.FRU] || {})[x] || 0; });
+      return h("tr", null, h("th", { scope: "row", class: "ref", text: r.FRU }), h("td", null, serie.length ? miniColonnes(serie) : null), h("td", { class: "n", text: nb(r["Moyenne hebdo"], 1) }),
+        h("td", { class: "n", text: nb(r["Rebut annuel bas (5 %)"]) }), h("td", { class: "n", text: nb(r["Rebut annuel moyen"]) }), h("td", { class: "n", text: nb(r["Rebut annuel haut (95 %)"]) }),
+        h("td", null, dansModele[r.FRU] ? puce("oui", "accent") : h("span", { class: "discret", text: "non : absent du classeur de paramètres" })));
+    }) : h("tr", null, h("td", { colspan: 7, class: "inconnu", text: "Rebut annuel non calculé : pas assez de semaines complètes." })));
+    $("flux-regle").textContent = (ra.length ? "Rebut annuel : bas et haut encadrent 90 % des années simulées en rééchantillonnant les semaines complètes. " : "") +
+      (D.flux.regle_date_rebut ? "Date du rebut retenue : " + D.flux.regle_date_rebut + "." : "");
+
+    // Estimé contre pesé, un petit graphique par flux
+    var rap = liste(D.flux.rapprochement), verdicts = {}, parFlux = {}, ordre = [];
+    liste(D.flux.verdict).forEach(function (v) { verdicts[v.Flux] = v; });
+    rap.forEach(function (r) { if (!parFlux[r.Flux]) { parFlux[r.Flux] = []; ordre.push(r.Flux); } parFlux[r.Flux].push(r); });
+    var hote = vider($("flux-rapprochement")), aDessiner = [];
+    var gardes = ordre.filter(function (fl) { return parFlux[fl].some(function (r) { return !inc(r["Estimé central (kg)"]) || !inc(r["Masse mesurée (kg)"]); }); });
+    if (!gardes.length) hote.appendChild(h("p", { class: "vide", text: "Aucune comparaison possible pour l'instant : elle apparaîtra quand les pesées hebdomadaires des bennes seront fournies." }));
+    gardes.forEach(function (fl, q) {
+      var v = verdicts[fl], lignes = parFlux[fl].slice().sort(function (a, b) { return a.Semaine < b.Semaine ? -1 : a.Semaine > b.Semaine ? 1 : 0; });
+      var u = v ? String(v["Utilisable par le modèle"] || "") : "";
+      var etatFlux = !v ? puce("pas encore de pesée", "") : u === "oui" ? puce("utilisable par le modèle", "bon") : u.indexOf("pas assez") === 0 ? puce("pas assez de semaines pesées", "alerte") : puce("à corriger avant usage", "critique");
+      var zone = h("div", { class: "graphe", id: "g-rapprochement-" + q });
+      var lecture = !v ? "Aucune semaine pesée : l'estimation n'est pas encore vérifiée."
+        : pluriel(v["Semaines comparées"], "semaine pesée", "semaines pesées") + ", dont " + nb(v["Semaines dans la marge"]) + " dans la marge d'erreur ; écart cumulé " +
+          (v["Écart cumulé final (%)"] > 0 ? "+" : "") + pct(v["Écart cumulé final (%)"], 1) + (inc(v["Couverture poids moyenne"]) ? "" : " ; poids connus pour " + pct(v["Couverture poids moyenne"]) + " des pièces") + ".";
+      hote.appendChild(h("figure", { class: "cadre" }, h("figcaption", null, "Flux " + fl + " (kg par semaine) ", etatFlux), zone, h("p", { class: "note", text: lecture })));
+      aDessiner.push([zone, lignes, fl]);
+    });
+    aDessiner.forEach(function (d) { dessinerRapprochement(d[0], d[1], d[2]); });
+    var pesees = rap.filter(function (r) { return !inc(r["Masse mesurée (kg)"]); });
+    $("flux-pesees").hidden = !pesees.length;
+    remplir($("flux-pesees-corps"), pesees.map(function (r) {
+      return h("tr", null, h("th", { scope: "row", text: r.Flux }), h("td", { text: dateCourte(r.Semaine) }), cellule(r["Estimé central (kg)"], 1), cellule(r["Marge d'erreur (± kg)"], 1),
+        cellule(r["Masse mesurée (kg)"], 1), h("td", { class: "n", text: inc(r["Écart (%)"]) ? INCONNU : (r["Écart (%)"] > 0 ? "+" : "") + pct(r["Écart (%)"]) }),
+        h("td", { text: r["Dans la marge"] || "" }), h("td", { class: "large", text: r["Causes candidates de l'écart"] || "" }));
+    }));
+    var ecartes = ordre.length - gardes.length;
+    $("flux-ecartes").textContent = ecartes ? pluriel(ecartes, "flux sans estimation ni pesée n'est pas affiché", "flux sans estimation ni pesée ne sont pas affichés") + " (pièces non classées ou sans poids)." : "";
+  }
+  function rendrePeriodes() {
+    var L = periodes.lignes, a = periodes.attrs, ok = aJour(periodes);
+    var t = [];
+    if (!L.length) t.push("Le rejeu semaine par semaine n'est pas disponible : il faut des FRU rebutés datés.");
+    else {
+      var pp = a["Résultat annualisé, période par période (€)"], an = a["Résultat du modèle annuel au flux moyen (€)"], cv = a["Coût de la variabilité du flux (€/an)"];
+      if (inc(pp) || inc(an)) t.push("Le résultat semaine par semaine ne peut pas être calculé avec " + (periodes.origine === "dossier" ? "les données du dossier" : "ces hypothèses") + ".");
+      else t.push("Rejouée semaine par semaine sur le flux réel, sans stock d'une semaine à l'autre, la ligne dégagerait " + eur(pp) + " par an, contre " + eur(an) +
+        " si les FRU arrivaient régulièrement : l'irrégularité du flux coûte " + eur(cv) + " par an (heures perdues les semaines creuses, FRU non traités les semaines chargées). " +
+        pluriel(a["Périodes en perte"], "semaine", "semaines") + " sur " + nb(a["Périodes"]) + (a["Périodes en perte"] < 2 ? " est en perte." : " sont en perte."));
+      t.push(periodes.origine === "dossier" ? "Calcul du pipeline, avec les hypothèses du dossier." : "Calcul de cette page, avec ses hypothèses.");
+      if (!ok) t.push("Les hypothèses ont changé depuis : rejouez les semaines pour mettre ce résultat à jour.");
+    }
+    $("periodes-phrase").textContent = t.join(" ");
+    dessinerColonnes($("g-periodes"), L.map(function (r) {
+      return { t: dateCourte(r.Semaine), v: r["Résultat (€)"], classe: r["Résultat (€)"] < 0 ? "g-neg" : "g-s1", titre: "Semaine du " + dateCourte(r.Semaine),
+               lignes: [["Résultat", eur(r["Résultat (€)"])], ["FRU arrivés", nb(r["FRU arrivées"])], ["FRU traités", nb(r["FRU traitées"], 1)], ["Heures utilisées", nb(r["Heures utilisées"], 1) + " sur " + nb(r["Capacité (h)"], 1)]] };
+    }), { euro: true, description: "Résultat de la ligne chaque semaine sur " + nb(L.length) + " semaines.", vide: "Aucune semaine à rejouer." });
+    remplir($("periodes-corps"), L.map(function (r) {
+      return h("tr", null, h("td", { text: dateCourte(r.Semaine) }), h("td", { class: "n", text: nb(r["FRU arrivées"]) }), h("td", { class: "n", text: nb(r["FRU traitées"], 1) }),
+        h("td", { class: "n", text: nb(r["Heures utilisées"], 1) }), h("td", { class: "n", text: eur(r["Marge variable (€)"]) }), h("td", { class: "n", text: eur(r["Coût fixe (€)"]) }),
+        h("td", { class: "n", text: eur(r["Résultat (€)"]) }), h("td", { class: "n", text: eur(r["Résultat cumulé (€)"]) }));
+    }));
+    $("periodes-rejouer").disabled = !liste(D.flux.fru_hebdo).length;
+  }
+  function rejouerPeriodes() {
+    $("periodes-message").textContent = "Calcul en cours…";
+    $("periodes-rejouer").disabled = true;
+    var version = etat.version;
+    setTimeout(function () {
+      var r = M.resultatParPeriode(calc.modele.ligne, calc.modele.frus, liste(D.flux.fru_hebdo));
+      periodes.lignes = r.lignes; periodes.attrs = r.attrs; periodes.origine = "page"; periodes.version = version;
+      $("periodes-message").textContent = "Semaines rejouées avec les hypothèses de la page.";
+      rendrePeriodes();
+    }, 20);
+  }
+
+  // ------------------------------------------------------------------ 9 à 11. tableaux du dossier
+  function cellule(v, dec) {
+    if (v === null || v === undefined || v === "" || (typeof v === "number" && !isFinite(v))) return h("td", { class: "inconnu" + (dec !== undefined ? " n" : ""), text: dec !== undefined ? INCONNU : "" });
+    if (typeof v === "number") return h("td", { class: "n", text: nb(v, dec || 0) });
+    return h("td", { text: String(v) });
+  }
+  function barre01(v) {
+    if (inc(v)) return h("td", { class: "inconnu", text: INCONNU });
+    return h("td", null, h("span", { class: "barre-mini", "aria-hidden": "true" }, h("span", { style: "width:" + Math.max(0, Math.min(100, 100 * v)).toFixed(0) + "%" })), h("span", { class: "chiffres", text: nb(v, 2) }));
+  }
+  function rendrePreselection() {
+    var P = liste(D.priorisation).slice(), tete = $("preselection-tete"), corps = $("preselection-corps");
+    if (!P.length) { remplir(corps, h("tr", null, h("td", { class: "inconnu", text: "Pré-sélection non calculée : aucune consommation de pièces dans les extractions." }))); return; }
+    P = P.map(function (r, i) { return { r: r, i: i }; }).sort(function (a, b) { return (b.r["Sur le front de Pareto"] ? 1 : 0) - (a.r["Sur le front de Pareto"] ? 1 : 0) || a.i - b.i; }).map(function (x) { return x.r; });
+    var a = function (c) { return P.some(function (r) { return possede(r, c); }); };
+    var mmicv = Object.keys(P[0]).filter(function (c) { return c.indexOf("MMICV total") === 0; })[0];
+    var cols = [["Pièce", null], ["Description", null]];
+    if (a("Ateliers")) cols.push(["Ateliers", null]);
+    if (a("Pièces")) cols.push(["Pièces consommées", "n"]);
+    if (mmicv) cols.push([mmicv, "n"]);
+    if (a("FRU rebutées (nomenclature)")) cols.push(["FRU rebutés concernés", "n"]);
+    if (a("Score risque matière (0-1)")) cols.push(["Risque matière (0 à 1)", null]);
+    if (a("Risque supply retenu")) cols.push(["Risque d'approvisionnement (0 à 1)", null]);
+    if (a("Fiabilité réemploi (1/rapport)")) cols.push(["Fiabilité du réemploi", "n"]);
+    remplir(tete, h("tr", null, cols.map(function (c) { return h("th", { class: c[1], text: c[0] }); })));
+    remplir(corps, P.map(function (r) {
+      var tr = h("tr", null, h("th", { scope: "row", class: "ref" }, r["Référence"], r["Sur le front de Pareto"] ? h("div", null, puce("front de Pareto", "accent")) : null),
+        h("td", null, r["Description"] || "", r["Type de pièce"] ? h("div", { class: "mini discret", text: r["Type de pièce"] }) : null));
+      if (a("Ateliers")) tr.appendChild(cellule(r["Ateliers"]));
+      if (a("Pièces")) tr.appendChild(cellule(r["Pièces"], 0));
+      if (mmicv) tr.appendChild(cellule(r[mmicv], 0));
+      if (a("FRU rebutées (nomenclature)")) tr.appendChild(cellule(r["FRU rebutées (nomenclature)"], 0));
+      if (a("Score risque matière (0-1)")) {
+        var tm = barre01(r["Score risque matière (0-1)"]);
+        if (r["CRM"]) tm.appendChild(h("div", { class: "mini discret", text: r["CRM"] }));
+        tr.appendChild(tm);
+      }
+      if (a("Risque supply retenu")) {
+        var td = barre01(r["Risque supply retenu"]);
+        if (r["Source supply retenue"] && !inc(r["Risque supply retenu"])) td.appendChild(h("div", { class: "mini discret", text: r["Source supply retenue"] }));
+        tr.appendChild(td);
+      }
+      if (a("Fiabilité réemploi (1/rapport)")) tr.appendChild(cellule(r["Fiabilité réemploi (1/rapport)"], 2));
+      return tr;
+    }));
+  }
+  function tableauLibre(tete, corps, lignes, vide, decimales, titres) {
+    if (!lignes.length) { vider(tete); remplir(corps, h("tr", null, h("td", { class: "inconnu", text: vide }))); return; }
+    var cols = Object.keys(lignes[0]);
+    var numerique = function (c) { return lignes.some(function (r) { return typeof r[c] === "number"; }); };
+    remplir(tete, h("tr", null, cols.map(function (c) { return h("th", { class: numerique(c) ? "n" : null, text: (titres && titres[c]) || c }); })));
+    remplir(corps, lignes.map(function (r) {
+      return h("tr", null, cols.map(function (c, i) {
+        var v = r[c], d = decimales[c];
+        if (i === 0) return h("th", { scope: "row", text: v === null ? "" : String(v) });
+        if (v === null || v === undefined) return h("td", { class: numerique(c) ? "n" : null });       // sans objet pour cette ligne
+        if (typeof v === "number") return h("td", { class: "n", text: d === "%" ? pct(v) : nb(v, d !== undefined ? d : 2) });
+        return h("td", { text: String(v) });
+      }));
+    }));
+  }
+  function rendreRex() {
+    var P = liste(D.rex.posterieur);
+    remplir($("rex-corps"), P.length ? P.map(function (r) {
+      var q = r["q moyen"], a = r["q bas (5 %)"], b = r["q haut (95 %)"], q0 = r["q0"];
+      var g = h("span", { class: "intervalle", role: "img", "aria-label": inc(q) ? "inconnu" : "Estimation " + pct(q) + ", intervalle de " + pct(a) + " à " + pct(b) });
+      if (!inc(a) && !inc(b)) g.appendChild(h("span", { class: "bande", style: "left:" + (100 * a).toFixed(1) + "%;width:" + (100 * (b - a)).toFixed(1) + "%" }));
+      if (!inc(q0)) g.appendChild(h("span", { class: "apriori", style: "left:" + (100 * q0).toFixed(1) + "%" }));
+      if (!inc(q)) g.appendChild(h("span", { class: "centre", style: "left:" + (100 * q).toFixed(1) + "%" }));
+      return h("tr", null, h("th", { scope: "row", class: "ref", text: r["Type de FRU"] }), h("td", { class: "ref", text: r["Pièce"] }), h("td", null, g), h("td", { class: "n", text: pct(q) }),
+        h("td", { class: "n", text: inc(a) || inc(b) ? INCONNU : nb(100 * a) + " à " + pct(b) }), h("td", { class: "n", text: pct(q0) }), h("td", { class: "n", text: nb(r["Pièces testées"]) }), h("td", { class: "n", text: nb(r["Pièces bonnes"]) }));
+    }) : h("tr", null, h("td", { colspan: 8, class: "inconnu", text: "Modèle de Rex non calculé : ni consommation exploitable ni audit de démontage." })));
+    tableauLibre($("rex-metriques-tete"), $("rex-metriques"), liste(D.rex.metriques), "Pas de métrique : l'audit de démontage n'a pas encore de lot à prédire.",
+      { "Lots": 0, "Pièces": 0, "Brier": 3, "Log-perte": 3, "Écart absolu moyen": 3, "Couverture IC90": "%" },
+      { "Lots": "Lots prédits", "Pièces": "Pièces testées", "Couverture IC90": "Couverture de l'intervalle à 90 %" });
+    tableauLibre($("rex-banc-tete"), $("rex-banc"), liste(D.rex.banc_essai), "Banc d'essai non calculé.",
+      { "Regret cumulé moyen (€)": 0, "Regret par pièce (€)": 2, "Part de pièces testées": "%", "q estimé final": "%" },
+      { "Politique": "Règle de décision", "q estimé final": "Probabilité estimée à la fin" });
+  }
+  function rendreDossier() {
+    var A = liste(D.a_obtenir);
+    remplir($("obtenir-corps"), A.length ? A.map(function (r) {
+      return h("tr", null, h("th", { scope: "row", text: r["Donnée"] || r["Paramètre"] || "" }), cellule(r["Valeurs manquantes"], 0), cellule(r["FRU concernés"], 0), h("td", { text: r["À demander à"] || "" }));
+    }) : h("tr", null, h("td", { colspan: 4, text: "Rien ne manque : tous les paramètres nécessaires au calcul sont renseignés dans le dossier." })));
+    var S = liste(D.sources);
+    remplir($("sources-corps"), S.length ? S.map(function (r) {
+      var e = String(r["État"] || ""), bas = e.toLowerCase();
+      var cl = bas.indexOf("charg") === 0 ? "bon" : bas.indexOf("erreur") >= 0 ? "critique" : "alerte";
+      return h("tr", null, h("th", { scope: "row", text: r["Source"] || "" }), h("td", { text: r["Fichier"] || "" }), h("td", null, puce(e || "inconnu", cl), r["Détail"] ? h("div", { class: "mini discret", text: r["Détail"] }) : null),
+        cellule(r["Lignes"], 0), h("td", { text: r["Sert à"] || "" }));
+    }) : h("tr", null, h("td", { colspan: 5, class: "inconnu", text: "État des sources non transmis." })));
+    var An = liste(D.anomalies);
+    remplir($("anomalies"), An.length ? h("div", { class: "tableau-zone" }, h("table", null,
+      h("thead", null, h("tr", null, h("th", { text: "Étape" }), h("th", { text: "Calcul" }), h("th", { text: "Erreur" }))),
+      h("tbody", null, An.map(function (r) { return h("tr", null, h("th", { scope: "row", text: r["Étape"] || "" }), h("td", { text: r["Calcul"] || "" }), h("td", { class: "large", text: r["Erreur"] || "" })); }))))
+      : h("p", { class: "note", text: "Aucune anomalie : tous les calculs du pipeline ont abouti." }));
+  }
+
+  // ------------------------------------------------------------------ 12. export
+  function nombreCsv(v) { return inc(v) ? "" : String(v).replace(".", ","); }
+  function champCsv(t) { t = t === null || t === undefined ? "" : String(t); return /[;"\n\r]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; }
+  function lignesExport() {
+    var L = [];
+    tousParams(function (p, niveau, f, pc, k) {
+      L.push({ niveau: niveau === "ligne" ? "ligne" : niveau === "fru" ? "type de FRU" : "pièce", fru: f ? f.fru : "", piece: pc ? pc.piece : "", parametre: k,
+               libelle: NOMS[k] || k, origine: p.origine, valeur: p.valeur, modifie: modifie(p), provenance: p.provenance || "" });
+    });
+    ["prix", "valeur", "temps"].forEach(function (k) {
+      L.push({ niveau: "variante d'ensemble", fru: "", piece: "", parametre: "multiplicateur_" + k, libelle: CONF_MULT[k].court, origine: 1, valeur: etat.mult[k], modifie: etat.mult[k] !== 1, provenance: "saisi dans l'outil" });
+    });
+    return L;
+  }
+  function resultatsExport() {
+    var r = calc.res.resume, o = {};
+    o["Gain annuel par rapport à la situation actuelle (€)"] = calc.scen.lignes[3]["Écart"];
+    Object.keys(r).forEach(function (k) { o[k] = r[k] === Infinity ? null : r[k]; });
+    o["Probabilité que la ligne soit rentable"] = aJour(mc) ? mc.p : null;
+    return o;
+  }
+  function texteExport(formatE) {
+    var L = lignesExport(), R = resultatsExport();
+    if (formatE === "json") {
+      var propre = {};
+      Object.keys(R).forEach(function (k) { propre[k] = inc(R[k]) ? null : R[k]; });
+      return JSON.stringify({ outil: "Outil de décision ERC", donnees: D.meta.donnees || null, periode: D.meta.periode || null, dossier_genere_le: D.meta.genere_le || null,
+                              hypotheses: L, resultats: propre }, null, 1);
+    }
+    var t = [["Niveau", "Type de FRU", "Pièce", "Paramètre", "Libellé", "Valeur du dossier", "Valeur actuelle", "Modifiée ici", "Provenance"].join(";")];
+    L.forEach(function (l) {
+      t.push([l.niveau, l.fru, l.piece, l.parametre, l.libelle, nombreCsv(l.origine), nombreCsv(l.valeur), l.modifie ? "oui" : "non", l.provenance].map(champCsv).join(";"));
+    });
+    Object.keys(R).forEach(function (k) { t.push(["résultat", "", "", "", k, "", nombreCsv(R[k]), "", D.meta.donnees === "démonstration" ? "calcul de l'outil, données fictives" : "calcul de l'outil"].map(champCsv).join(";")); });
+    return t.join("\r\n");
+  }
+  var adresseBlob = null;
+  function majExport() {
+    var f = $("export-format").value === "json" ? "json" : "csv", texte = texteExport(f), lien = $("export-telecharger");
+    $("export-texte").value = texte;
+    try {
+      if (adresseBlob) URL.revokeObjectURL(adresseBlob);
+      adresseBlob = URL.createObjectURL(new Blob([f === "csv" ? "\ufeff" + texte : texte], { type: f === "csv" ? "text/csv;charset=utf-8" : "application/json" }));
+      lien.href = adresseBlob;
+      lien.setAttribute("download", "ERC_hypotheses." + f);
+    } catch (e) { lien.href = "#export"; }
+    return texte;
+  }
+  function copierExport() {
+    var texte = majExport(), zone = $("export-texte"), msg = $("export-message");
+    function secours() {
+      zone.focus(); zone.select();
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+      msg.textContent = ok ? "Copié dans le presse-papiers." : "Le texte est sélectionné : Ctrl+C (ou Cmd+C) pour le copier.";
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texte).then(function () { msg.textContent = "Copié dans le presse-papiers (" + nb(texte.split("\n").length) + " lignes)."; }, secours);
+      } else secours();
+    } catch (e) { secours(); }
+  }
+
+  // ------------------------------------------------------------------ recalcul
+  var minuterie = null;
+  function planifier() { clearTimeout(minuterie); minuterie = setTimeout(recalculer, 110); }
+  function calculer() {
+    calc.modele = M.versModele({ ligne: etat.ligne, frus: etat.frus }, { mult: etat.mult });
+    calc.prep = M.preparer(calc.modele.ligne, calc.modele.frus);
+    calc.res = M.optimiserLigne(calc.modele.ligne, calc.modele.frus, calc.prep);
+    calc.scen = M.comparerScenarios(calc.modele.ligne, calc.modele.frus, calc.res);
+  }
+  function rendreCalcul() {
+    rendreDecision(); majHypotheses(); rendreComparaison(); majPlan(); planifierSensibilite(); rendreIncertitude(); rendrePeriodes(); majExport();
+  }
+  function recalculer() {
+    clearTimeout(minuterie);
+    etat.version++;
+    calculer();
+    rendreCalcul();
+  }
+
+  // ------------------------------------------------------------------ sommaire et redimensionnement
+  function brancherSommaire() {
+    var liens = Array.prototype.slice.call($("sommaire").querySelectorAll("a"));
+    var doux = !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    liens.concat([$("lien-evitement")]).forEach(function (a) {
+      a.addEventListener("click", function (ev) {
+        var cible = $(a.getAttribute("href").slice(1));
+        if (!cible) return;
+        ev.preventDefault();
+        cible.scrollIntoView({ behavior: doux ? "smooth" : "auto", block: "start" });
+        var titre = cible.querySelector("h2");
+        if (titre) titre.focus({ preventScroll: true });
+      });
+    });
+    if (!("IntersectionObserver" in window)) return;
+    var visibles = {};
+    var obs = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) { visibles[e.target.id] = e.isIntersecting; });
+      var premier = null;
+      liens.forEach(function (a) { var id = a.getAttribute("href").slice(1); if (premier === null && visibles[id]) premier = id; });
+      liens.forEach(function (a) { if (a.getAttribute("href").slice(1) === premier) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+    }, { rootMargin: "-20% 0px -60% 0px" });
+    liens.forEach(function (a) { var c = $(a.getAttribute("href").slice(1)); if (c) obs.observe(c); });
+  }
+  function redessiner() {
+    rendreComparaison();
+    if (sens.pts.length) dessinerSensibilite($("g-sensibilite"), sens.pts, inc(sens.cap) ? null : sens.cap, sens.cle);
+    rendreIncertitude(); rendreFlux(); rendrePeriodes();
+  }
+  function suivreLargeur() {
+    var derniere = document.documentElement.clientWidth, attente = null;
+    window.addEventListener("resize", function () {
+      clearTimeout(attente);
+      attente = setTimeout(function () {
+        var l = document.documentElement.clientWidth;
+        if (l !== derniere) { derniere = l; redessiner(); }
+      }, 150);
+    });
+  }
+
+  // ------------------------------------------------------------------ démarrage
+  rendreEtat();
+  calculer();
+  controler();
+  construireHypotheses();
+  construirePlan();
+  rendreCalcul();
+  rendreFlux();
+  rendrePreselection();
+  rendreRex();
+  rendreDossier();
+  $("mc-lancer").addEventListener("click", lancerMonteCarlo);
+  $("periodes-rejouer").addEventListener("click", rejouerPeriodes);
+  $("export-copier").addEventListener("click", copierExport);
+  $("export-format").addEventListener("change", majExport);
+  brancherSommaire();
+  suivreLargeur();
+  window.ERCOutil = { etat: etat, calc: calc, mc: mc, periodes: periodes, recalculer: recalculer };
+})();
+</script>
+</body>
+</html>
