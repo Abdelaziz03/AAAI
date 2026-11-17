@@ -1,73 +1,89 @@
-# Modèle : ligne de démontage et de tri contre le recycleur actuel
+# Modélisation mathématique : ligne de démontage et de tri des FRU rebutées
 
-Formulation du modèle codé dans `erc_ligne_tri.py`. Entre parenthèses : le nom du champ dans le code.
+Formulation du modèle codé dans `erc_ligne_tri.py` (optimisation) et `erc_modele_rex.py` (choix réemploi / recyclage). Entre parenthèses : le nom du champ dans le code.
 
-## 1. Question posée
+## 0. Le schéma de décision
 
-Aujourd'hui, une FRU rebutée part entière dans la benne DEEE du recycleur actuel (coût de traitement, pas de recette). Faut-il installer une ligne qui ouvre ces FRU pour **réemployer** certaines pièces et **trier** les autres vers des acheteurs qui paient au kilo, et si oui, pour quelles FRU et quelles pièces ?
+```
+Flux des FRU rebutées ──► Démontage ou scrap direct ? ──non──► coût actuel de traitement des déchets
+   (suivi hebdomadaire)              │oui
+                                     ▼
+                  coût fixe de la ligne par période + coût variable (temps de démontage et de tri)
+                                     ▼
+                       Modèle de Rex : réemploi ou recyclage trié ?  ──► valeur tirée de chaque solution
+```
 
-## 2. Ensembles
+Deux décisions : (A) ouvrir la FRU ou la laisser au recycleur actuel ; (B) pour chaque pièce d'une FRU ouverte, réemploi ou recyclage trié. La décision B dépend d'une probabilité estimée par le **modèle de Rex** (§8).
+
+## 1. Sets
 
 | Symbole | Ensemble |
 |---|---|
+| $t \in T$ | périodes (semaine ou mois ; le code traite une période d'un an) |
 | $f \in F$ | types de FRU rebutées (ex. SSSA `5453107-2-R`) |
-| $p \in P_f$ | pièces contenues dans une FRU de type $f$ |
-| $o \in O = \{1, 2, 3\}$ | option d'une pièce : 1 démontage + réemploi, 2 tri + recyclage, 3 laissée dans la FRU (recycleur actuel) |
-| $s \in S_f$ | plans de traitement d'une FRU $f$ : une option par pièce ; $s_0$ = tout en option 3 = FRU non ouverte |
-| $w \in W$ | semaines (flux d'entrée et suivi terrain) |
+| $p \in P_f$ | pièces contenues dans une FRU de type $f$ (la carcasse peut être déclarée comme une pièce) |
+| $o \in O = \{1, 2, 3\}$ | devenir d'une pièce : 1 réemploi, 2 recyclage trié, 3 laissée dans la FRU |
+| $s \in S_f$ | plans de traitement d'une FRU $f$ = une option par pièce ; $s_0$ = tout en option 3 = scrap direct |
 
-## 3. Paramètres (variables de coût et de valeur)
-
-**Flux d'entrée**
+## 2. Paramètres
 
 | Symbole | Sens | Champ | Source |
 |---|---|---|---|
-| $N_f$ | FRU rebutées par an | `rebut_an` | vwERT, suivi hebdomadaire |
-| $m_f$ | masse d'une FRU (kg) | `poids_fru_kg` | pesée |
+| $N_{ft}$ | FRU de type $f$ rebutées sur la période | `rebut_an` | vwERT, suivi hebdomadaire |
+| $m_f$, $m_p$ | masse d'une FRU, d'une pièce (kg) | `poids_fru_kg`, `poids_kg` | pesées |
 | $n_{fp}$ | exemplaires de $p$ dans $f$ | `n_par_fru` | audit de démontage |
-| $m_p$ | masse d'une pièce (kg) | `poids_kg` | pesée, fiche |
+| $t^{ouv}_f$, $t^{tri,ouv}_f$ | ouverture soignée / sommaire d'une FRU (h) | `ouverture_min`, `ouverture_tri_min` | audit chronométré |
+| $t^{ext}_p$, $t^{test}_p$, $t^{tri}_p$ | extraction, test, tri d'un exemplaire (h) | `extraction_min`, `test_min`, `tri_min` | audit chronométré |
+| $c^{h}_f$ | coût horaire hors plan de charge, selon le type de FRU (€/h) | `taux_horaire_eur` | Stéphan, Lewis |
+| $H_t$ | heures opérateur disponibles sur la période | `heures_operateur_an` | Stéphan, Lewis |
+| $q_{fp}$ | probabilité qu'un exemplaire extrait soit réutilisable | `p_reutilisable` | **modèle de Rex** (§8) |
+| $v_p$ | valeur d'une pièce réemployée (€) | `valeur_eur` | fraction du MMICV, à fixer |
+| $L_p$, $\lambda_p$ | délai d'approvisionnement (semaines), valeur d'une semaine évitée (€) | `delai_semaines`, `valeur_semaine_eur` | achats |
+| $\pi_p$ | prix payé par le recycleur acheteur (€/kg) | `prix_recycleur_eur_kg` | consultation |
+| $\tau_p$ | transport par pièce réemployée (€) | `transport_eur` | registre partenaires |
+| $c^{trait}$ | coût de traitement du recycleur actuel (€/kg ; 0 si gratuit) | `cout_traitement_eur_kg` | contrat actuel |
+| $I$, $A$ | investissement d'installation (€), amortissement (périodes) | `cout_installation_eur`, `amortissement_ans` | devis |
+| $C^{fix}_t$ | coûts fixes de la période : place, encadrement, étalonnage | `couts_fixes_annuels_eur` | atelier |
 
-**Main-d'œuvre**
+## 3. Variables de décision
 
-| Symbole | Sens | Champ |
+| Variable | Décision du schéma | Sens |
 |---|---|---|
-| $t^{ouv}_f$, $t^{tri,ouv}_f$ | ouverture soignée / sommaire d'une FRU (h) | `ouverture_min`, `ouverture_tri_min` |
-| $t^{ext}_p$, $t^{test}_p$, $t^{tri}_p$ | extraction, test, tri d'un exemplaire (h) | `extraction_min`, `test_min`, `tri_min` |
-| $c^{h}_f$ | coût horaire hors plan de charge, selon le type de FRU (€/h) | `taux_horaire_eur` |
-| $H$ | heures opérateur disponibles par an | `heures_operateur_an` |
+| $y \in \{0, 1\}$ | — | installer la ligne (1) ou rester en situation actuelle (0) |
+| $x_{fst} \ge 0$ | A et B | nombre de FRU de type $f$ traitées sur la période $t$ selon le plan $s$ |
 
-**Valeur**
+$x_{f s_0 t}$ = FRU en scrap direct (décision A = non). Tout autre $s$ = FRU démontée, et $s$ fixe l'option $o_s(p)$ de chaque pièce (décision B).
 
-| Symbole | Sens | Champ |
-|---|---|---|
-| $q_p$ | probabilité qu'un exemplaire extrait soit réutilisable | `p_reutilisable` |
-| $v_p$ | valeur d'une pièce réemployée (€) | `valeur_eur` |
-| $L_p$, $\lambda_p$ | délai d'approvisionnement (semaines), valeur d'une semaine évitée (€) | `delai_semaines`, `valeur_semaine_eur` |
-| $\pi_p$ | prix payé par le recycleur acheteur (€/kg) | `prix_recycleur_eur_kg` |
-| $\tau_p$ | transport par pièce réemployée (€) | `transport_eur` |
+## 4. Hypothèses
 
-**Situation actuelle et ligne**
+1. **Flux connu par période** : $N_{ft}$ vient du suivi hebdomadaire ; le modèle n'est utilisé qu'à la granularité où l'estimé est confirmé par les pesées (§9).
+2. **Linéarité** : temps et valeurs proportionnels au nombre de FRU ; pas d'effet d'apprentissage ni de lot minimal de l'acheteur.
+3. **Capacité = heures opérateur** : la place et le banc de test ne sont pas limitants (contraintes à ajouter si l'audit le montre).
+4. **Indépendance des pièces** d'une même FRU ; le facteur « FRU rebutée » du modèle de Rex corrige en moyenne.
+5. **Demande** : toute pièce réemployable est absorbée par la réparation (sinon ajouter $\sum_f n_{fp}\,q_{fp}\,x \le D_{pt}$).
+6. **Poids inconnu** : aucun traitement évité compté pour la pièce (prudent).
+7. **Carcasse** : reste chez le recycleur actuel sauf si elle est déclarée comme pièce à trier ; elle porte l'essentiel de la masse.
+8. **Coût fixe par période** : payé dès que la ligne existe, quel que soit le volume de la période.
+9. **Valeur de réemploi** $v_p$ : fraction du MMICV, pas un prix de vente ; la tenue en service (taux de défaillance précoce d'une pièce réemployée) s'en retranche via le coût d'une défaillance terrain.
+10. **Pas de stock entre périodes** : une FRU rebutée en $t$ est traitée ou jetée en $t$ (à lever avec une variable de stock si la place le permet).
 
-| Symbole | Sens | Champ |
-|---|---|---|
-| $c^{trait}$ | coût de traitement du recycleur actuel (€/kg ; 0 si gratuit, négatif s'il paie) | `cout_traitement_eur_kg` |
-| $I$, $A$ | investissement d'installation (€), durée d'amortissement (ans) | `cout_installation_eur`, `amortissement_ans` |
-| $C^{fix}$ | coûts fixes annuels : place, encadrement, étalonnage (€/an) | `couts_fixes_annuels_eur` |
+## 5. Fonctions coûts
 
-$q_p$ vient de la consommation : $q_p = (1 - \rho_f \cdot d_p)(1 - b_p)\,r_p$ avec $d_p = \dfrac{\text{pièces consommées} \times (1 - \text{part préventive})}{\text{FRU réparées} \times n_{fp}}$, $\rho_f \ge 1$ le facteur « FRU rebutée plus abîmée », $b_p$ la casse au démontage, $r_p$ le rendement du test.
+**Temps par FRU pour le plan $s$** (l'ouverture est payée une fois par FRU) :
 
-## 4. Variables de décision
+$$h_{fs} = t^{ouv}_f\,\mathbb{1}[\exists p : o_s(p)=1] + t^{tri,ouv}_f\,\mathbb{1}[\nexists p : o_s(p)=1 \ \wedge\ \exists p : o_s(p)=2] + \sum_{p:\,o_s(p)=1} n_{fp}\,(t^{ext}_p + t^{test}_p) + \sum_{p:\,o_s(p)=2} n_{fp}\, t^{tri}_p$$
 
-| Variable | Sens |
-|---|---|
-| $x_{fs} \ge 0$ | nombre de FRU de type $f$ traitées par an selon le plan $s$ |
-| $y \in \{0, 1\}$ | installer la ligne (1) ou garder la situation actuelle (0) |
+**Coût variable par FRU** : $C^{var}_{fs} = c^{h}_f \cdot h_{fs}$
 
-Le plan $s$ fixe l'option $o_s(p)$ de chaque pièce. Les FRU non traitées ($x_{f s_0}$) restent chez le recycleur actuel.
+**Coût fixe de la ligne par période** : $C^{ligne}_t = \dfrac{I}{A} + C^{fix}_t$
 
-## 5. Fonctions de valorisation (par FRU, plan $s$)
+**Coût de la situation actuelle** (scrap direct de tout le flux) : $C^{actuel}_t = c^{trait} \sum_f N_{ft}\, m_f$
 
-$$V^{1}_{fp} = n_{fp}\,\big[\,q_p\,(v_p + L_p \lambda_p) + (1 - q_p)\,m_p \pi_p - \tau_p\,\big] \qquad \text{réemploi ; l'exemplaire qui échoue au test est vendu au kg}$$
+## 6. Fonctions valorisation
+
+Par FRU traitée selon le plan $s$ :
+
+$$V^{1}_{fp} = n_{fp}\,\big[\,q_{fp}\,(v_p + L_p \lambda_p) + (1 - q_{fp})\,m_p \pi_p - \tau_p\,\big] \qquad \text{réemploi ; l'exemplaire qui échoue au test est vendu au kg}$$
 
 $$V^{2}_{fp} = n_{fp}\, m_p\, \pi_p \qquad \text{recyclage trié}$$
 
@@ -75,58 +91,62 @@ $$E_{fs} = c^{trait} \sum_{p:\,o_s(p) \in \{1,2\}} n_{fp}\, m_p \qquad \text{tra
 
 $$V_{fs} = \sum_{p:\,o_s(p)=1} V^{1}_{fp} + \sum_{p:\,o_s(p)=2} V^{2}_{fp} + E_{fs}$$
 
-## 6. Fonctions de coût
-
-**Temps par FRU**
-
-$$h_{fs} = \underbrace{t^{ouv}_f\,[\exists p : o_s(p)=1] + t^{tri,ouv}_f\,[\nexists\, o_s(p)=1 \wedge \exists p : o_s(p)=2]}_{\text{ouverture, payée une fois}} + \sum_{p:\,o_s(p)=1} n_{fp}\,(t^{ext}_p + t^{test}_p) + \sum_{p:\,o_s(p)=2} n_{fp}\, t^{tri}_p$$
-
-**Coût variable par FRU** : $C^{var}_{fs} = c^{h}_f \cdot h_{fs}$
-
-**Coût fixe annualisé de la ligne** : $C^{ligne} = \dfrac{I}{A} + C^{fix}$
-
-**Coût de la situation actuelle** : $C^{actuel} = c^{trait} \sum_f N_f\, m_f$
-
 ## 7. Fonction objectif
 
-Marge d'une FRU traitée selon $s$, par rapport à la situation actuelle : $g_{fs} = V_{fs} - C^{var}_{fs}$, avec $g_{f s_0} = 0$.
+Marge d'une FRU traitée selon $s$, par rapport au scrap direct : $g_{fs} = V_{fs} - C^{var}_{fs}$, avec $g_{f s_0} = 0$.
 
-$$\max_{x,\,y} \; Z = \sum_{f \in F} \sum_{s \in S_f} g_{fs}\, x_{fs} \;-\; y\, C^{ligne}$$
+$$\max_{x,\,y} \; Z = \sum_{t \in T} \Big[ \sum_{f \in F} \sum_{s \in S_f} g_{fs}\, x_{fst} \;-\; y\, C^{ligne}_t \Big]$$
 
 sous les contraintes
 
-$$\sum_{s} x_{fs} = N_f \quad \forall f \qquad \text{(chaque FRU rebutée reçoit un plan)}$$
+$$\sum_{s \in S_f} x_{fst} = N_{ft} \quad \forall f, t \qquad \text{(chaque FRU rebutée reçoit un plan)}$$
 
-$$\sum_{f}\sum_{s} h_{fs}\, x_{fs} \le H\, y \qquad \text{(capacité en heures ; aucune heure sans ligne)}$$
+$$\sum_{f}\sum_{s} h_{fs}\, x_{fst} \le H_t\, y \quad \forall t \qquad \text{(capacité ; aucune heure sans ligne)}$$
 
-$$x_{fs} \ge 0,\quad y \in \{0,1\}$$
+$$x_{fst} \ge 0,\quad y \in \{0,1\}$$
 
-$Z$ est le **gain annuel par rapport au recycleur actuel**. On installe la ligne si $Z^* > 0$. Coût total avec la ligne $= C^{actuel} - Z^*$.
+$Z$ est le **gain par rapport au recycleur actuel**. On installe la ligne si $Z^* > 0$ ; coût total avec la ligne $= \sum_t C^{actuel}_t - Z^*$.
 
-**Résolution.** À $y = 1$, le problème est linéaire en $x$. Le multiplicateur $\mu$ de la contrainte d'heures donne, pour chaque type de FRU, le plan qui maximise $g_{fs} - \mu\, h_{fs}$ ; $\mu$ est trouvé par dichotomie. **$\mu$ est la valeur nette d'une heure opérateur supplémentaire.**
+**Résolution.** À $y = 1$ le problème est linéaire et séparable par période. Le multiplicateur $\mu_t$ de la contrainte d'heures donne pour chaque type de FRU le plan qui maximise $g_{fs} - \mu_t h_{fs}$ ; $\mu_t$ est trouvé par dichotomie. **$\mu_t$ est la valeur nette d'une heure opérateur supplémentaire.**
 
-**Indicateurs dérivés.** Seuil de rentabilité $= C^{ligne} / \bar g$ (FRU par an) ; retour sur investissement $= I / (\sum g\,x - C^{fix})$ ; part de masse détournée $= \sum \text{kg sortis} / \sum_f N_f m_f$.
+**Indicateurs.** Seuil de rentabilité $= C^{ligne} / \bar g$ (FRU par période) ; retour sur investissement $= I / (\sum g\,x - C^{fix})$ ; part de masse détournée.
 
-## 8. Incertitude
+**Période par période.** `resultat_par_periode` rejoue le modèle sur le flux hebdomadaire réel : capacité et coût fixe de la semaine, pas de stock. L'écart avec le modèle annuel au flux moyen est le **coût de la variabilité du flux** (heures perdues les semaines creuses, FRU non traitées les semaines chargées) ; il chiffre ce que rapporterait un stock tampon.
 
-Tout paramètre peut être une plage (bas, haut) ou un triangle (bas, mode, haut). Le problème est résolu pour chaque tirage (Monte-Carlo) : on obtient la distribution de $Z^*$ et $P(Z^* > 0)$, la probabilité que la ligne soit rentable.
+**Incertitude.** Chaque paramètre peut être une plage ; le problème est résolu pour chaque tirage (Monte-Carlo) → distribution de $Z^*$ et $P(Z^* > 0)$.
 
-## 9. Hypothèses
+## 8. Modèle de Rex : choix, justification, paramètres, entraînement, métriques
 
-1. **Régime annuel stationnaire** : $N_f$ constant ; à vérifier avec le suivi hebdomadaire du flux d'entrée.
-2. **Linéarité** : temps et valeurs proportionnels au nombre de FRU ; pas d'effet d'apprentissage ni de lot minimal de l'acheteur.
-3. **Capacité = heures opérateur** : la place et le banc de test ne sont pas limitants (à ajouter comme contraintes si l'audit le montre).
-4. **Indépendance des pièces** dans une FRU : l'état d'une pièce ne dépend pas de celui des autres ; $\rho_f$ corrige en moyenne.
-5. **Tout ce qui est réemployable est absorbé** par la demande de réparation (à borner par la consommation : contrainte $\sum_f n_{fp} q_p x \le D_p$ à ajouter si une pièce sature).
-6. **Poids inconnu** : aucun traitement évité compté pour la pièce (prudent).
-7. **La carcasse** (châssis, tôlerie) reste chez le recycleur actuel, sauf si elle est déclarée comme une « pièce » avec son poids, son prix au kg et son temps de tri. C'est elle qui porte l'essentiel de la masse.
-8. **Valeur de réemploi** $v_p$ : fraction du MMICV à fixer par l'équipe concernée ; elle n'est pas un prix de vente.
-9. **Fiabilité** : $q_p$ ne couvre que l'état à l'extraction ; la tenue en service d'une pièce réemployée (taux ELF réparé / neuf, survie sur la garantie) se retranche de $v_p$ via le coût d'une défaillance terrain (voir `erc_fiabilite_risques.valeur_voies`).
+**Ce qu'il décide.** Pour une pièce d'une FRU ouverte, réemploi plutôt que recyclage si
 
-## 10. Du flux d'entrée au modèle
+$$q_{fp}\,(v_p + L_p\lambda_p) + (1-q_{fp})\,m_p\pi_p - \tau_p - c^h_f\,(t^{ext}_p + t^{test}_p) \;>\; m_p\pi_p - c^h_f\, t^{tri}_p$$
 
-Le modèle est alimenté à la granularité où le flux est vérifié (`erc_flux_hebdo.py`, notebook `ERC_Flux_Entree_Suivi_Hebdo.ipynb`) :
+Tout est mesurable sauf $q_{fp}$ : le modèle de Rex est le modèle qui **estime $q_{fp}$**.
 
-1. tableau composants → type de déchet → benne ;
-2. par semaine et par flux : masse estimée (SQL × poids unitaires) avec marge d'erreur, masse pesée, écart, cause ;
-3. quand l'écart tient dans la marge sur plusieurs semaines, $N_f$, $m_p$ et les types de déchet sont jugés fiables et alimentent le modèle ; sinon la cause (poids manquants, benne partagée, décalage des bacs) désigne la donnée à corriger d'abord.
+| Élément | Contenu |
+|---|---|
+| **Choix** | Estimation : Bêta-binomial bayésien par couple (type de FRU, pièce). Décision : échantillonnage de Thompson |
+| **Justification de l'estimation** | Peu de données au départ (quelques FRU auditées) ; fournit une incertitude, nécessaire au Monte-Carlo ; se met à jour chaque semaine sans ré-entraînement ; lisible par l'atelier |
+| **Justification de la décision** | On n'observe l'état d'une pièce que si on la teste. Une règle qui suit la moyenne estimée ne teste jamais une pièce jugée mauvaise au départ et ne corrige donc jamais un a priori trop pessimiste. Thompson tire chaque période un $q$ plausible dans l'a posteriori et optimise la ligne avec ce tirage : les pièces incertaines sont essayées de temps en temps, de moins en moins à mesure que l'audit tranche. C'est un bandit, la forme la plus simple d'apprentissage par renforcement qui règle ce problème |
+| **Paramètres** | A priori $q^0_{fp} = (1 - \rho_f\, d_{fp})(1 - b_p)\,r_p$ avec $d_{fp} = \dfrac{\text{pièces consommées} \times (1 - \text{part préventive})}{\text{FRU réparées} \times n_{fp}}$ ; $\rho_f \ge 1$ facteur « FRU rebutée plus abîmée » ; $b_p$ casse au démontage ; $r_p$ rendement du test. Hyperparamètre : force de l'a priori $N_0$ (pièces équivalentes) |
+| **Entraînement** | Données = audit de démontage (date, type de FRU, pièce, pièces testées, pièces bonnes). A posteriori : $q_{fp} \sim \text{Bêta}(q^0 N_0 + \text{bonnes},\ (1-q^0) N_0 + \text{mauvaises})$. $N_0$ réglé sur la log-perte |
+| **Validation** | Prequentielle : chaque lot d'audit est prédit avec ce que le modèle savait avant, puis sert à le mettre à jour. Aucune donnée ne sert à apprendre et à noter |
+| **Métriques d'estimation** | Brier (0 parfait, 0,25 = pile ou face) ; log-perte ; écart absolu moyen entre taux prédit et observé ; couverture de l'intervalle prédictif à 90 % (cible ≈ 90 %) |
+| **Métrique de décision** | Regret cumulé = gain d'un oracle qui connaîtrait $q$ − gain obtenu ; mesuré sur banc d'essai synthétique (`simuler_politiques`), puis suivi en réel par l'écart entre marge prévue et marge constatée |
+| **Références à battre** | « A priori seul » (consommation, jamais mise à jour) et « fréquence observée » (sans a priori) |
+| **Sortie** | (bas 5 %, moyenne, haut 95 %) de $q_{fp}$ → `p_reutilisable` de la ligne de tri |
+| **Évolution** | Régression logistique ou gradient boosting sur l'âge du donneur, le motif de rebut, l'atelier, quand l'audit dépasse quelques centaines de pièces, et seulement s'ils battent le Bêta-binomial sur ces métriques. Apprentissage par renforcement à plusieurs états : seulement si un stock entre périodes est autorisé, car la décision d'une semaine engage alors les suivantes |
+
+**Résultat du banc d'essai synthétique** (a priori 0,2 alors que 60 % des pièces sont bonnes, seuil de réemploi 0,27) : la règle « a priori seul » et la règle gloutonne ne testent jamais la pièce et perdent 17 € par pièce ; Thompson en teste 97 %, retrouve $q \approx 0{,}59$ et perd 0,6 € par pièce. Chiffres de simulation, pas de l'ERC.
+
+Fichier d'audit attendu : `Acquisition/audit_demontage.csv`, colonnes `Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`.
+
+## 9. Du flux d'entrée au modèle
+
+`ERC_Flux_Entree_Suivi_Hebdo.ipynb` produit les tableaux qui conditionnent le modèle :
+
+1. **Composant, FRU, type de déchet** : une ligne par couple (FRU, composant), avec benne et poids.
+2. **FRU rebutées par semaine et par type** : c'est $N_{ft}$. Une semaine sans rebut compte pour 0. Le rebut annuel (bas, moyen, haut) en est tiré par ré-échantillonnage des semaines et repris automatiquement par le modèle de ligne.
+3. **Semaine, valeur estimée et mesurée, marge d'erreur, cause de déviation** : masse estimée (SQL × poids unitaires) avec ses bornes, masse pesée, écart, causes candidates, cause constatée.
+
+Quand l'écart cumulé d'un flux tient dans la marge sur au moins trois semaines, $N_{ft}$, $m_p$ et les types de déchet de ce flux alimentent le modèle ; sinon la cause dominante désigne la donnée à corriger d'abord.

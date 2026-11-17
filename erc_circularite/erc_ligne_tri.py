@@ -193,8 +193,9 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
     taux = ligne.get("taux_horaire_eur")
     incomplets = {f: manques(d, taux) for f, d in frus.items()}
     ok = {f: dict(d, _c_trait=ligne.get("cout_traitement_eur_kg")) for f, d in frus.items() if not incomplets[f]}
-    opts = {f: options_fru(d, taux)[:3] for f, d in ok.items()}
-    kmap = {f: options_fru(d, taux)[3] for f, d in ok.items()}
+    tout = {f: options_fru(d, taux) for f, d in ok.items()}
+    opts = {f: o[:3] for f, o in tout.items()}
+    kmap = {f: o[3] for f, o in tout.items()}
     cap = ligne.get("heures_operateur_an") or np.inf
 
     def choix(mu):
@@ -325,3 +326,36 @@ def monte_carlo_ligne(ligne: dict, frus: dict, n=500, rng=RNG) -> dict:
 def point_milieu(ligne, frus):
     """Version déterministe au centre des plages, pour lire le détail."""
     return optimiser_ligne(_milieu(ligne), _milieu(frus))
+
+
+def resultat_par_periode(ligne: dict, frus: dict, flux: pd.DataFrame, periodes_par_an=52) -> pd.DataFrame:
+    """Le modèle rejoué période par période sur le flux RÉEL des FRU rebutées (colonnes Semaine, FRU, FRU rebutées).
+
+    Chaque période : capacité = heures annuelles / périodes ; coût fixe = (installation amortie + fixes annuels) / périodes,
+    payé même si peu de FRU arrivent ; pas de stock d'une période à l'autre (hypothèse 10 du modèle).
+    Les attributs du tableau comparent avec le modèle annuel au flux moyen : l'écart est le COÛT DE LA VARIABILITÉ
+    du flux (heures perdues les semaines creuses, FRU non traitées les semaines chargées).
+    """
+    lg, fr = _milieu(ligne), _milieu(frus)
+    H, inv, fix = lg.get("heures_operateur_an"), lg.get("cout_installation_eur"), lg.get("couts_fixes_annuels_eur")
+    fixe_p = (inv / max(lg.get("amortissement_ans") or 1, 1) + fix) / periodes_par_an if inv is not None and fix is not None else np.nan
+    piv = flux[flux["FRU"].isin(fr)].pivot_table(index="Semaine", columns="FRU", values="FRU rebutées", aggfunc="sum", fill_value=0)
+    piv = piv.reindex(sorted(flux["Semaine"].unique()), fill_value=0)
+    lignes = []
+    for sem, n in piv.iterrows():
+        fr_t = {f: dict(d, rebut_an=float(n.get(f, 0))) for f, d in fr.items()}
+        r = optimiser_ligne(dict(lg, heures_operateur_an=H / periodes_par_an if H else None), fr_t)["resume"]
+        lignes.append({"Semaine": sem, "FRU arrivées": float(n.sum()), "FRU traitées": r["FRU traitées / an"], "Heures utilisées": r["Heures utilisées / an"],
+                       "Capacité (h)": H / periodes_par_an if H else np.nan, "Marge variable (€)": r["Marge variable / an (€)"],
+                       "Coût fixe (€)": fixe_p, "Résultat (€)": r["Marge variable / an (€)"] - fixe_p,
+                       "Valeur d'une heure en plus (€)": r["Valeur d'une heure opérateur en plus (€ net)"]})
+    t = pd.DataFrame(lignes)
+    if len(t):
+        t["Résultat cumulé (€)"] = t["Résultat (€)"].cumsum()
+        moyen = {f: dict(d, rebut_an=float(piv[f].mean()) * periodes_par_an if f in piv else 0.0) for f, d in fr.items()}
+        annuel = optimiser_ligne(lg, moyen)["resume"]["Résultat / an (€)"]
+        par_periode = t["Résultat (€)"].mean() * periodes_par_an
+        t.attrs.update({"Périodes": len(t), "Résultat annualisé, période par période (€)": par_periode,
+                        "Résultat du modèle annuel au flux moyen (€)": annuel, "Coût de la variabilité du flux (€/an)": annuel - par_periode,
+                        "Périodes en perte": int((t["Résultat (€)"] < 0).sum())})
+    return t

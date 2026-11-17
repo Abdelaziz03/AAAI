@@ -4,9 +4,12 @@
 - `ERC_Fiabilite_Risques_Priorisation.ipynb` — à placer à côté de `ERC_Aide_Decision_Composants.ipynb` et à exécuter après lui. Lit `ERC_Aide_Decision_Composants.xlsx` et le cache `Extraction_R26/fiabilite_ELF_references_ERC.csv`. Écrit `ERC_Fiabilite_Risques_Priorisation.xlsx`.
 - `Modele_Ligne_Demontage_Tri.md` — formulation du modèle : ensembles, paramètres, variables de décision, fonctions de coût et de valorisation, fonction objectif, contraintes, hypothèses.
 - `ERC_Flux_Entree_Suivi_Hebdo.ipynb` + `erc_flux_hebdo.py` — flux d'entrée : composants par type de déchet et benne, masse estimée par semaine avec marge d'erreur, rapprochement avec `Acquisition/pesees_hebdo.csv` (`Semaine;Flux;Masse mesurée (kg)`), causes d'écart, verdict par flux. À exécuter avant le modèle de ligne.
+- `erc_modele_rex.py` — modèle de Rex (réemploi ou recyclage) : estimation bayésienne de la probabilité qu'une pièce soit réutilisable, entraînée sur `Acquisition/audit_demontage.csv` (`Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`), métriques, décision par échantillonnage de Thompson.
 - `erc_ligne_tri.py` — économie d'une ligne de tri/démontage : coûts fixes amortis, capacité en heures opérateur, coûts variables par type de FRU (ouverture, extraction, test, taux horaire), probabilité de réemploi tirée de la consommation, choix optimal des pièces à extraire, valeur d'une heure supplémentaire, Monte-Carlo.
 - `erc_fiabilite_risques.py` — module appelé par le notebook (numpy + pandas seulement) : tables codées en dur (CRM UE, composition par type, supply par référence), Kaplan-Meier, Weibull avec censure et troncature, taux bayésien, survie conditionnelle, valeur par voie en Monte-Carlo, front de Pareto.
 
 Fichier facultatif qui active les taux de fiabilité : `Extraction_R26/poses_2022_2023_par_reference.csv` (séparateur `;`, colonnes `Référence;Origine;Pièces posées`, origine = `Neuve`, `Réparée` ou `Récupérée`), pour la même période que le fichier Parts_DI_ULS.
 
 Les notebooks ont été testés sur des données fictives, avec et sans le cache ELF et ce dénominateur ; pas encore sur les données réelles.
+
+Ordre d'exécution : `ERC_Aide_Decision_Composants.ipynb` → `ERC_Flux_Entree_Suivi_Hebdo.ipynb` → `ERC_Fiabilite_Risques_Priorisation.ipynb`.
