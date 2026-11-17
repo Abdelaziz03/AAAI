@@ -1,6 +1,6 @@
 # Modélisation mathématique : ligne de démontage et de tri des FRU rebutées
 
-Formulation du modèle codé dans `erc_ligne_tri.py` (optimisation) et `erc_modele_rex.py` (choix réemploi / recyclage). Entre parenthèses : le nom du champ dans le code.
+Formulation du modèle codé dans `erc/ligne.py` (optimisation) et `erc/rex.py` (choix réemploi / recyclage). Les noms de champ sont ceux du classeur `parametres/ERC_Parametres.xlsx` et du code.
 
 ## 0. Le schéma de décision
 
@@ -20,7 +20,7 @@ Deux décisions : (A) ouvrir la FRU ou la laisser au recycleur actuel ; (B) pour
 | Symbole | Ensemble |
 |---|---|
 | $t \in T$ | périodes (semaine ou mois ; le code traite une période d'un an) |
-| $f \in F$ | types de FRU rebutées (ex. SSSA `5453107-2-R`) |
+| $f \in F$ | types de FRU rebutées (une ligne de l'onglet « FRU » du classeur de paramètres) |
 | $p \in P_f$ | pièces contenues dans une FRU de type $f$ (la carcasse peut être déclarée comme une pièce) |
 | $o \in O = \{1, 2, 3\}$ | devenir d'une pièce : 1 réemploi, 2 recyclage trié, 3 laissée dans la FRU |
 | $s \in S_f$ | plans de traitement d'une FRU $f$ = une option par pièce ; $s_0$ = tout en option 3 = scrap direct |
@@ -34,8 +34,8 @@ Deux décisions : (A) ouvrir la FRU ou la laisser au recycleur actuel ; (B) pour
 | $n_{fp}$ | exemplaires de $p$ dans $f$ | `n_par_fru` | audit de démontage |
 | $t^{ouv}_f$, $t^{tri,ouv}_f$ | ouverture soignée / sommaire d'une FRU (h) | `ouverture_min`, `ouverture_tri_min` | audit chronométré |
 | $t^{ext}_p$, $t^{test}_p$, $t^{tri}_p$ | extraction, test, tri d'un exemplaire (h) | `extraction_min`, `test_min`, `tri_min` | audit chronométré |
-| $c^{h}_f$ | coût horaire hors plan de charge, selon le type de FRU (€/h) | `taux_horaire_eur` | Stéphan, Lewis |
-| $H_t$ | heures opérateur disponibles sur la période | `heures_operateur_an` | Stéphan, Lewis |
+| $c^{h}_f$ | coût horaire hors plan de charge, selon le type de FRU (€/h) | `taux_horaire_eur` | responsables d'atelier |
+| $H_t$ | heures opérateur disponibles sur la période | `heures_operateur_an` | responsables d'atelier |
 | $q_{fp}$ | probabilité qu'un exemplaire extrait soit réutilisable | `p_reutilisable` | **modèle de Rex** (§8) |
 | $v_p$ | valeur d'une pièce réemployée (€) | `valeur_eur` | fraction du MMICV, à fixer |
 | $L_p$, $\lambda_p$ | délai d'approvisionnement (semaines), valeur d'une semaine évitée (€) | `delai_semaines`, `valeur_semaine_eur` | achats |
@@ -111,7 +111,7 @@ $Z$ est le **gain par rapport au recycleur actuel**. On installe la ligne si $Z^
 
 **Indicateurs.** Seuil de rentabilité $= C^{ligne} / \bar g$ (FRU par période) ; retour sur investissement $= I / (\sum g\,x - C^{fix})$ ; part de masse détournée.
 
-**Période par période.** `resultat_par_periode` rejoue le modèle sur le flux hebdomadaire réel : capacité et coût fixe de la semaine, pas de stock. L'écart avec le modèle annuel au flux moyen est le **coût de la variabilité du flux** (heures perdues les semaines creuses, FRU non traitées les semaines chargées) ; il chiffre ce que rapporterait un stock tampon.
+**Période par période.** `erc.ligne.resultat_par_periode` rejoue le modèle sur le flux hebdomadaire réel : capacité et coût fixe de la semaine, pas de stock. L'écart avec le modèle annuel au flux moyen est le **coût de la variabilité du flux** (heures perdues les semaines creuses, FRU non traitées les semaines chargées) ; il chiffre ce que rapporterait un stock tampon.
 
 **Incertitude.** Chaque paramètre peut être une plage ; le problème est résolu pour chaque tirage (Monte-Carlo) → distribution de $Z^*$ et $P(Z^* > 0)$.
 
@@ -132,18 +132,18 @@ Tout est mesurable sauf $q_{fp}$ : le modèle de Rex est le modèle qui **estime
 | **Entraînement** | Données = audit de démontage (date, type de FRU, pièce, pièces testées, pièces bonnes). A posteriori : $q_{fp} \sim \text{Bêta}(q^0 N_0 + \text{bonnes},\ (1-q^0) N_0 + \text{mauvaises})$. $N_0$ réglé sur la log-perte |
 | **Validation** | Prequentielle : chaque lot d'audit est prédit avec ce que le modèle savait avant, puis sert à le mettre à jour. Aucune donnée ne sert à apprendre et à noter |
 | **Métriques d'estimation** | Brier (0 parfait, 0,25 = pile ou face) ; log-perte ; écart absolu moyen entre taux prédit et observé ; couverture de l'intervalle prédictif à 90 % (cible ≈ 90 %) |
-| **Métrique de décision** | Regret cumulé = gain d'un oracle qui connaîtrait $q$ − gain obtenu ; mesuré sur banc d'essai synthétique (`simuler_politiques`), puis suivi en réel par l'écart entre marge prévue et marge constatée |
+| **Métrique de décision** | Regret cumulé = gain d'un oracle qui connaîtrait $q$ − gain obtenu ; mesuré sur banc d'essai synthétique (`erc.rex.simuler_politiques`), puis suivi en réel par l'écart entre marge prévue et marge constatée |
 | **Références à battre** | « A priori seul » (consommation, jamais mise à jour) et « fréquence observée » (sans a priori) |
 | **Sortie** | (bas 5 %, moyenne, haut 95 %) de $q_{fp}$ → `p_reutilisable` de la ligne de tri |
 | **Évolution** | Régression logistique ou gradient boosting sur l'âge du donneur, le motif de rebut, l'atelier, quand l'audit dépasse quelques centaines de pièces, et seulement s'ils battent le Bêta-binomial sur ces métriques. Apprentissage par renforcement à plusieurs états : seulement si un stock entre périodes est autorisé, car la décision d'une semaine engage alors les suivantes |
 
 **Résultat du banc d'essai synthétique** (a priori 0,2 alors que 60 % des pièces sont bonnes, seuil de réemploi 0,27) : la règle « a priori seul » et la règle gloutonne ne testent jamais la pièce et perdent 17 € par pièce ; Thompson en teste 97 %, retrouve $q \approx 0{,}59$ et perd 0,6 € par pièce. Chiffres de simulation, pas de l'ERC.
 
-Fichier d'audit attendu : `Acquisition/audit_demontage.csv`, colonnes `Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`.
+Fichier d'audit attendu dans le dossier des extractions : `Acquisition/audit_demontage.csv`, colonnes `Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`.
 
 ## 9. Du flux d'entrée au modèle
 
-`ERC_Flux_Entree_Suivi_Hebdo.ipynb` produit les tableaux qui conditionnent le modèle :
+L'étape « flux » du pipeline (notebook `02_Flux_entree.ipynb`) produit les tableaux qui conditionnent le modèle :
 
 1. **Composant, FRU, type de déchet** : une ligne par couple (FRU, composant), avec benne et poids.
 2. **FRU rebutées par semaine et par type** : c'est $N_{ft}$. Une semaine sans rebut compte pour 0. Le rebut annuel (bas, moyen, haut) en est tiré par ré-échantillonnage des semaines et repris automatiquement par le modèle de ligne.

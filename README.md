@@ -8,4 +8,4 @@ Personal planning notes and research dossiers.
 - [gsoc/STATUS.md](./gsoc/STATUS.md) — live status log: what's actually been decided/verified/drafted vs. what's still pending.
 - [gsoc/issue-760-technical-brief.md](./gsoc/issue-760-technical-brief.md) — root-cause analysis for the first target issue.
 - [gsoc/drafts/](./gsoc/drafts/) — draft messages (forum introduction, mentor outreach) to personalize and send yourself.
-- [erc_circularite/](./erc_circularite/) — ERC repair-centre circularity: reliability, supply/material risk and FRU pre-selection notebook, plus meeting brief.
+- [erc_circularite/](./erc_circularite/) — circularity decision dossier for a repair centre: pipeline, notebooks, artefact store and a decision tool, with fictional demo data only.

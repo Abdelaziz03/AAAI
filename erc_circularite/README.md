@@ -1,15 +1,81 @@
-# ERC circularité : fiabilité, risques et pré-sélection
+# ERC circularité
 
-- `Brief_Point_Superieur.md` — support du point d'avancement avec le responsable.
-- `ERC_Fiabilite_Risques_Priorisation.ipynb` — à placer à côté de `ERC_Aide_Decision_Composants.ipynb` et à exécuter après lui. Lit `ERC_Aide_Decision_Composants.xlsx` et le cache `Extraction_R26/fiabilite_ELF_references_ERC.csv`. Écrit `ERC_Fiabilite_Risques_Priorisation.xlsx`.
-- `Modele_Ligne_Demontage_Tri.md` — formulation du modèle : ensembles, paramètres, variables de décision, fonctions de coût et de valorisation, fonction objectif, contraintes, hypothèses.
-- `ERC_Flux_Entree_Suivi_Hebdo.ipynb` + `erc_flux_hebdo.py` — flux d'entrée : composants par type de déchet et benne, masse estimée par semaine avec marge d'erreur, rapprochement avec `Acquisition/pesees_hebdo.csv` (`Semaine;Flux;Masse mesurée (kg)`), causes d'écart, verdict par flux. À exécuter avant le modèle de ligne.
-- `erc_modele_rex.py` — modèle de Rex (réemploi ou recyclage) : estimation bayésienne de la probabilité qu'une pièce soit réutilisable, entraînée sur `Acquisition/audit_demontage.csv` (`Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`), métriques, décision par échantillonnage de Thompson.
-- `erc_ligne_tri.py` — économie d'une ligne de tri/démontage : coûts fixes amortis, capacité en heures opérateur, coûts variables par type de FRU (ouverture, extraction, test, taux horaire), probabilité de réemploi tirée de la consommation, choix optimal des pièces à extraire, valeur d'une heure supplémentaire, Monte-Carlo.
-- `erc_fiabilite_risques.py` — module appelé par le notebook (numpy + pandas seulement) : tables codées en dur (CRM UE, composition par type, supply par référence), Kaplan-Meier, Weibull avec censure et troncature, taux bayésien, survie conditionnelle, valeur par voie en Monte-Carlo, front de Pareto.
+Que faire des FRU rebutées d'un centre de réparation et des pièces qu'elles contiennent : les démonter pour
+réemployer des pièces, les trier pour les vendre au kilo à un recycleur, ou les laisser au recycleur actuel ?
+Ce dossier va des données brutes à la décision.
 
-Fichier facultatif qui active les taux de fiabilité : `Extraction_R26/poses_2022_2023_par_reference.csv` (séparateur `;`, colonnes `Référence;Origine;Pièces posées`, origine = `Neuve`, `Réparée` ou `Récupérée`), pour la même période que le fichier Parts_DI_ULS.
+Le dépôt ne contient **aucune donnée réelle**. Un jeu de démonstration entièrement fictif permet de tout faire
+tourner ; les données réelles sont lues là où elles se trouvent et leurs résultats ne quittent pas le poste.
 
-Les notebooks ont été testés sur des données fictives, avec et sans le cache ELF et ce dénominateur ; pas encore sur les données réelles.
+## Ce que contient le dossier
 
-Ordre d'exécution : `ERC_Aide_Decision_Composants.ipynb` → `ERC_Flux_Entree_Suivi_Hebdo.ipynb` → `ERC_Fiabilite_Risques_Priorisation.ipynb`.
+| Élément | Rôle |
+|---|---|
+| `erc/` | Le code : lecture des sources, calculs, dépôt des artefacts, outil des décideurs |
+| `notebooks/` | Sept notebooks qui lancent une étape et affichent ses artefacts, avec le mode de lecture |
+| `artefacts/` | Tout ce qui est produit à partir des données réelles (non versionné) |
+| `parametres/` | Le classeur des paramètres saisis et les chemins des sources (non versionné) |
+| `demo/` | Le même dossier pour les données fictives : `demo/artefacts/` montre à quoi ressemble le résultat |
+| `docs/` | La modélisation mathématique |
+| `tests/` | Les tests |
+
+Un artefact est une table (CSV lisible dans Excel, et un classeur par étape), une figure (PNG) ou un fichier JSON.
+`artefacts/manifeste.json` les liste tous, avec leur description et leur date.
+
+## Les sept étapes
+
+| # | Étape | Ce qu'elle produit | Notebook |
+|---|---|---|---|
+| 0 | sources | État de chaque fichier attendu, période couverte | `00_Demarrage` |
+| 1 | classement | Pièces les plus consommées et les plus chères, FRU rebutées, pré-sélection (valeur, gisement, risque matière, risque supply) | `01_Classement_et_priorisation` |
+| 2 | flux | Composant × FRU × type de déchet ; FRU rebutées par semaine ; masse estimée contre masse pesée, marge d'erreur, cause d'écart | `02_Flux_entree` |
+| 3 | fiabilite | Défaillances précoces par origine de pièce (neuve, réparée, récupérée), forme de la défaillance | `03_Fiabilite` |
+| 4 | rex | Modèle de Rex : probabilité qu'une pièce extraite soit réutilisable, entraînement sur l'audit, métriques | `04_Modele_de_Rex` |
+| 5 | ligne | Ligne de démontage et de tri : trois options par pièce, plan optimal, comparaison au recycleur actuel, incertitude | `05_Ligne_demontage_tri` |
+| 6 | synthese | Tableau de décision, données à obtenir, outil des décideurs | `06_Synthese_decideurs` |
+
+## Démarrer
+
+Prérequis : Python 3.9 ou plus, `pandas`, `numpy`, `openpyxl`, `matplotlib`, Jupyter. `pyxlsb` seulement pour la
+première lecture du fichier de fiabilité.
+
+**Voir la démonstration**
+
+```bash
+python -m erc --demo
+```
+
+Les résultats sont dans `demo/artefacts/`. L'outil des décideurs est `demo/artefacts/outil/ERC_Outil_Decision.html` :
+il s'ouvre dans un navigateur, sans installation ni connexion.
+
+**Travailler sur les données réelles**
+
+1. Ouvrir `notebooks/00_Demarrage.ipynb` et indiquer une fois où sont les extractions :
+   `erc.memoriser_chemins(projet=r"...\ERC_Flux_Dechets_Ateliers")`. Les référentiels sont cherchés dans le dossier parent.
+2. Exécuter le notebook. Au premier lancement, le pipeline crée `parametres/ERC_Parametres.xlsx`, pré-rempli avec
+   les FRU rebutées et leurs pièces trouvées dans les données.
+3. Remplir le classeur : temps de démontage, coût horaire, prix des recycleurs, délais. Une cellule accepte un
+   nombre (`45`), une plage (`30|70`) ou un triangle (`30|45|70`). Une cellule vide reste « inconnu ».
+   Le pipeline ne réécrit jamais ce classeur.
+4. Relancer. Les notebooks 01 à 06 affichent les résultats ; `06_Synthese_decideurs` donne le tableau de décision
+   et l'outil.
+
+Fichiers de terrain facultatifs, à déposer dans le dossier des extractions :
+`Acquisition/pesees_hebdo.csv` (`Semaine;Flux;Masse mesurée (kg)`) et
+`Acquisition/audit_demontage.csv` (`Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`).
+
+## Règles du dossier
+
+- Une valeur inconnue reste inconnue : elle n'est jamais remplacée par zéro, et le résultat qui en dépend reste vide.
+- Chaque paramètre garde sa provenance : saisi, tiré des données, ou manquant.
+- Une estimation est présentée comme une estimation. Le MMICV est un coût standard, pas un prix de revente.
+- Un calcul qui échoue n'arrête pas le pipeline : il est inscrit dans la table « Anomalies ».
+
+## Tests
+
+```bash
+python -m pytest tests
+```
+
+La modélisation (ensembles, variables de décision, hypothèses, fonctions de coût et de valorisation, fonction
+objectif, modèle de Rex) est dans `docs/Modele_mathematique.md`.
