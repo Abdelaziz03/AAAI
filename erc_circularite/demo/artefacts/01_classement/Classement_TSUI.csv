@@ -1,0 +1,7 @@
+﻿Référence;Description;Ateliers;Familles;Pièces;PO;Jours avec sortie;MMICV unitaire (USD);Source MMICV;MMICV total (USD);Part du MMICV total;Rang pièces;Rang MMICV;Catégorie proposée;Benne;Poids unitaire (kg);Source poids;Fabricant;Nature réelle;Niveau de preuve;Kg (poids connus);Pièce posée
+P-3002;Tête de joystick;TSUI;Commande;268;228;95;56,0;fiche article;15008,0;0,278322793613115;2;1,0;Plastique;DIB;0,05;pesée (démo);Fabricant démo;Tête de joystick;démo;13,4;Neuve
+P-3001;Coque boîtier gris;TSUI;Commande;115;115;70;120,0;fiche article;13800,0;0,2559204792018248;3;2,0;Plastique;DIB;0,6;pesée (démo);Fabricant démo;Coque boîtier gris;démo;69,0;Neuve
+P-3005;Keypad controller board;TSUI;Commande;67;67;45;180,0;fiche article;12060,0;0,2236522448676817;5;3,0;Carte C;DEEE;0,2;pesée (démo);Fabricant démo;Keypad controller board;démo;13,4;Neuve
+P-3004;Cable harness boîtier;TSUI;Commande;77;77;59;140,0;fiche article;10780,0;0,1999146931735994;4;4,0;Câbles;DEEE;0,3;pesée (démo);Fabricant démo;Cable harness boîtier;démo;23,099999999999998;Neuve
+P-4001;Grille de protection;TSUI;Commande;43;43;37;40,0;fiche article;1720,0;0,0318973350889231;6;5,0;Métal;Métal;0,3;pesée (démo);Fabricant démo;Grille de protection;démo;12,9;Neuve
+P-3003;Soufflet caoutchouc;TSUI;Commande;370;277;106;1,5;fiche article;555,0;0,010292454054855998;1;6,0;Plastique;DIB;0,02;pesée (démo);Fabricant démo;Soufflet caoutchouc;démo;7,4;Neuve

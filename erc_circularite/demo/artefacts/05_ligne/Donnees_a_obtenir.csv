@@ -1,0 +1,8 @@
+﻿Paramètre;Donnée;Valeurs manquantes;FRU concernés;À demander à
+tri_min;Tri d'un exemplaire vers son flux de recyclage (minutes);4;1;Audit de démontage chronométré
+test_min;Test d'un exemplaire (minutes);3;1;Audit de démontage chronométré, qualité
+extraction_min;Extraction d'un exemplaire (minutes);3;1;Audit de démontage chronométré
+poids_kg;Poids d'un exemplaire (vide = classement matière);1;1;Pesée
+ouverture_min;Ouverture soignée du FRU, pour extraire des pièces à réemployer (minutes);1;1;Audit de démontage chronométré
+prix_recycleur_eur_kg;Prix payé par le recycleur acheteur (vide = référentiel des grades);1;1;Consultation des recycleurs
+valeur_eur;Valeur d'une pièce réemployée (vide = MMICV × fraction de la ligne);1;1;Finance supply chain

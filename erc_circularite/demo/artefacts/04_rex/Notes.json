@@ -1,0 +1,12 @@
+{
+ "lots_audit": 30,
+ "pieces_testees": 204.0,
+ "N0": 10,
+ "banc_essai": {
+  "q vrai": 0.6,
+  "q0": 0.2,
+  "Seuil q* (réemploi si q > q*)": 0.2692307692307692,
+  "Gain oracle par pièce (€)": 19.2
+ },
+ "banc_essai_synthetique": true
+}

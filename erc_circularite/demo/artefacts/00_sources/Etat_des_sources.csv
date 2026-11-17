@@ -1,0 +1,13 @@
+﻿Source;Fichier;État;Lignes;Détail;Sert à
+Extraction R26;ERC_R26_extraction_20260831_20261101.xlsx;chargé;737;20260831 → 20261101;consommations, FRU rebutées
+Extraction R26;ERC_R26_extraction_20260601_20260913.xlsx;chargé;1030;20260601 → 20260913;consommations, FRU rebutées
+FRU_info;FRU_info.xlsx;chargé;5;;atelier et famille de chaque FRU
+Classification matières;ERC_Classification_Cartes_resultats.xlsx;chargé;18;;type de déchet, benne, poids unitaire
+Référentiel des grades;ERC_Referentiel_Grades.xlsx;chargé;8;;prix recycleur par catégorie
+QueryComponents;ERC_Valorisation_MICV_v1.xlsx;chargé;23;;nomenclature de consommation, MMICV de repli
+QueryERC_Flow_In_Out;ERC_Valorisation_MICV_v1.xlsx;chargé;6;;poids et description des FRU
+Fiche article (vwAllItems);poids_items_vwAllItems.csv;chargé;19;;MMICV unitaire (coût standard)
+Fiabilité (cache);fiabilite_ELF_references_ERC.csv;chargé;132;;défaillances précoces par référence
+Pièces posées 2022-2023;poses_2022_2023_par_reference.csv;chargé;8;;dénominateur du taux de défaillance
+Pesées hebdomadaires;pesees_hebdo.csv;chargé;12;;masse mesurée par semaine et par flux
+Audit de démontage;audit_demontage.csv;chargé;30;;pièces testées et pièces bonnes (modèle de Rex)

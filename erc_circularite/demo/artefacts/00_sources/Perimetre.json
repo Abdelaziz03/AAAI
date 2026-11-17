@@ -1,0 +1,24 @@
+{
+ "mode": "DÉMONSTRATION (données fictives)",
+ "demo": true,
+ "periode": "du 01/06/2026 au 01/11/2026, 154 jours extraits",
+ "jours_extraits": 154,
+ "debut": "2026-06-01T00:00:00",
+ "fin": "2026-11-01T00:00:00",
+ "lignes_consommation": 1767,
+ "pieces_consommees": 2276.0,
+ "fru_rebutees": 273.0,
+ "regle_date_rebut": "plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer",
+ "ateliers_prioritaires": [
+  "MR",
+  "TSUI"
+ ],
+ "classeur_parametres": "absent : il sera créé à l'étape classement",
+ "genere_le": "2026-11-17T14:42:24",
+ "Mode": "DÉMONSTRATION (données fictives)",
+ "Dossier": "/home/user/AAAI/erc_circularite/demo",
+ "Extractions (projet)": "/home/user/AAAI/erc_circularite/demo/sources/ERC_Flux_Dechets_Ateliers",
+ "Référentiels (racine)": "/home/user/AAAI/erc_circularite/demo/sources",
+ "Artefacts": "/home/user/AAAI/erc_circularite/demo/artefacts",
+ "Paramètres": "/home/user/AAAI/erc_circularite/demo/parametres/ERC_Parametres.xlsx"
+}

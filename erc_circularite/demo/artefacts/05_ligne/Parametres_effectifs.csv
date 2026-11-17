@@ -1,0 +1,247 @@
+﻿FRU;Pièce;Paramètre;Valeur;Provenance;État
+(ligne);;cout_installation_eur;20000 | 30000 | 45000;saisi : DÉMO : valeur fictive;saisi
+(ligne);;amortissement_ans;5;saisi : DÉMO : valeur fictive;saisi
+(ligne);;couts_fixes_annuels_eur;6000;saisi : DÉMO : valeur fictive;saisi
+(ligne);;heures_operateur_an;900;saisi : DÉMO : valeur fictive;saisi
+(ligne);;taux_horaire_eur;38 | 42 | 48;saisi : DÉMO : valeur fictive;saisi
+(ligne);;cout_traitement_eur_kg;0.15 | 0.35;saisi : DÉMO : valeur fictive;saisi
+(ligne);;valeur_reemploi_frac;0.3 | 0.5 | 0.7;saisi : DÉMO : valeur fictive;saisi
+(ligne);;valeur_semaine_eur;0.5;saisi : DÉMO : valeur fictive;saisi
+(ligne);;taux_change_mmicv;0.92;saisi : DÉMO : valeur fictive;saisi
+FRU-A100-R;;rebut_an;243.455 | 312 | 378.182;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-A100-R;;poids_fru_kg;79;auto : fiche du FRU (Net weight);tiré des données
+FRU-A100-R;;ouverture_min;30 | 45 | 70;saisi;saisi
+FRU-A100-R;;ouverture_tri_min;15;saisi;saisi
+FRU-A100-R;P-1004;n_par_fru;1;saisi;saisi
+FRU-A100-R;P-1004;extraction_min;8 | 10 | 14;saisi;saisi
+FRU-A100-R;P-1004;test_min;15 | 20 | 30;saisi;saisi
+FRU-A100-R;P-1004;tri_min;2;saisi;saisi
+FRU-A100-R;P-1004;transport_eur;;manquant;manquant
+FRU-A100-R;P-1004;poids_kg;0.4;auto : classement matière (pesée (démo));tiré des données
+FRU-A100-R;P-1004;prix_recycleur_eur_kg;8;auto : référentiel des grades (Carte B);tiré des données
+FRU-A100-R;P-1004;valeur_eur;88.32 | 147.2 | 206.08;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A100-R;P-1004;delai_semaines;16;auto : onglet Supply;tiré des données
+FRU-A100-R;P-1004;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1004;p_reutilisable;0.259894 | 0.368981 | 0.485944;auto : modèle de Rex (38 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;P-1005;n_par_fru;1;saisi;saisi
+FRU-A100-R;P-1005;extraction_min;10;saisi;saisi
+FRU-A100-R;P-1005;test_min;20;saisi;saisi
+FRU-A100-R;P-1005;tri_min;2;saisi;saisi
+FRU-A100-R;P-1005;transport_eur;;manquant;manquant
+FRU-A100-R;P-1005;poids_kg;0.45;auto : classement matière (pesée (démo));tiré des données
+FRU-A100-R;P-1005;prix_recycleur_eur_kg;8;auto : référentiel des grades (Carte B);tiré des données
+FRU-A100-R;P-1005;valeur_eur;85.56 | 142.6 | 199.64;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A100-R;P-1005;delai_semaines;16;auto : onglet Supply;tiré des données
+FRU-A100-R;P-1005;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1005;p_reutilisable;0.468553 | 0.71662 | 0.910663;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;P-1001;n_par_fru;2;saisi;saisi
+FRU-A100-R;P-1001;extraction_min;6;saisi;saisi
+FRU-A100-R;P-1001;test_min;4;saisi;saisi
+FRU-A100-R;P-1001;tri_min;1;saisi;saisi
+FRU-A100-R;P-1001;transport_eur;;manquant;manquant
+FRU-A100-R;P-1001;poids_kg;0.35;auto : classement matière (pesée (démo));tiré des données
+FRU-A100-R;P-1001;prix_recycleur_eur_kg;2.5;auto : référentiel des grades (Composant de puissance);tiré des données
+FRU-A100-R;P-1001;valeur_eur;8.832 | 14.72 | 20.608;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A100-R;P-1001;delai_semaines;26;auto : onglet Supply;tiré des données
+FRU-A100-R;P-1001;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1001;p_reutilisable;0.431193 | 0.546504 | 0.658366;auto : modèle de Rex (41 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;P-1002;n_par_fru;2;saisi;saisi
+FRU-A100-R;P-1002;extraction_min;6;saisi;saisi
+FRU-A100-R;P-1002;test_min;4;saisi;saisi
+FRU-A100-R;P-1002;tri_min;1;saisi;saisi
+FRU-A100-R;P-1002;transport_eur;;manquant;manquant
+FRU-A100-R;P-1002;poids_kg;0.35;auto : classement matière (pesée (démo));tiré des données
+FRU-A100-R;P-1002;prix_recycleur_eur_kg;2.5;auto : référentiel des grades (Composant de puissance);tiré des données
+FRU-A100-R;P-1002;valeur_eur;6.9 | 11.5 | 16.1;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A100-R;P-1002;delai_semaines;26;auto : onglet Supply;tiré des données
+FRU-A100-R;P-1002;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1002;p_reutilisable;0.366734 | 0.627343 | 0.852308;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;P-1006;n_par_fru;3;saisi;saisi
+FRU-A100-R;P-1006;extraction_min;2;saisi;saisi
+FRU-A100-R;P-1006;test_min;1;saisi;saisi
+FRU-A100-R;P-1006;tri_min;0.5;saisi;saisi
+FRU-A100-R;P-1006;transport_eur;;manquant;manquant
+FRU-A100-R;P-1006;poids_kg;0.05;auto : classement matière (pesée (démo));tiré des données
+FRU-A100-R;P-1006;prix_recycleur_eur_kg;0.5;auto : référentiel des grades (Composant standard);tiré des données
+FRU-A100-R;P-1006;valeur_eur;1.242 | 2.07 | 2.898;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A100-R;P-1006;delai_semaines;;manquant;manquant
+FRU-A100-R;P-1006;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1006;p_reutilisable;0.425483 | 0.677934 | 0.886957;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;P-1007;n_par_fru;2;saisi;saisi
+FRU-A100-R;P-1007;extraction_min;2;saisi;saisi
+FRU-A100-R;P-1007;test_min;1;saisi;saisi
+FRU-A100-R;P-1007;tri_min;0.5;saisi;saisi
+FRU-A100-R;P-1007;transport_eur;;manquant;manquant
+FRU-A100-R;P-1007;poids_kg;0.08;auto : classement matière (pesée (démo));tiré des données
+FRU-A100-R;P-1007;prix_recycleur_eur_kg;0.5;auto : référentiel des grades (Composant standard);tiré des données
+FRU-A100-R;P-1007;valeur_eur;0.4968 | 0.828 | 1.1592;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A100-R;P-1007;delai_semaines;;manquant;manquant
+FRU-A100-R;P-1007;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1007;p_reutilisable;0.487645 | 0.732244 | 0.925677;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;P-1003;n_par_fru;4;saisi;saisi
+FRU-A100-R;P-1003;extraction_min;3;saisi;saisi
+FRU-A100-R;P-1003;test_min;2;saisi;saisi
+FRU-A100-R;P-1003;tri_min;0.5;saisi;saisi
+FRU-A100-R;P-1003;transport_eur;;manquant;manquant
+FRU-A100-R;P-1003;poids_kg;;manquant;manquant
+FRU-A100-R;P-1003;prix_recycleur_eur_kg;0.6;auto : référentiel des grades (Condensateur);tiré des données
+FRU-A100-R;P-1003;valeur_eur;;manquant;manquant
+FRU-A100-R;P-1003;delai_semaines;;manquant;manquant
+FRU-A100-R;P-1003;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A100-R;P-1003;p_reutilisable;0.154566 | 0.249176 | 0.353638;auto : modèle de Rex (40 pièces testées, a priori de consommation);tiré des données
+FRU-A100-R;CARCASSE;poids_kg;76.44;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
+FRU-A100-R;CARCASSE;prix_recycleur_eur_kg;0.12 | 0.25;saisi;saisi
+FRU-A100-R;CARCASSE;tri_min;10;saisi;saisi
+FRU-A200-R;;rebut_an;87.4545 | 115.818 | 141.818;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-A200-R;;poids_fru_kg;62;auto : fiche du FRU (Net weight);tiré des données
+FRU-A200-R;;ouverture_min;25 | 35 | 50;saisi;saisi
+FRU-A200-R;;ouverture_tri_min;12;saisi;saisi
+FRU-A200-R;P-2001;n_par_fru;1;saisi;saisi
+FRU-A200-R;P-2001;extraction_min;12;saisi;saisi
+FRU-A200-R;P-2001;test_min;20;saisi;saisi
+FRU-A200-R;P-2001;tri_min;2;saisi;saisi
+FRU-A200-R;P-2001;transport_eur;;manquant;manquant
+FRU-A200-R;P-2001;poids_kg;0.6;auto : classement matière (pesée (démo));tiré des données
+FRU-A200-R;P-2001;prix_recycleur_eur_kg;8;auto : référentiel des grades (Carte B);tiré des données
+FRU-A200-R;P-2001;valeur_eur;57.96 | 96.6 | 135.24;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A200-R;P-2001;delai_semaines;12;auto : onglet Supply;tiré des données
+FRU-A200-R;P-2001;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A200-R;P-2001;p_reutilisable;0.117622 | 0.329564 | 0.585318;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A200-R;P-1002;n_par_fru;2;saisi;saisi
+FRU-A200-R;P-1002;extraction_min;6;saisi;saisi
+FRU-A200-R;P-1002;test_min;4;saisi;saisi
+FRU-A200-R;P-1002;tri_min;1;saisi;saisi
+FRU-A200-R;P-1002;transport_eur;;manquant;manquant
+FRU-A200-R;P-1002;poids_kg;0.35;auto : classement matière (pesée (démo));tiré des données
+FRU-A200-R;P-1002;prix_recycleur_eur_kg;2.5;auto : référentiel des grades (Composant de puissance);tiré des données
+FRU-A200-R;P-1002;valeur_eur;6.9 | 11.5 | 16.1;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A200-R;P-1002;delai_semaines;26;auto : onglet Supply;tiré des données
+FRU-A200-R;P-1002;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A200-R;P-1002;p_reutilisable;0.375807 | 0.630679 | 0.856258;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A200-R;P-2002;n_par_fru;2;saisi;saisi
+FRU-A200-R;P-2002;extraction_min;5;saisi;saisi
+FRU-A200-R;P-2002;test_min;3;saisi;saisi
+FRU-A200-R;P-2002;tri_min;1;saisi;saisi
+FRU-A200-R;P-2002;transport_eur;;manquant;manquant
+FRU-A200-R;P-2002;poids_kg;0.25;auto : classement matière (pesée (démo));tiré des données
+FRU-A200-R;P-2002;prix_recycleur_eur_kg;0.5;auto : référentiel des grades (Composant standard);tiré des données
+FRU-A200-R;P-2002;valeur_eur;4.968 | 8.28 | 11.592;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A200-R;P-2002;delai_semaines;;manquant;manquant
+FRU-A200-R;P-2002;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A200-R;P-2002;p_reutilisable;0.22828 | 0.471027 | 0.723798;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A200-R;P-1007;n_par_fru;2;saisi;saisi
+FRU-A200-R;P-1007;extraction_min;2;saisi;saisi
+FRU-A200-R;P-1007;test_min;1;saisi;saisi
+FRU-A200-R;P-1007;tri_min;0.5;saisi;saisi
+FRU-A200-R;P-1007;transport_eur;;manquant;manquant
+FRU-A200-R;P-1007;poids_kg;0.08;auto : classement matière (pesée (démo));tiré des données
+FRU-A200-R;P-1007;prix_recycleur_eur_kg;0.5;auto : référentiel des grades (Composant standard);tiré des données
+FRU-A200-R;P-1007;valeur_eur;0.4968 | 0.828 | 1.1592;auto : MMICV × fraction de réemploi;tiré des données
+FRU-A200-R;P-1007;delai_semaines;;manquant;manquant
+FRU-A200-R;P-1007;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-A200-R;P-1007;p_reutilisable;0.429376 | 0.67817 | 0.888332;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-A200-R;CARCASSE;poids_kg;60.04;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
+FRU-A200-R;CARCASSE;prix_recycleur_eur_kg;0.12 | 0.25;saisi;saisi
+FRU-A200-R;CARCASSE;tri_min;10;saisi;saisi
+FRU-B300-R;;rebut_an;70.9091 | 94.5455 | 118.182;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-B300-R;;poids_fru_kg;5.5;auto : fiche du FRU (Net weight);tiré des données
+FRU-B300-R;;ouverture_min;10 | 15 | 25;saisi;saisi
+FRU-B300-R;;ouverture_tri_min;6;saisi;saisi
+FRU-B300-R;P-3001;n_par_fru;1;saisi;saisi
+FRU-B300-R;P-3001;extraction_min;5;saisi;saisi
+FRU-B300-R;P-3001;test_min;2;saisi;saisi
+FRU-B300-R;P-3001;tri_min;1;saisi;saisi
+FRU-B300-R;P-3001;transport_eur;;manquant;manquant
+FRU-B300-R;P-3001;poids_kg;0.6;auto : classement matière (pesée (démo));tiré des données
+FRU-B300-R;P-3001;prix_recycleur_eur_kg;0.05;auto : référentiel des grades (Plastique);tiré des données
+FRU-B300-R;P-3001;valeur_eur;33.12 | 55.2 | 77.28;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B300-R;P-3001;delai_semaines;;manquant;manquant
+FRU-B300-R;P-3001;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B300-R;P-3001;p_reutilisable;0.331445 | 0.444929 | 0.561614;auto : modèle de Rex (39 pièces testées, a priori de consommation);tiré des données
+FRU-B300-R;P-3002;n_par_fru;2;saisi;saisi
+FRU-B300-R;P-3002;extraction_min;4;saisi;saisi
+FRU-B300-R;P-3002;test_min;3;saisi;saisi
+FRU-B300-R;P-3002;tri_min;0.5;saisi;saisi
+FRU-B300-R;P-3002;transport_eur;;manquant;manquant
+FRU-B300-R;P-3002;poids_kg;0.05;auto : classement matière (pesée (démo));tiré des données
+FRU-B300-R;P-3002;prix_recycleur_eur_kg;0.05;auto : référentiel des grades (Plastique);tiré des données
+FRU-B300-R;P-3002;valeur_eur;15.456 | 25.76 | 36.064;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B300-R;P-3002;delai_semaines;;manquant;manquant
+FRU-B300-R;P-3002;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B300-R;P-3002;p_reutilisable;0.59624 | 0.698996 | 0.794071;auto : modèle de Rex (46 pièces testées, a priori de consommation);tiré des données
+FRU-B300-R;P-3004;n_par_fru;1;saisi;saisi
+FRU-B300-R;P-3004;extraction_min;6;saisi;saisi
+FRU-B300-R;P-3004;test_min;5;saisi;saisi
+FRU-B300-R;P-3004;tri_min;1;saisi;saisi
+FRU-B300-R;P-3004;transport_eur;;manquant;manquant
+FRU-B300-R;P-3004;poids_kg;0.3;auto : classement matière (pesée (démo));tiré des données
+FRU-B300-R;P-3004;prix_recycleur_eur_kg;1.8;auto : référentiel des grades (Câbles);tiré des données
+FRU-B300-R;P-3004;valeur_eur;38.64 | 64.4 | 90.16;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B300-R;P-3004;delai_semaines;;manquant;manquant
+FRU-B300-R;P-3004;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B300-R;P-3004;p_reutilisable;0.34867 | 0.604016 | 0.834487;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-B300-R;P-3005;n_par_fru;1;saisi;saisi
+FRU-B300-R;P-3005;extraction_min;7;saisi;saisi
+FRU-B300-R;P-3005;test_min;12;saisi;saisi
+FRU-B300-R;P-3005;tri_min;1;saisi;saisi
+FRU-B300-R;P-3005;transport_eur;;manquant;manquant
+FRU-B300-R;P-3005;poids_kg;0.2;auto : classement matière (pesée (démo));tiré des données
+FRU-B300-R;P-3005;prix_recycleur_eur_kg;3;auto : référentiel des grades (Carte C);tiré des données
+FRU-B300-R;P-3005;valeur_eur;49.68 | 82.8 | 115.92;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B300-R;P-3005;delai_semaines;10;auto : onglet Supply;tiré des données
+FRU-B300-R;P-3005;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B300-R;P-3005;p_reutilisable;0.426017 | 0.678985 | 0.887649;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-B300-R;P-3003;n_par_fru;2;saisi;saisi
+FRU-B300-R;P-3003;extraction_min;2;saisi;saisi
+FRU-B300-R;P-3003;test_min;1;saisi;saisi
+FRU-B300-R;P-3003;tri_min;0.3;saisi;saisi
+FRU-B300-R;P-3003;transport_eur;;manquant;manquant
+FRU-B300-R;P-3003;poids_kg;0.02;auto : classement matière (pesée (démo));tiré des données
+FRU-B300-R;P-3003;prix_recycleur_eur_kg;0.05;auto : référentiel des grades (Plastique);tiré des données
+FRU-B300-R;P-3003;valeur_eur;0.414 | 0.69 | 0.966;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B300-R;P-3003;delai_semaines;;manquant;manquant
+FRU-B300-R;P-3003;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B300-R;P-3003;p_reutilisable;0.0667357 | 0.251987 | 0.492026;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-B300-R;CARCASSE;poids_kg;4.26;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
+FRU-B300-R;CARCASSE;prix_recycleur_eur_kg;0.12 | 0.25;saisi;saisi
+FRU-B300-R;CARCASSE;tri_min;10;saisi;saisi
+FRU-B400-R;;rebut_an;18.9091 | 35.4545 | 54.3636;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-B400-R;;poids_fru_kg;6.3;auto : fiche du FRU (Net weight);tiré des données
+FRU-B400-R;;ouverture_min;;manquant;manquant
+FRU-B400-R;;ouverture_tri_min;;manquant;manquant
+FRU-B400-R;P-3002;n_par_fru;2;auto : maximum observé sur un même PO (minimum, à confirmer par l'audit);tiré des données
+FRU-B400-R;P-3002;extraction_min;;manquant;manquant
+FRU-B400-R;P-3002;test_min;;manquant;manquant
+FRU-B400-R;P-3002;tri_min;;manquant;manquant
+FRU-B400-R;P-3002;transport_eur;;manquant;manquant
+FRU-B400-R;P-3002;poids_kg;0.05;auto : classement matière (pesée (démo));tiré des données
+FRU-B400-R;P-3002;prix_recycleur_eur_kg;0.05;auto : référentiel des grades (Plastique);tiré des données
+FRU-B400-R;P-3002;valeur_eur;15.456 | 25.76 | 36.064;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B400-R;P-3002;delai_semaines;;manquant;manquant
+FRU-B400-R;P-3002;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B400-R;P-3002;p_reutilisable;0.342235 | 0.59589 | 0.824961;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-B400-R;P-3005;n_par_fru;1;auto : maximum observé sur un même PO (minimum, à confirmer par l'audit);tiré des données
+FRU-B400-R;P-3005;extraction_min;;manquant;manquant
+FRU-B400-R;P-3005;test_min;;manquant;manquant
+FRU-B400-R;P-3005;tri_min;;manquant;manquant
+FRU-B400-R;P-3005;transport_eur;;manquant;manquant
+FRU-B400-R;P-3005;poids_kg;0.2;auto : classement matière (pesée (démo));tiré des données
+FRU-B400-R;P-3005;prix_recycleur_eur_kg;3;auto : référentiel des grades (Carte C);tiré des données
+FRU-B400-R;P-3005;valeur_eur;49.68 | 82.8 | 115.92;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B400-R;P-3005;delai_semaines;10;auto : onglet Supply;tiré des données
+FRU-B400-R;P-3005;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B400-R;P-3005;p_reutilisable;0.601968 | 0.821918 | 0.969142;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-B400-R;P-4001;n_par_fru;1;auto : maximum observé sur un même PO (minimum, à confirmer par l'audit);tiré des données
+FRU-B400-R;P-4001;extraction_min;;manquant;manquant
+FRU-B400-R;P-4001;test_min;;manquant;manquant
+FRU-B400-R;P-4001;tri_min;;manquant;manquant
+FRU-B400-R;P-4001;transport_eur;;manquant;manquant
+FRU-B400-R;P-4001;poids_kg;0.3;auto : classement matière (pesée (démo));tiré des données
+FRU-B400-R;P-4001;prix_recycleur_eur_kg;0.25;auto : référentiel des grades (Métal);tiré des données
+FRU-B400-R;P-4001;valeur_eur;11.04 | 18.4 | 25.76;auto : MMICV × fraction de réemploi;tiré des données
+FRU-B400-R;P-4001;delai_semaines;;manquant;manquant
+FRU-B400-R;P-4001;valeur_semaine_eur;0.5;auto : défaut de la ligne;tiré des données
+FRU-B400-R;P-4001;p_reutilisable;0.177443 | 0.410959 | 0.664926;auto : modèle de Rex (0 pièces testées, a priori de consommation);tiré des données
+FRU-B400-R;CARCASSE;poids_kg;5.7;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
+FRU-B400-R;CARCASSE;prix_recycleur_eur_kg;;manquant;manquant
+FRU-B400-R;CARCASSE;tri_min;;manquant;manquant

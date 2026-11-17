@@ -1,0 +1,6704 @@
+{
+ "meta": {
+  "genere_le": "2026-11-17T14:42:34",
+  "donnees": "démonstration",
+  "periode": "du 01/06/2026 au 01/11/2026, 154 jours extraits",
+  "jours_extraits": 154,
+  "ateliers": [
+   "MR",
+   "TSUI"
+  ],
+  "garantie_jours": 365
+ },
+ "ligne": {
+  "cout_installation_eur": {
+   "valeur": 30000.0,
+   "bas": 20000.0,
+   "haut": 45000.0,
+   "loi": "triangulaire",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Investissement d'installation de la ligne (postes, outillage antistatique, banc de test)",
+   "unite": "€",
+   "a_demander_a": "Méthodes, devis fournisseurs"
+  },
+  "amortissement_ans": {
+   "valeur": 5.0,
+   "bas": 5.0,
+   "haut": 5.0,
+   "loi": "fixe",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Durée d'amortissement de l'installation",
+   "unite": "ans",
+   "a_demander_a": "Finance"
+  },
+  "couts_fixes_annuels_eur": {
+   "valeur": 6000.0,
+   "bas": 6000.0,
+   "haut": 6000.0,
+   "loi": "fixe",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Coûts fixes annuels de la ligne (place, encadrement, étalonnage)",
+   "unite": "€/an",
+   "a_demander_a": "Responsables d'atelier, finance"
+  },
+  "heures_operateur_an": {
+   "valeur": 900.0,
+   "bas": 900.0,
+   "haut": 900.0,
+   "loi": "fixe",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Heures opérateur disponibles par an, hors plan de charge",
+   "unite": "h/an",
+   "a_demander_a": "Responsables d'atelier"
+  },
+  "taux_horaire_eur": {
+   "valeur": 42.0,
+   "bas": 38.0,
+   "haut": 48.0,
+   "loi": "triangulaire",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Coût horaire d'un opérateur hors plan de charge (défaut de tous les FRU)",
+   "unite": "€/h",
+   "a_demander_a": "Responsables d'atelier"
+  },
+  "cout_traitement_eur_kg": {
+   "valeur": 0.25,
+   "bas": 0.15,
+   "haut": 0.35,
+   "loi": "uniforme",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Coût de traitement du recycleur actuel (0 si gratuit, négatif s'il paie)",
+   "unite": "€/kg",
+   "a_demander_a": "Responsable déchets, contrat actuel"
+  },
+  "valeur_reemploi_frac": {
+   "valeur": 0.5,
+   "bas": 0.3,
+   "haut": 0.7,
+   "loi": "triangulaire",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Valeur d'une pièce réemployée, en fraction du MMICV (défaut des pièces sans valeur saisie)",
+   "unite": "0 à 1",
+   "a_demander_a": "Finance supply chain"
+  },
+  "valeur_semaine_eur": {
+   "valeur": 0.5,
+   "bas": 0.5,
+   "haut": 0.5,
+   "loi": "fixe",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Valeur d'une semaine de délai d'approvisionnement évitée (défaut de toutes les pièces)",
+   "unite": "€/semaine",
+   "a_demander_a": "Achats, service"
+  },
+  "taux_change_mmicv": {
+   "valeur": 0.92,
+   "bas": 0.92,
+   "haut": 0.92,
+   "loi": "fixe",
+   "provenance": "saisi : DÉMO : valeur fictive",
+   "libelle": "Conversion du MMICV vers l'euro (1 si le MMICV est déjà en euros)",
+   "unite": "€ par unité de MMICV",
+   "a_demander_a": "Finance"
+  }
+ },
+ "frus": [
+  {
+   "fru": "FRU-A100-R",
+   "description": "Amplificateur de gradient (démo)",
+   "atelier": "MR",
+   "pieces": [
+    {
+     "piece": "P-1004",
+     "description": "Gate Driver Board",
+     "type_piece": "Carte électronique",
+     "type_dechet": "Carte B",
+     "benne": "DEEE",
+     "risque_matiere": 1.0,
+     "crm": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 10.0,
+      "bas": 8.0,
+      "haut": 14.0,
+      "loi": "triangulaire",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 20.0,
+      "bas": 15.0,
+      "haut": 30.0,
+      "loi": "triangulaire",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.4,
+      "bas": 0.4,
+      "haut": 0.4,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 8.0,
+      "bas": 8.0,
+      "haut": 8.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte B)"
+     },
+     "valeur_eur": {
+      "valeur": 147.20000000000002,
+      "bas": 88.32000000000001,
+      "haut": 206.08,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 16.0,
+      "bas": 16.0,
+      "haut": 16.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.36898092369477914,
+      "bas": 0.25989420249411327,
+      "haut": 0.4859436054272534,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (38 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1005",
+     "description": "Control board assembly",
+     "type_piece": "Carte électronique",
+     "type_dechet": "Carte B",
+     "benne": "DEEE",
+     "risque_matiere": 1.0,
+     "crm": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 10.0,
+      "bas": 10.0,
+      "haut": 10.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 20.0,
+      "bas": 20.0,
+      "haut": 20.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.45,
+      "bas": 0.45,
+      "haut": 0.45,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 8.0,
+      "bas": 8.0,
+      "haut": 8.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte B)"
+     },
+     "valeur_eur": {
+      "valeur": 142.6,
+      "bas": 85.55999999999999,
+      "haut": 199.64,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 16.0,
+      "bas": 16.0,
+      "haut": 16.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.7166204819277109,
+      "bas": 0.4685528020347304,
+      "haut": 0.910663200883362,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1001",
+     "description": "IGBT 400A 1200V",
+     "type_piece": "IGBT / module de puissance",
+     "type_dechet": "Composant de puissance",
+     "benne": "DEEE",
+     "risque_matiere": 0.75,
+     "crm": "cuivre, bauxite/alumine/aluminium, silicium métal",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 6.0,
+      "bas": 6.0,
+      "haut": 6.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 4.0,
+      "bas": 4.0,
+      "haut": 4.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.35,
+      "bas": 0.35,
+      "haut": 0.35,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 2.5,
+      "bas": 2.5,
+      "haut": 2.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant de puissance)"
+     },
+     "valeur_eur": {
+      "valeur": 14.72,
+      "bas": 8.832,
+      "haut": 20.608,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 26.0,
+      "bas": 26.0,
+      "haut": 26.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.5465036617056461,
+      "bas": 0.43119306206260977,
+      "haut": 0.6583664969653091,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (41 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1002",
+     "description": "IGBT 400A 600V",
+     "type_piece": "IGBT / module de puissance",
+     "type_dechet": "Composant de puissance",
+     "benne": "DEEE",
+     "risque_matiere": 0.75,
+     "crm": "cuivre, bauxite/alumine/aluminium, silicium métal",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 6.0,
+      "bas": 6.0,
+      "haut": 6.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 4.0,
+      "bas": 4.0,
+      "haut": 4.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.35,
+      "bas": 0.35,
+      "haut": 0.35,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 2.5,
+      "bas": 2.5,
+      "haut": 2.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant de puissance)"
+     },
+     "valeur_eur": {
+      "valeur": 11.5,
+      "bas": 6.8999999999999995,
+      "haut": 16.099999999999998,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 26.0,
+      "bas": 26.0,
+      "haut": 26.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.627343373493976,
+      "bas": 0.3667341594524756,
+      "haut": 0.8523083645792162,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1006",
+     "description": "Bus resistance 33k ohm 10W",
+     "type_piece": "Résistance de puissance",
+     "type_dechet": "Composant standard",
+     "benne": "DEEE",
+     "risque_matiere": 0.5,
+     "crm": "nickel, cuivre",
+     "n_par_fru": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
+     },
+     "valeur_eur": {
+      "valeur": 2.0700000000000003,
+      "bas": 1.2420000000000002,
+      "haut": 2.898,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.677933734939759,
+      "bas": 0.4254833183362979,
+      "haut": 0.8869566387780172,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1007",
+     "description": "Protection fuse 100A high speed",
+     "type_piece": "Fusible",
+     "type_dechet": "Composant standard",
+     "benne": "DEEE",
+     "risque_matiere": 0.25,
+     "crm": "cuivre",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.08,
+      "bas": 0.08,
+      "haut": 0.08,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
+     },
+     "valeur_eur": {
+      "valeur": 0.8280000000000001,
+      "bas": 0.4968,
+      "haut": 1.1592,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.7322439759036145,
+      "bas": 0.48764538714797584,
+      "haut": 0.9256769000204049,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1003",
+     "description": "AL Electrolytic Capacitor 450V 4700uF 105degC",
+     "type_piece": "Condensateur électrolytique",
+     "type_dechet": "Condensateur",
+     "benne": "DEEE",
+     "risque_matiere": 0.25,
+     "crm": "bauxite/alumine/aluminium",
+     "n_par_fru": {
+      "valeur": 4.0,
+      "bas": 4.0,
+      "haut": 4.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.6,
+      "bas": 0.6,
+      "haut": 0.6,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Condensateur)"
+     },
+     "valeur_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.24917560240963854,
+      "bas": 0.1545663046856326,
+      "haut": 0.3536378223547302,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (40 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "CARCASSE",
+     "description": "Châssis et reste du FRU",
+     "type_piece": "Carcasse",
+     "type_dechet": null,
+     "benne": null,
+     "risque_matiere": null,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": ""
+     },
+     "tri_min": {
+      "valeur": 10.0,
+      "bas": 10.0,
+      "haut": 10.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 76.44,
+      "bas": 76.44,
+      "haut": 76.44,
+      "loi": "fixe",
+      "provenance": "auto : poids du FRU moins les pièces listées au poids connu"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.185,
+      "bas": 0.12,
+      "haut": 0.25,
+      "loi": "uniforme",
+      "provenance": "saisi"
+     }
+    }
+   ],
+   "rebut_an": {
+    "valeur": 312.0,
+    "bas": 243.45454545454544,
+    "haut": 378.1818181818182,
+    "loi": "triangulaire",
+    "provenance": "auto : suivi hebdomadaire (22 semaines complètes)"
+   },
+   "poids_fru_kg": {
+    "valeur": 79.0,
+    "bas": 79.0,
+    "haut": 79.0,
+    "loi": "fixe",
+    "provenance": "auto : fiche du FRU (Net weight)"
+   },
+   "ouverture_min": {
+    "valeur": 45.0,
+    "bas": 30.0,
+    "haut": 70.0,
+    "loi": "triangulaire",
+    "provenance": "saisi"
+   },
+   "ouverture_tri_min": {
+    "valeur": 15.0,
+    "bas": 15.0,
+    "haut": 15.0,
+    "loi": "fixe",
+    "provenance": "saisi"
+   },
+   "taux_horaire_eur": {
+    "valeur": null,
+    "bas": null,
+    "haut": null,
+    "loi": null,
+    "provenance": "manquant"
+   }
+  },
+  {
+   "fru": "FRU-A200-R",
+   "description": "Alimentation de puissance (démo)",
+   "atelier": "MR",
+   "pieces": [
+    {
+     "piece": "P-2001",
+     "description": "Power supply board",
+     "type_piece": "Carte électronique",
+     "type_dechet": "Carte B",
+     "benne": "DEEE",
+     "risque_matiere": 1.0,
+     "crm": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 12.0,
+      "bas": 12.0,
+      "haut": 12.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 20.0,
+      "bas": 20.0,
+      "haut": 20.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.6,
+      "bas": 0.6,
+      "haut": 0.6,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 8.0,
+      "bas": 8.0,
+      "haut": 8.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte B)"
+     },
+     "valeur_eur": {
+      "valeur": 96.60000000000001,
+      "bas": 57.96,
+      "haut": 135.24,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 12.0,
+      "bas": 12.0,
+      "haut": 12.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.3295636363636364,
+      "bas": 0.11762243766596686,
+      "haut": 0.5853181658329776,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1002",
+     "description": "IGBT 400A 600V",
+     "type_piece": "IGBT / module de puissance",
+     "type_dechet": "Composant de puissance",
+     "benne": "DEEE",
+     "risque_matiere": 0.75,
+     "crm": "cuivre, bauxite/alumine/aluminium, silicium métal",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 6.0,
+      "bas": 6.0,
+      "haut": 6.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 4.0,
+      "bas": 4.0,
+      "haut": 4.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.35,
+      "bas": 0.35,
+      "haut": 0.35,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 2.5,
+      "bas": 2.5,
+      "haut": 2.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant de puissance)"
+     },
+     "valeur_eur": {
+      "valeur": 11.5,
+      "bas": 6.8999999999999995,
+      "haut": 16.099999999999998,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 26.0,
+      "bas": 26.0,
+      "haut": 26.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.6306790909090909,
+      "bas": 0.37580715948597027,
+      "haut": 0.8562575816371267,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-2002",
+     "description": "Cooling fan 120mm",
+     "type_piece": "Ventilateur / moteur",
+     "type_dechet": "Composant standard",
+     "benne": "DEEE",
+     "risque_matiere": 0.5,
+     "crm": "cuivre, terres rares légères",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 5.0,
+      "bas": 5.0,
+      "haut": 5.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.25,
+      "bas": 0.25,
+      "haut": 0.25,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
+     },
+     "valeur_eur": {
+      "valeur": 8.280000000000001,
+      "bas": 4.968000000000001,
+      "haut": 11.592,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.47102727272727274,
+      "bas": 0.22827985559780842,
+      "haut": 0.7237982585368566,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-1007",
+     "description": "Protection fuse 100A high speed",
+     "type_piece": "Fusible",
+     "type_dechet": "Composant standard",
+     "benne": "DEEE",
+     "risque_matiere": 0.25,
+     "crm": "cuivre",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.08,
+      "bas": 0.08,
+      "haut": 0.08,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Composant standard)"
+     },
+     "valeur_eur": {
+      "valeur": 0.8280000000000001,
+      "bas": 0.4968,
+      "haut": 1.1592,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.6781704545454545,
+      "bas": 0.42937578719058195,
+      "haut": 0.8883315950315324,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "CARCASSE",
+     "description": "Châssis et reste du FRU",
+     "type_piece": "Carcasse",
+     "type_dechet": null,
+     "benne": null,
+     "risque_matiere": null,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": ""
+     },
+     "tri_min": {
+      "valeur": 10.0,
+      "bas": 10.0,
+      "haut": 10.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 60.04,
+      "bas": 60.04,
+      "haut": 60.04,
+      "loi": "fixe",
+      "provenance": "auto : poids du FRU moins les pièces listées au poids connu"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.185,
+      "bas": 0.12,
+      "haut": 0.25,
+      "loi": "uniforme",
+      "provenance": "saisi"
+     }
+    }
+   ],
+   "rebut_an": {
+    "valeur": 115.81818181818181,
+    "bas": 87.45454545454545,
+    "haut": 141.8181818181818,
+    "loi": "triangulaire",
+    "provenance": "auto : suivi hebdomadaire (22 semaines complètes)"
+   },
+   "poids_fru_kg": {
+    "valeur": 62.0,
+    "bas": 62.0,
+    "haut": 62.0,
+    "loi": "fixe",
+    "provenance": "auto : fiche du FRU (Net weight)"
+   },
+   "ouverture_min": {
+    "valeur": 35.0,
+    "bas": 25.0,
+    "haut": 50.0,
+    "loi": "triangulaire",
+    "provenance": "saisi"
+   },
+   "ouverture_tri_min": {
+    "valeur": 12.0,
+    "bas": 12.0,
+    "haut": 12.0,
+    "loi": "fixe",
+    "provenance": "saisi"
+   },
+   "taux_horaire_eur": {
+    "valeur": null,
+    "bas": null,
+    "haut": null,
+    "loi": null,
+    "provenance": "manquant"
+   }
+  },
+  {
+   "fru": "FRU-B300-R",
+   "description": "Boîtier de commande (démo)",
+   "atelier": "TSUI",
+   "pieces": [
+    {
+     "piece": "P-3001",
+     "description": "Coque boîtier gris",
+     "type_piece": "Pièce plastique / mécanique",
+     "type_dechet": "Plastique",
+     "benne": "DIB",
+     "risque_matiere": 0.0,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 5.0,
+      "bas": 5.0,
+      "haut": 5.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.6,
+      "bas": 0.6,
+      "haut": 0.6,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
+     },
+     "valeur_eur": {
+      "valeur": 55.2,
+      "bas": 33.12,
+      "haut": 77.28,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.444929379376384,
+      "bas": 0.33144473362419374,
+      "haut": 0.5616141006555486,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (39 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-3002",
+     "description": "Tête de joystick",
+     "type_piece": "Pièce plastique / mécanique",
+     "type_dechet": "Plastique",
+     "benne": "DIB",
+     "risque_matiere": 0.0,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 4.0,
+      "bas": 4.0,
+      "haut": 4.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
+     },
+     "valeur_eur": {
+      "valeur": 25.76,
+      "bas": 15.456,
+      "haut": 36.064,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.6989962557603686,
+      "bas": 0.5962402463076093,
+      "haut": 0.7940706912098472,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (46 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-3004",
+     "description": "Cable harness boîtier",
+     "type_piece": "Câble / faisceau",
+     "type_dechet": "Câbles",
+     "benne": "DEEE",
+     "risque_matiere": 0.25,
+     "crm": "cuivre",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 6.0,
+      "bas": 6.0,
+      "haut": 6.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 5.0,
+      "bas": 5.0,
+      "haut": 5.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.3,
+      "bas": 0.3,
+      "haut": 0.3,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 1.8,
+      "bas": 1.8,
+      "haut": 1.8,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Câbles)"
+     },
+     "valeur_eur": {
+      "valeur": 64.4,
+      "bas": 38.64,
+      "haut": 90.16,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.604016129032258,
+      "bas": 0.3486703966725123,
+      "haut": 0.8344867062890486,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-3005",
+     "description": "Keypad controller board",
+     "type_piece": "Carte électronique",
+     "type_dechet": "Carte C",
+     "benne": "DEEE",
+     "risque_matiere": 1.0,
+     "crm": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 7.0,
+      "bas": 7.0,
+      "haut": 7.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 12.0,
+      "bas": 12.0,
+      "haut": 12.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.2,
+      "bas": 0.2,
+      "haut": 0.2,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte C)"
+     },
+     "valeur_eur": {
+      "valeur": 82.8,
+      "bas": 49.68,
+      "haut": 115.91999999999999,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 10.0,
+      "bas": 10.0,
+      "haut": 10.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.6789853372434017,
+      "bas": 0.42601653762705893,
+      "haut": 0.8876491032330892,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-3003",
+     "description": "Soufflet caoutchouc",
+     "type_piece": "Pièce plastique / mécanique",
+     "type_dechet": "Plastique",
+     "benne": "DIB",
+     "risque_matiere": 0.0,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "extraction_min": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "test_min": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "tri_min": {
+      "valeur": 0.3,
+      "bas": 0.3,
+      "haut": 0.3,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 0.02,
+      "bas": 0.02,
+      "haut": 0.02,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
+     },
+     "valeur_eur": {
+      "valeur": 0.6900000000000001,
+      "bas": 0.41400000000000003,
+      "haut": 0.966,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.2519868035190616,
+      "bas": 0.06673572320725972,
+      "haut": 0.4920261200674518,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "CARCASSE",
+     "description": "Châssis et reste du FRU",
+     "type_piece": "Carcasse",
+     "type_dechet": null,
+     "benne": null,
+     "risque_matiere": null,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": ""
+     },
+     "tri_min": {
+      "valeur": 10.0,
+      "bas": 10.0,
+      "haut": 10.0,
+      "loi": "fixe",
+      "provenance": "saisi"
+     },
+     "poids_kg": {
+      "valeur": 4.26,
+      "bas": 4.26,
+      "haut": 4.26,
+      "loi": "fixe",
+      "provenance": "auto : poids du FRU moins les pièces listées au poids connu"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.185,
+      "bas": 0.12,
+      "haut": 0.25,
+      "loi": "uniforme",
+      "provenance": "saisi"
+     }
+    }
+   ],
+   "rebut_an": {
+    "valeur": 94.54545454545455,
+    "bas": 70.9090909090909,
+    "haut": 118.18181818181819,
+    "loi": "triangulaire",
+    "provenance": "auto : suivi hebdomadaire (22 semaines complètes)"
+   },
+   "poids_fru_kg": {
+    "valeur": 5.5,
+    "bas": 5.5,
+    "haut": 5.5,
+    "loi": "fixe",
+    "provenance": "auto : fiche du FRU (Net weight)"
+   },
+   "ouverture_min": {
+    "valeur": 15.0,
+    "bas": 10.0,
+    "haut": 25.0,
+    "loi": "triangulaire",
+    "provenance": "saisi"
+   },
+   "ouverture_tri_min": {
+    "valeur": 6.0,
+    "bas": 6.0,
+    "haut": 6.0,
+    "loi": "fixe",
+    "provenance": "saisi"
+   },
+   "taux_horaire_eur": {
+    "valeur": null,
+    "bas": null,
+    "haut": null,
+    "loi": null,
+    "provenance": "manquant"
+   }
+  },
+  {
+   "fru": "FRU-B400-R",
+   "description": "Pupitre de table (démo)",
+   "atelier": "TSUI",
+   "pieces": [
+    {
+     "piece": "P-3002",
+     "description": "Tête de joystick",
+     "type_piece": "Pièce plastique / mécanique",
+     "type_dechet": "Plastique",
+     "benne": "DIB",
+     "risque_matiere": 0.0,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 2.0,
+      "bas": 2.0,
+      "haut": 2.0,
+      "loi": "fixe",
+      "provenance": "auto : maximum observé sur un même PO (minimum, à confirmer par l'audit)"
+     },
+     "extraction_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "test_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "tri_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "poids_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.05,
+      "bas": 0.05,
+      "haut": 0.05,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Plastique)"
+     },
+     "valeur_eur": {
+      "valeur": 25.76,
+      "bas": 15.456,
+      "haut": 36.064,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.595890410958904,
+      "bas": 0.3422352348024697,
+      "haut": 0.8249613804569993,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-3005",
+     "description": "Keypad controller board",
+     "type_piece": "Carte électronique",
+     "type_dechet": "Carte C",
+     "benne": "DEEE",
+     "risque_matiere": 1.0,
+     "crm": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "auto : maximum observé sur un même PO (minimum, à confirmer par l'audit)"
+     },
+     "extraction_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "test_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "tri_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "poids_kg": {
+      "valeur": 0.2,
+      "bas": 0.2,
+      "haut": 0.2,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 3.0,
+      "bas": 3.0,
+      "haut": 3.0,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Carte C)"
+     },
+     "valeur_eur": {
+      "valeur": 82.8,
+      "bas": 49.68,
+      "haut": 115.91999999999999,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": 10.0,
+      "bas": 10.0,
+      "haut": 10.0,
+      "loi": "fixe",
+      "provenance": "auto : onglet Supply"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.821917808219178,
+      "bas": 0.6019676890953417,
+      "haut": 0.9691415034414701,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "P-4001",
+     "description": "Grille de protection",
+     "type_piece": "Pièce plastique / mécanique",
+     "type_dechet": "Métal",
+     "benne": "Métal",
+     "risque_matiere": 0.0,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": "auto : maximum observé sur un même PO (minimum, à confirmer par l'audit)"
+     },
+     "extraction_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "test_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "tri_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "poids_kg": {
+      "valeur": 0.3,
+      "bas": 0.3,
+      "haut": 0.3,
+      "loi": "fixe",
+      "provenance": "auto : classement matière (pesée (démo))"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": 0.25,
+      "bas": 0.25,
+      "haut": 0.25,
+      "loi": "fixe",
+      "provenance": "auto : référentiel des grades (Métal)"
+     },
+     "valeur_eur": {
+      "valeur": 18.400000000000002,
+      "bas": 11.040000000000001,
+      "haut": 25.76,
+      "loi": "triangulaire",
+      "provenance": "auto : MMICV × fraction de réemploi"
+     },
+     "delai_semaines": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "valeur_semaine_eur": {
+      "valeur": 0.5,
+      "bas": 0.5,
+      "haut": 0.5,
+      "loi": "fixe",
+      "provenance": "auto : défaut de la ligne"
+     },
+     "transport_eur": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "part_preventive": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "casse_demontage": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "rendement_test": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "p_reutilisable": {
+      "valeur": 0.410958904109589,
+      "bas": 0.17744306136426236,
+      "haut": 0.6649264984679722,
+      "loi": "triangulaire",
+      "provenance": "auto : modèle de Rex (0 pièces testées, a priori de consommation)"
+     }
+    },
+    {
+     "piece": "CARCASSE",
+     "description": "Châssis et reste du FRU",
+     "type_piece": "Carcasse",
+     "type_dechet": null,
+     "benne": null,
+     "risque_matiere": null,
+     "crm": "",
+     "n_par_fru": {
+      "valeur": 1.0,
+      "bas": 1.0,
+      "haut": 1.0,
+      "loi": "fixe",
+      "provenance": ""
+     },
+     "tri_min": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     },
+     "poids_kg": {
+      "valeur": 5.699999999999999,
+      "bas": 5.699999999999999,
+      "haut": 5.699999999999999,
+      "loi": "fixe",
+      "provenance": "auto : poids du FRU moins les pièces listées au poids connu"
+     },
+     "prix_recycleur_eur_kg": {
+      "valeur": null,
+      "bas": null,
+      "haut": null,
+      "loi": null,
+      "provenance": "manquant"
+     }
+    }
+   ],
+   "rebut_an": {
+    "valeur": 35.45454545454545,
+    "bas": 18.90909090909091,
+    "haut": 54.36363636363636,
+    "loi": "triangulaire",
+    "provenance": "auto : suivi hebdomadaire (22 semaines complètes)"
+   },
+   "poids_fru_kg": {
+    "valeur": 6.3,
+    "bas": 6.3,
+    "haut": 6.3,
+    "loi": "fixe",
+    "provenance": "auto : fiche du FRU (Net weight)"
+   },
+   "ouverture_min": {
+    "valeur": null,
+    "bas": null,
+    "haut": null,
+    "loi": null,
+    "provenance": "manquant"
+   },
+   "ouverture_tri_min": {
+    "valeur": null,
+    "bas": null,
+    "haut": null,
+    "loi": null,
+    "provenance": "manquant"
+   },
+   "taux_horaire_eur": {
+    "valeur": null,
+    "bas": null,
+    "haut": null,
+    "loi": null,
+    "provenance": "manquant"
+   }
+  }
+ ],
+ "reference": {
+  "resume": {
+   "Marge variable / an (€)": 58903.45822888809,
+   "Coûts fixes annualisés (€)": 12000.0,
+   "Résultat / an (€)": 46903.45822888809,
+   "Heures utilisées / an": 900.0,
+   "Capacité (h/an)": 900.0,
+   "Taux d'occupation": 1.0,
+   "FRU traitées / an": 406.54545454545456,
+   "Marge moyenne par FRU (€)": 144.8877550352793,
+   "Seuil de rentabilité (FRU / an)": 82.82273403351492,
+   "Retour sur investissement (ans)": 0.5670706793912087,
+   "Valeur d'une heure opérateur en plus (€ net)": 51.80034479092846,
+   "Types de FRU incomplets": 1,
+   "Masse des FRU rebutées (kg/an)": 32572.090909090908,
+   "Masse détournée de la benne (kg/an)": 24643.734545454543,
+   "Coût actuel de traitement (€/an)": 8143.022727272727
+  },
+  "plan": [
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Décision": "traiter",
+    "1 Réemploi": "P-1005, P-1004, P-1002, P-1001",
+    "2 Recyclage": "CARCASSE",
+    "FRU traitées / an": 282.0000000000002,
+    "FRU rebutées / an": 312.0,
+    "Heures par FRU": 2.583333333333333,
+    "Marge par FRU (€)": 156.02596723954642,
+    "Marge par heure (€)": 60.39714860885668,
+    "Heures / an": 728.5000000000005,
+    "Marge variable / an (€)": 43999.322761552125,
+    "Kg détournés / an": 22190.580000000016,
+    "Entrées manquantes": ""
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Décision": "traiter",
+    "1 Réemploi": "P-1005, P-1004, P-1002",
+    "2 Recyclage": "CARCASSE",
+    "FRU traitées / an": 29.999999999999773,
+    "FRU rebutées / an": 312.0,
+    "Heures par FRU": 2.25,
+    "Marge par FRU (€)": 138.7591856425703,
+    "Marge par heure (€)": 61.67074917447568,
+    "Heures / an": 67.49999999999949,
+    "Marge variable / an (€)": 4162.775569277077,
+    "Kg détournés / an": 2339.699999999982,
+    "Entrées manquantes": ""
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Décision": "jeter telle quelle",
+    "1 Réemploi": "",
+    "2 Recyclage": "",
+    "FRU traitées / an": 0.0,
+    "FRU rebutées / an": 115.81818181818181,
+    "Heures par FRU": 0.0,
+    "Marge par FRU (€)": 0.0,
+    "Marge par heure (€)": null,
+    "Heures / an": 0.0,
+    "Marge variable / an (€)": 0.0,
+    "Kg détournés / an": 0.0,
+    "Entrées manquantes": ""
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Décision": "traiter",
+    "1 Réemploi": "P-3005, P-3004, P-3002, P-3001",
+    "2 Recyclage": "",
+    "FRU traitées / an": 94.54545454545455,
+    "FRU rebutées / an": 94.54545454545455,
+    "Heures par FRU": 1.1,
+    "Marge par FRU (€)": 113.61053738331512,
+    "Marge par heure (€)": 103.28230671210464,
+    "Heures / an": 104.00000000000001,
+    "Marge variable / an (€)": 10741.359898058885,
+    "Kg détournés / an": 113.45454545454545,
+    "Entrées manquantes": ""
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Décision": "incomplet",
+    "1 Réemploi": null,
+    "2 Recyclage": null,
+    "FRU traitées / an": null,
+    "FRU rebutées / an": null,
+    "Heures par FRU": null,
+    "Marge par FRU (€)": null,
+    "Marge par heure (€)": null,
+    "Heures / an": null,
+    "Marge variable / an (€)": null,
+    "Kg détournés / an": null,
+    "Entrées manquantes": "aucune option calculable : P-3002 réemploi[extraction_min, test_min, ouverture_min] recyclage[tri_min, ouverture_tri_min]; P-3005 réemploi[extraction_min, test_min, ouverture_min] recyclage[tri_min, ouverture_tri_min]; P-4001 réemploi[extraction_min, test_min, ouverture_min] recyclage[tri_min, ouverture_tri_min]; CARCASSE réemploi[extraction_min, test_min, p_reutilisable, valeur_eur, ouverture_min] recyclage[prix_recycleur_eur_kg, tri_min, ouverture_tri_min]"
+   }
+  ],
+  "actuel_contre_ligne": [
+   {
+    "Poste (€/an)": "Traitement des FRU par le recycleur actuel",
+    "Actuel": -8143.022727272727,
+    "Avec la ligne": -1982.0890909090913,
+    "Écart": 6160.933636363636
+   },
+   {
+    "Poste (€/an)": "Marge de la ligne : réemploi + vente au kg − main-d'œuvre",
+    "Actuel": 0.0,
+    "Avec la ligne": 52742.52459252445,
+    "Écart": 52742.52459252445
+   },
+   {
+    "Poste (€/an)": "Coûts fixes de la ligne (installation amortie + annuels)",
+    "Actuel": 0.0,
+    "Avec la ligne": -12000.0,
+    "Écart": -12000.0
+   },
+   {
+    "Poste (€/an)": "TOTAL",
+    "Actuel": -8143.022727272727,
+    "Avec la ligne": 38760.435501615364,
+    "Écart": 46903.45822888809
+   }
+  ],
+  "options": [
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1004",
+    "1 Réemploi (€/FRU)": 38.38510040160644,
+    "2 Recyclage (€/FRU)": 1.9000000000000004,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.5,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.4,
+    "Kg détournés recyclage": 0.4,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1005",
+    "1 Réemploi (€/FRU)": 88.05571084337349,
+    "2 Recyclage (€/FRU)": 2.3125,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.5,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.45,
+    "Kg détournés recyclage": 0.45,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1001",
+    "1 Réemploi (€/FRU)": 17.266781596976138,
+    "2 Recyclage (€/FRU)": 0.5250000000000001,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.3333333333333333,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.7,
+    "Kg détournés recyclage": 0.7,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1002",
+    "1 Réemploi (€/FRU)": 17.566974397590364,
+    "2 Recyclage (€/FRU)": 0.5250000000000001,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.3333333333333333,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.7,
+    "Kg détournés recyclage": 0.7,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1006",
+    "1 Réemploi (€/FRU)": -2.028376536144578,
+    "2 Recyclage (€/FRU)": -0.9375000000000001,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.15,
+    "Heures recyclage": 0.025,
+    "Kg détournés réemploi": 0.15000000000000002,
+    "Kg détournés recyclage": 0.15000000000000002,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1007",
+    "1 Réemploi (€/FRU)": -2.9259834939759037,
+    "2 Recyclage (€/FRU)": -0.58,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.1,
+    "Heures recyclage": 0.016666666666666666,
+    "Kg détournés réemploi": 0.16,
+    "Kg détournés recyclage": 0.16,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1003",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": null,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": null,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 0.0,
+    "Manque réemploi": "valeur_eur",
+    "Manque recyclage": "poids_kg",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "CARCASSE",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": 26.251399999999997,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": 0.16666666666666666,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 76.44,
+    "Manque réemploi": "extraction_min, test_min, p_reutilisable, valeur_eur",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Recyclage",
+    "Ouverture soignée (€/FRU)": 31.5,
+    "Ouverture sommaire (€/FRU)": 10.5
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-2001",
+    "1 Réemploi (€/FRU)": 14.781323636363647,
+    "2 Recyclage (€/FRU)": 3.55,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.5333333333333333,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.6,
+    "Kg détournés recyclage": 0.6,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 24.5,
+    "Ouverture sommaire (€/FRU)": 8.4
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-1002",
+    "1 Réemploi (€/FRU)": 17.724587045454545,
+    "2 Recyclage (€/FRU)": 0.5250000000000001,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.3333333333333333,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.7,
+    "Kg détournés recyclage": 0.7,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 24.5,
+    "Ouverture sommaire (€/FRU)": 8.4
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-2002",
+    "1 Réemploi (€/FRU)": -3.14254518181818,
+    "2 Recyclage (€/FRU)": -1.025,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.26666666666666666,
+    "Heures recyclage": 0.03333333333333333,
+    "Kg détournés réemploi": 0.5,
+    "Kg détournés recyclage": 0.5,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 24.5,
+    "Ouverture sommaire (€/FRU)": 8.4
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-1007",
+    "1 Réemploi (€/FRU)": -3.0112033636363638,
+    "2 Recyclage (€/FRU)": -0.58,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.1,
+    "Heures recyclage": 0.016666666666666666,
+    "Kg détournés réemploi": 0.16,
+    "Kg détournés recyclage": 0.16,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 24.5,
+    "Ouverture sommaire (€/FRU)": 8.4
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "CARCASSE",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": 19.1174,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": 0.16666666666666666,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 60.04,
+    "Manque réemploi": "extraction_min, test_min, p_reutilisable, valeur_eur",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Recyclage",
+    "Ouverture soignée (€/FRU)": 24.5,
+    "Ouverture sommaire (€/FRU)": 8.4
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3001",
+    "1 Réemploi (€/FRU)": 19.826753860195105,
+    "2 Recyclage (€/FRU)": -0.5199999999999999,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.11666666666666667,
+    "Heures recyclage": 0.016666666666666666,
+    "Kg détournés réemploi": 0.6,
+    "Kg détournés recyclage": 0.6,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 10.5,
+    "Ouverture sommaire (€/FRU)": 4.2
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3002",
+    "1 Réemploi (€/FRU)": 26.23879211549539,
+    "2 Recyclage (€/FRU)": -0.6699999999999999,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.23333333333333334,
+    "Heures recyclage": 0.016666666666666666,
+    "Kg détournés réemploi": 0.1,
+    "Kg détournés recyclage": 0.1,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 10.5,
+    "Ouverture sommaire (€/FRU)": 4.2
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3004",
+    "1 Réemploi (€/FRU)": 31.487470000000002,
+    "2 Recyclage (€/FRU)": -0.08499999999999992,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.18333333333333332,
+    "Heures recyclage": 0.016666666666666666,
+    "Kg détournés réemploi": 0.3,
+    "Kg détournés recyclage": 0.3,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 10.5,
+    "Ouverture sommaire (€/FRU)": 4.2
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3005",
+    "1 Réemploi (€/FRU)": 46.55752140762463,
+    "2 Recyclage (€/FRU)": -0.049999999999999864,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.31666666666666665,
+    "Heures recyclage": 0.016666666666666666,
+    "Kg détournés réemploi": 0.2,
+    "Kg détournés recyclage": 0.2,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Réemploi",
+    "Ouverture soignée (€/FRU)": 10.5,
+    "Ouverture sommaire (€/FRU)": 4.2
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3003",
+    "1 Réemploi (€/FRU)": -3.8407621847507336,
+    "2 Recyclage (€/FRU)": -0.408,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": 0.1,
+    "Heures recyclage": 0.01,
+    "Kg détournés réemploi": 0.04,
+    "Kg détournés recyclage": 0.04,
+    "Manque réemploi": "",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 10.5,
+    "Ouverture sommaire (€/FRU)": 4.2
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "CARCASSE",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": -5.1469000000000005,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": 0.16666666666666666,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 4.26,
+    "Manque réemploi": "extraction_min, test_min, p_reutilisable, valeur_eur",
+    "Manque recyclage": "",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": 10.5,
+    "Ouverture sommaire (€/FRU)": 4.2
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "P-3002",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": null,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": null,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 0.0,
+    "Manque réemploi": "extraction_min, test_min, ouverture_min",
+    "Manque recyclage": "tri_min, ouverture_tri_min",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": null,
+    "Ouverture sommaire (€/FRU)": null
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "P-3005",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": null,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": null,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 0.0,
+    "Manque réemploi": "extraction_min, test_min, ouverture_min",
+    "Manque recyclage": "tri_min, ouverture_tri_min",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": null,
+    "Ouverture sommaire (€/FRU)": null
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "P-4001",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": null,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": null,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 0.0,
+    "Manque réemploi": "extraction_min, test_min, ouverture_min",
+    "Manque recyclage": "tri_min, ouverture_tri_min",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": null,
+    "Ouverture sommaire (€/FRU)": null
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "CARCASSE",
+    "1 Réemploi (€/FRU)": null,
+    "2 Recyclage (€/FRU)": null,
+    "3 Jeté (€/FRU)": 0.0,
+    "Heures réemploi": null,
+    "Heures recyclage": null,
+    "Kg détournés réemploi": 0.0,
+    "Kg détournés recyclage": 0.0,
+    "Manque réemploi": "extraction_min, test_min, p_reutilisable, valeur_eur, ouverture_min",
+    "Manque recyclage": "prix_recycleur_eur_kg, tri_min, ouverture_tri_min",
+    "Meilleure option seule": "Jeté",
+    "Ouverture soignée (€/FRU)": null,
+    "Ouverture sommaire (€/FRU)": null
+   }
+  ],
+  "sensibilite_heures": [
+   {
+    "Heures / an": 225,
+    "Marge variable / an (€)": 18392.276886220225,
+    "Résultat / an (€)": 6392.276886220225,
+    "Taux d'occupation": 1.0,
+    "FRU traitées / an": 157.67588932806325,
+    "Valeur d'une heure opérateur en plus (€ net)": 63.23071891042378
+   },
+   {
+    "Heures / an": 450,
+    "Marge variable / an (€)": 32619.188641065695,
+    "Résultat / an (€)": 20619.188641065695,
+    "Taux d'occupation": 1.0,
+    "FRU traitées / an": 275.0671936758893,
+    "Valeur d'une heure opérateur en plus (€ net)": 63.23071891042378
+   },
+   {
+    "Heures / an": 675,
+    "Marge variable / an (€)": 46846.10039591116,
+    "Résultat / an (€)": 34846.10039591116,
+    "Taux d'occupation": 1.0,
+    "FRU traitées / an": 392.45849802371544,
+    "Valeur d'une heure opérateur en plus (€ net)": 63.23071891042378
+   },
+   {
+    "Heures / an": 900,
+    "Marge variable / an (€)": 58903.45822888809,
+    "Résultat / an (€)": 46903.45822888809,
+    "Taux d'occupation": 1.0,
+    "FRU traitées / an": 406.54545454545456,
+    "Valeur d'une heure opérateur en plus (€ net)": 51.80034479092846
+   },
+   {
+    "Heures / an": 1125,
+    "Marge variable / an (€)": 62562.83420485522,
+    "Résultat / an (€)": 50562.83420485522,
+    "Taux d'occupation": 0.9753239057239057,
+    "FRU traitées / an": 522.3636363636364,
+    "Valeur d'une heure opérateur en plus (€ net)": 0.0
+   },
+   {
+    "Heures / an": 1350,
+    "Marge variable / an (€)": 62562.83420485522,
+    "Résultat / an (€)": 50562.83420485522,
+    "Taux d'occupation": 0.8127699214365881,
+    "FRU traitées / an": 522.3636363636364,
+    "Valeur d'une heure opérateur en plus (€ net)": 0.0
+   },
+   {
+    "Heures / an": 1800,
+    "Marge variable / an (€)": 62562.83420485522,
+    "Résultat / an (€)": 50562.83420485522,
+    "Taux d'occupation": 0.609577441077441,
+    "FRU traitées / an": 522.3636363636364,
+    "Valeur d'une heure opérateur en plus (€ net)": 0.0
+   },
+   {
+    "Heures / an": 2700,
+    "Marge variable / an (€)": 62562.83420485522,
+    "Résultat / an (€)": 50562.83420485522,
+    "Taux d'occupation": 0.40638496071829405,
+    "FRU traitées / an": 522.3636363636364,
+    "Valeur d'une heure opérateur en plus (€ net)": 0.0
+   }
+  ]
+ },
+ "monte_carlo": {
+  "p_rentable": 1.0,
+  "p5_mediane_p95": [
+   27726.0,
+   42583.0,
+   57350.0
+  ],
+  "tirages": [
+   57298.8,
+   51172.4,
+   31574.2,
+   38844.8,
+   39057.6,
+   33767.5,
+   56582.1,
+   31715.2,
+   27726.6,
+   51922.3,
+   56048.7,
+   47697.4,
+   49108.6,
+   42498.4,
+   53214.2,
+   39960.9,
+   48267.4,
+   48618.2,
+   55437.1,
+   38050.4,
+   25062.4,
+   32846.0,
+   39211.8,
+   40561.6,
+   57486.1,
+   35632.4,
+   53574.4,
+   25215.7,
+   36284.4,
+   44187.5,
+   36603.9,
+   62323.0,
+   39753.4,
+   42205.4,
+   57692.1,
+   56387.2,
+   29377.0,
+   51919.1,
+   29975.8,
+   42659.2,
+   55773.0,
+   29952.4,
+   27148.3,
+   45060.7,
+   38622.5,
+   28595.5,
+   42203.7,
+   41570.8,
+   35482.1,
+   42746.7,
+   43894.6,
+   46677.2,
+   40299.8,
+   48286.4,
+   53811.1,
+   52473.3,
+   43013.1,
+   56945.0,
+   49787.4,
+   22296.7,
+   48018.5,
+   23975.7,
+   51996.1,
+   44595.8,
+   35862.1,
+   53535.0,
+   31552.8,
+   36768.6,
+   33904.7,
+   51026.6,
+   55878.8,
+   56426.3,
+   45439.6,
+   42501.8,
+   45688.9,
+   34047.3,
+   43455.8,
+   37155.9,
+   41608.3,
+   48074.3,
+   33767.3,
+   48396.3,
+   45063.6,
+   39784.3,
+   46714.9,
+   41758.1,
+   34559.5,
+   55864.6,
+   54916.5,
+   33014.9,
+   51319.5,
+   35165.9,
+   53739.3,
+   42077.3,
+   44984.7,
+   48196.9,
+   43709.1,
+   44317.8,
+   51490.8,
+   34107.4,
+   42267.0,
+   55422.9,
+   53502.5,
+   49439.9,
+   34844.7,
+   30652.2,
+   39973.1,
+   43632.8,
+   52196.1,
+   36045.4,
+   51130.8,
+   58051.0,
+   50689.1,
+   44545.4,
+   51322.0,
+   48410.0,
+   43225.1,
+   38260.5,
+   41527.0,
+   45524.7,
+   55637.2,
+   39492.1,
+   36595.7,
+   52137.5,
+   35799.4,
+   54454.2,
+   63663.8,
+   34062.6,
+   37374.4,
+   35718.5,
+   45564.9,
+   50650.1,
+   44732.9,
+   57000.0,
+   32783.3,
+   37727.8,
+   59870.1,
+   44088.3,
+   35102.3,
+   38596.1,
+   38503.7,
+   43102.6,
+   39939.9,
+   63565.1,
+   42644.0,
+   27926.6,
+   57787.5,
+   58589.6,
+   35832.1,
+   43085.3,
+   37286.5,
+   49998.3,
+   45143.0,
+   37075.1,
+   44207.1,
+   47814.6,
+   29547.0,
+   50700.2,
+   39601.4,
+   36534.8,
+   37511.4,
+   41073.2,
+   39868.0,
+   23115.1,
+   53251.0,
+   42695.4,
+   27545.9,
+   52170.8,
+   29907.5,
+   54507.9,
+   32075.1,
+   40948.0,
+   38036.5,
+   42601.2,
+   51917.6,
+   40452.4,
+   49782.2,
+   49482.2,
+   54037.8,
+   35966.5,
+   32014.6,
+   36134.2,
+   47113.7,
+   39439.7,
+   46188.7,
+   43621.1,
+   61347.2,
+   51826.7,
+   32711.3,
+   22943.3,
+   32950.3,
+   39315.7,
+   41085.2,
+   27208.8,
+   44529.2,
+   35803.0,
+   61225.4,
+   48986.9,
+   36066.8,
+   43634.7,
+   39650.6,
+   44174.4,
+   36968.5,
+   59854.8,
+   58467.0,
+   41850.3,
+   44058.1,
+   44576.2,
+   33060.2,
+   45770.1,
+   61792.3,
+   43351.0,
+   31618.4,
+   32507.4,
+   43096.8,
+   51055.3,
+   43656.1,
+   38461.6,
+   49663.6,
+   36926.8,
+   45600.4,
+   33497.3,
+   48995.5,
+   35292.7,
+   54104.0,
+   42010.6,
+   48098.1,
+   33565.7,
+   42602.3,
+   21085.2,
+   43859.7,
+   29220.3,
+   34361.6,
+   50650.0,
+   50229.8,
+   40011.8,
+   48437.3,
+   48335.4,
+   33189.0,
+   27165.6,
+   52494.2,
+   39112.5,
+   69256.2,
+   50926.7,
+   46175.3,
+   39058.1,
+   27708.5,
+   32761.5,
+   48065.4,
+   32559.7,
+   45450.2,
+   45887.8,
+   38077.3,
+   49971.9,
+   39956.8,
+   33703.6,
+   44566.0,
+   36441.6,
+   48174.2,
+   49480.1,
+   20483.1,
+   41263.1,
+   36608.5,
+   25187.5,
+   40300.6,
+   45337.0,
+   24390.4,
+   30007.5,
+   32419.7,
+   56699.8,
+   43048.4,
+   44130.0,
+   49178.7,
+   43856.6,
+   24790.1,
+   29738.7,
+   46050.1,
+   40561.0,
+   36988.0,
+   45782.6,
+   37698.8,
+   50711.6,
+   34926.6,
+   56330.7,
+   48226.2,
+   43988.0,
+   39754.5,
+   36001.8,
+   30047.0,
+   42695.6,
+   42966.5,
+   43573.0,
+   41396.3,
+   38223.8,
+   53196.4,
+   41370.5,
+   55221.1,
+   33574.8,
+   48110.2,
+   57342.6,
+   56241.5,
+   46757.9,
+   30015.0,
+   39946.9,
+   33754.5,
+   50557.7,
+   30480.5,
+   36761.8,
+   46618.8,
+   32871.3,
+   38356.7,
+   30074.5,
+   42235.8,
+   51952.6,
+   56351.6,
+   27050.4,
+   54888.2,
+   39335.2,
+   53448.5,
+   39136.9,
+   45843.4,
+   59989.5,
+   39826.7,
+   35434.0,
+   50776.9,
+   25440.8,
+   23107.1,
+   29389.5,
+   34338.7,
+   61807.8,
+   56325.2,
+   31324.9,
+   57081.3,
+   38968.0,
+   60518.1,
+   39861.0,
+   56487.6,
+   32060.9,
+   34816.3,
+   33203.9,
+   59000.6,
+   46556.5,
+   35964.8,
+   43870.9,
+   43247.7,
+   38612.6,
+   42460.7,
+   51763.8,
+   52790.8,
+   52422.6,
+   55255.5,
+   48165.1,
+   30069.9,
+   51422.9,
+   35520.4,
+   56768.7,
+   30646.2,
+   49904.1,
+   34433.9,
+   56734.6,
+   34540.1,
+   32052.2,
+   24562.2,
+   40701.6,
+   46689.8,
+   32923.7,
+   48919.0,
+   32653.6,
+   47264.4,
+   28061.0,
+   33199.5,
+   50490.1,
+   42589.8,
+   33144.7,
+   59438.7,
+   47145.0,
+   47474.6,
+   36936.1,
+   41856.4,
+   30704.6,
+   53932.3,
+   38343.2,
+   47359.7,
+   51630.2,
+   38589.2,
+   30493.6,
+   35600.6,
+   36838.0,
+   37131.5,
+   47124.8,
+   42358.2,
+   42576.5,
+   28768.8,
+   29345.1,
+   30104.1,
+   43050.8,
+   31925.9,
+   32216.7,
+   47440.0,
+   36673.9
+  ],
+  "n": 400,
+  "frequence_traitement": {
+   "FRU-A100-R": 1.0,
+   "FRU-B300-R": 1.0,
+   "FRU-A200-R": 0.5725
+  }
+ },
+ "periodes": {
+  "table": [
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU arrivées": 3.0,
+    "FRU traitées": 3.0,
+    "Heures utilisées": 5.816666666666666,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 210.27258860318278,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": -20.49664216604799,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": -20.49664216604799
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU arrivées": 8.0,
+    "FRU traitées": 7.0,
+    "Heures utilisées": 13.699999999999998,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 663.0583711474089,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 432.28914037817816,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 411.79249821213017
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU arrivées": 17.0,
+    "FRU traitées": 9.882274247491639,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1182.491320459502,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 951.7220896902713,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 1363.5145879024014
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU arrivées": 11.0,
+    "FRU traitées": 9.882274247491639,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1182.491320459502,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 951.7220896902713,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 2315.236677592673
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU arrivées": 3.0,
+    "FRU traitées": 3.0,
+    "Heures utilisées": 6.266666666666666,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 425.662471862408,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 194.8932410931772,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 2510.12991868585
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU arrivées": 19.0,
+    "FRU traitées": 10.308361204013377,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1226.5480670413504,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 995.7788362721196,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 3505.90875495797
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU arrivées": 9.0,
+    "FRU traitées": 8.0,
+    "Heures utilisées": 16.28333333333333,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 819.0843383869553,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 588.3151076177246,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 4094.2238625756945
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU arrivées": 16.0,
+    "FRU traitées": 10.308361204013377,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1226.5480670413504,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 995.7788362721196,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 5090.002698847814
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU arrivées": 17.0,
+    "FRU traitées": 9.882274247491639,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1182.491320459502,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 951.7220896902713,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 6041.724788538086
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU arrivées": 10.0,
+    "FRU traitées": 10.0,
+    "Heures utilisées": 17.0,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1003.8899832973543,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 773.1207525281236,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 6814.845541066209
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU arrivées": 0.0,
+    "FRU traitées": 0.0,
+    "Heures utilisées": 0.0,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 0.0,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": -230.76923076923077,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 6584.076310296979
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU arrivées": 6.0,
+    "FRU traitées": 6.0,
+    "Heures utilisées": 14.016666666666664,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 893.7403735810472,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 662.9711428118164,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 7247.047453108795
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU arrivées": 10.0,
+    "FRU traitées": 10.0,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 969.1418874254774,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 738.3726566562466,
+    "Valeur d'une heure en plus (€)": 10.420487900128052,
+    "Résultat cumulé (€)": 7985.420109765041
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU arrivées": 14.0,
+    "FRU traitées": 9.030100334448159,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1094.377827295805,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 863.6085965265743,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 8849.028706291616
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU arrivées": 19.0,
+    "FRU traitées": 10.308361204013377,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1226.5480670413504,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 995.7788362721196,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 9844.807542563736
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU arrivées": 11.0,
+    "FRU traitées": 9.0,
+    "Heures utilisées": 13.450000000000001,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 718.9613595000797,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 488.1921287308489,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 10332.999671294585
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU arrivées": 16.0,
+    "FRU traitées": 10.308361204013377,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1226.5480670413504,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 995.7788362721196,
+    "Valeur d'une heure en plus (€)": 63.23071891042378,
+    "Résultat cumulé (€)": 11328.778507566705
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU arrivées": 8.0,
+    "FRU traitées": 8.0,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1067.417695193193,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 836.6484644239622,
+    "Valeur d'une heure en plus (€)": 10.420487900128052,
+    "Résultat cumulé (€)": 12165.426971990668
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU arrivées": 12.0,
+    "FRU traitées": 8.0,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1108.6334562279244,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 877.8642254586937,
+    "Valeur d'une heure en plus (€)": 51.80034479092846,
+    "Résultat cumulé (€)": 13043.291197449362
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU arrivées": 8.0,
+    "FRU traitées": 6.0,
+    "Heures utilisées": 11.116666666666665,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 507.03240390786254,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 276.26317313863177,
+    "Valeur d'une heure en plus (€)": 0.0,
+    "Résultat cumulé (€)": 13319.554370587994
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU arrivées": 11.0,
+    "FRU traitées": 9.0,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1234.1071108418432,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 1003.3378800726125,
+    "Valeur d'une heure en plus (€)": 51.80034479092846,
+    "Résultat cumulé (€)": 14322.892250660607
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU arrivées": 8.0,
+    "FRU traitées": 8.0,
+    "Heures utilisées": 17.307692307692307,
+    "Capacité (h)": 17.307692307692307,
+    "Marge variable (€)": 1143.0552044782369,
+    "Coût fixe (€)": 230.76923076923077,
+    "Résultat (€)": 912.2859737090062,
+    "Valeur d'une heure en plus (€)": 51.80034479092846,
+    "Résultat cumulé (€)": 15235.178224369613
+   }
+  ],
+  "resume": {
+   "Périodes": 22,
+   "Résultat annualisé, période par période (€)": 36010.421257600894,
+   "Résultat du modèle annuel au flux moyen (€)": 46903.45822888809,
+   "Coût de la variabilité du flux (€/an)": 10893.036971287198,
+   "Périodes en perte": 2
+  }
+ },
+ "flux": {
+  "fru_hebdo": [
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 79.0
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 124.0
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 237.0
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 186.0
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 6.3
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 9.0
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 11.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 869.0
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 25.2
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 8.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 632.0
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 62.0
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 158.0
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 11.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 869.0
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 248.0
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 16.5
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 6.3
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 6.0
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 316.0
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 186.0
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 6.3
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 6.0
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 8.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 632.0
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 248.0
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 16.5
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 6.3
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 13.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 1027.0
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 62.0
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 6.3
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 9.0
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 237.0
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 186.0
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 22.0
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 5.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 395.0
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 5.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 395.0
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 248.0
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 9.0
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 11.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 869.0
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 186.0
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 11.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 869.0
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 186.0
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 16.5
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 12.6
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 6.0
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 79.0
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 248.0
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 22.0
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 12.6
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 6.0
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 9.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 711.0
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 248.0
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 16.5
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 6.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 474.0
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 62.0
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 6.0
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 7.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 553.0
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 248.0
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 158.0
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 3.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 186.0
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 5.5
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 12.6
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 5.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 395.0
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 124.0
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 4.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 22.0
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 1.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 3.0
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU": "FRU-A100-R",
+    "FRU rebutées": 6.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 79.0,
+    "Masse estimée (kg)": 474.0
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU": "FRU-A200-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 62.0,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU": "FRU-B300-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 5.5,
+    "Masse estimée (kg)": 11.0
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU": "FRU-B400-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 6.3,
+    "Masse estimée (kg)": 0.0
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU": "FRU-C500-R",
+    "FRU rebutées": 2.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 3.0,
+    "Masse estimée (kg)": 6.0
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "FRU": "FRU-W600-R",
+    "FRU rebutées": 0.0,
+    "Jours extraits": 7,
+    "Semaine complète": true,
+    "Poids FRU (kg)": 11.0,
+    "Masse estimée (kg)": 0.0
+   }
+  ],
+  "rebut_annuel": [
+   {
+    "FRU": "FRU-A100-R",
+    "Semaines complètes": 22,
+    "Moyenne hebdo": 6.0,
+    "Écart-type hebdo": 3.8421224293227256,
+    "Rebut annuel bas (5 %)": 243.45454545454544,
+    "Rebut annuel moyen": 312.0,
+    "Rebut annuel haut (95 %)": 378.1818181818182,
+    "Note": ""
+   },
+   {
+    "FRU": "FRU-A200-R",
+    "Semaines complètes": 22,
+    "Moyenne hebdo": 2.227272727272727,
+    "Écart-type hebdo": 1.5715269548108202,
+    "Rebut annuel bas (5 %)": 87.45454545454545,
+    "Rebut annuel moyen": 115.81818181818181,
+    "Rebut annuel haut (95 %)": 141.8181818181818,
+    "Note": ""
+   },
+   {
+    "FRU": "FRU-B300-R",
+    "Semaines complètes": 22,
+    "Moyenne hebdo": 1.8181818181818181,
+    "Écart-type hebdo": 1.2960145368218983,
+    "Rebut annuel bas (5 %)": 70.9090909090909,
+    "Rebut annuel moyen": 94.54545454545455,
+    "Rebut annuel haut (95 %)": 118.18181818181819,
+    "Note": ""
+   },
+   {
+    "FRU": "FRU-B400-R",
+    "Semaines complètes": 22,
+    "Moyenne hebdo": 0.6818181818181818,
+    "Écart-type hebdo": 1.04135276655684,
+    "Rebut annuel bas (5 %)": 18.90909090909091,
+    "Rebut annuel moyen": 35.45454545454545,
+    "Rebut annuel haut (95 %)": 54.36363636363636,
+    "Note": ""
+   },
+   {
+    "FRU": "FRU-C500-R",
+    "Semaines complètes": 22,
+    "Moyenne hebdo": 1.4090909090909092,
+    "Écart-type hebdo": 0.9081163607574332,
+    "Rebut annuel bas (5 %)": 56.72727272727272,
+    "Rebut annuel moyen": 73.27272727272728,
+    "Rebut annuel haut (95 %)": 89.81818181818181,
+    "Note": ""
+   },
+   {
+    "FRU": "FRU-W600-R",
+    "Semaines complètes": 22,
+    "Moyenne hebdo": 0.2727272727272727,
+    "Écart-type hebdo": 0.4558423058385519,
+    "Rebut annuel bas (5 %)": 7.09090909090909,
+    "Rebut annuel moyen": 14.18181818181818,
+    "Rebut annuel haut (95 %)": 21.272727272727273,
+    "Note": ""
+   }
+  ],
+  "rapprochement": [
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "Flux": "(non classé)",
+    "Estimé bas (kg)": 0.0,
+    "Estimé central (kg)": null,
+    "Estimé haut (kg)": null,
+    "Marge d'erreur (± kg)": null,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 13.36,
+    "Estimé central (kg)": 14.4078431372549,
+    "Estimé haut (kg)": 15.455686274509803,
+    "Marge d'erreur (± kg)": 1.047843137254902,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 17.23,
+    "Estimé central (kg)": 18.863879310344828,
+    "Estimé haut (kg)": 20.497758620689655,
+    "Marge d'erreur (± kg)": 1.6338793103448275,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 13.82,
+    "Estimé central (kg)": 15.517192982456141,
+    "Estimé haut (kg)": 17.21438596491228,
+    "Marge d'erreur (± kg)": 1.6971929824561407,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 13.14,
+    "Estimé central (kg)": 15.2424,
+    "Estimé haut (kg)": 17.3448,
+    "Marge d'erreur (± kg)": 2.1023999999999994,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 15.209999999999999,
+    "Estimé central (kg)": 16.818749999999998,
+    "Estimé haut (kg)": 18.4275,
+    "Marge d'erreur (± kg)": 1.6087499999999997,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 11.559999999999999,
+    "Estimé central (kg)": 12.313913043478259,
+    "Estimé haut (kg)": 13.06782608695652,
+    "Marge d'erreur (± kg)": 0.7539130434782608,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 11.27,
+    "Estimé central (kg)": 12.649999999999999,
+    "Estimé haut (kg)": 14.03,
+    "Marge d'erreur (± kg)": 1.38,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 13.74,
+    "Estimé central (kg)": 16.085853658536585,
+    "Estimé haut (kg)": 18.43170731707317,
+    "Marge d'erreur (± kg)": 2.3458536585365843,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 14.07,
+    "Estimé central (kg)": 15.336300000000001,
+    "Estimé haut (kg)": 16.602600000000002,
+    "Marge d'erreur (± kg)": 1.266300000000001,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 14.899999999999999,
+    "Estimé central (kg)": 16.296875,
+    "Estimé haut (kg)": 17.693749999999998,
+    "Marge d'erreur (± kg)": 1.3968749999999996,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 9.69,
+    "Estimé central (kg)": 10.454999999999998,
+    "Estimé haut (kg)": 11.219999999999999,
+    "Marge d'erreur (± kg)": 0.7649999999999997,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 18.74,
+    "Estimé central (kg)": 21.011515151515148,
+    "Estimé haut (kg)": 23.2830303030303,
+    "Marge d'erreur (± kg)": 2.2715151515151515,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 15.52,
+    "Estimé central (kg)": 17.12551724137931,
+    "Estimé haut (kg)": 18.73103448275862,
+    "Marge d'erreur (± kg)": 1.6055172413793102,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 17.78,
+    "Estimé central (kg)": 19.58376811594203,
+    "Estimé haut (kg)": 21.38753623188406,
+    "Marge d'erreur (± kg)": 1.8037681159420291,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 24.46,
+    "Estimé central (kg)": 26.770111111111113,
+    "Estimé haut (kg)": 29.080222222222226,
+    "Marge d'erreur (± kg)": 2.3101111111111123,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 14.18,
+    "Estimé central (kg)": 15.848235294117647,
+    "Estimé haut (kg)": 17.516470588235293,
+    "Marge d'erreur (± kg)": 1.6682352941176468,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 15.93,
+    "Estimé central (kg)": 17.549999999999997,
+    "Estimé haut (kg)": 19.169999999999998,
+    "Marge d'erreur (± kg)": 1.6199999999999992,
+    "Masse mesurée (kg)": 24.5,
+    "Écart (%)": 0.39601139601139623,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.39601139601139623,
+    "Causes candidates de l'écart": "mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes"
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 16.58,
+    "Estimé central (kg)": 19.39267857142857,
+    "Estimé haut (kg)": 22.20535714285714,
+    "Marge d'erreur (± kg)": 2.8126785714285703,
+    "Masse mesurée (kg)": 27.2,
+    "Écart (%)": 0.4025911840808849,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.399465387980414,
+    "Causes candidates de l'écart": "poids unitaires manquants (25% des pièces) ; mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes"
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 12.01,
+    "Estimé central (kg)": 13.358061224489795,
+    "Estimé haut (kg)": 14.706122448979592,
+    "Marge d'erreur (± kg)": 1.348061224489796,
+    "Masse mesurée (kg)": 23.3,
+    "Écart (%)": 0.7442651001840975,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.49103174832601276,
+    "Causes candidates de l'écart": "mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes"
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 15.9,
+    "Estimé central (kg)": 18.864406779661017,
+    "Estimé haut (kg)": 21.828813559322032,
+    "Marge d'erreur (± kg)": 2.964406779661016,
+    "Masse mesurée (kg)": 27.6,
+    "Écart (%)": 0.4630727762803235,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.48340609511880517,
+    "Causes candidates de l'écart": "poids unitaires manquants (27% des pièces) ; mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes"
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 11.42,
+    "Estimé central (kg)": 13.09121951219512,
+    "Estimé haut (kg)": 14.762439024390243,
+    "Marge d'erreur (± kg)": 1.6712195121951217,
+    "Masse mesurée (kg)": 23.9,
+    "Écart (%)": 0.825651153258561,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.5378748906195759,
+    "Causes candidates de l'écart": "poids unitaires manquants (23% des pièces) ; mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes"
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "Flux": "DEEE",
+    "Estimé bas (kg)": 11.69,
+    "Estimé central (kg)": 13.394791666666666,
+    "Estimé haut (kg)": 15.099583333333333,
+    "Marge d'erreur (± kg)": 1.704791666666667,
+    "Masse mesurée (kg)": 20.1,
+    "Écart (%)": 0.5005832490862432,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.532652645735417,
+    "Causes candidates de l'écart": "poids unitaires manquants (23% des pièces) ; mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes"
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 5.22,
+    "Estimé central (kg)": 5.22,
+    "Estimé haut (kg)": 5.22,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-08T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 4.24,
+    "Estimé central (kg)": 4.24,
+    "Estimé haut (kg)": 4.24,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 4.859999999999999,
+    "Estimé central (kg)": 4.859999999999999,
+    "Estimé haut (kg)": 4.859999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 4.83,
+    "Estimé central (kg)": 4.83,
+    "Estimé haut (kg)": 4.83,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.9299999999999997,
+    "Estimé central (kg)": 3.9299999999999997,
+    "Estimé haut (kg)": 3.9299999999999997,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.66,
+    "Estimé central (kg)": 3.66,
+    "Estimé haut (kg)": 3.66,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 2.9899999999999998,
+    "Estimé central (kg)": 2.9899999999999998,
+    "Estimé haut (kg)": 2.9899999999999998,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 2.28,
+    "Estimé central (kg)": 2.28,
+    "Estimé haut (kg)": 2.28,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.88,
+    "Estimé central (kg)": 3.88,
+    "Estimé haut (kg)": 3.88,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.08,
+    "Estimé central (kg)": 3.08,
+    "Estimé haut (kg)": 3.08,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 5.59,
+    "Estimé central (kg)": 5.59,
+    "Estimé haut (kg)": 5.59,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 5.9399999999999995,
+    "Estimé central (kg)": 5.9399999999999995,
+    "Estimé haut (kg)": 5.9399999999999995,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 6.1,
+    "Estimé central (kg)": 6.1,
+    "Estimé haut (kg)": 6.1,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-31T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.1199999999999997,
+    "Estimé central (kg)": 3.1199999999999997,
+    "Estimé haut (kg)": 3.1199999999999997,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 4.66,
+    "Estimé central (kg)": 4.66,
+    "Estimé haut (kg)": 4.66,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.29,
+    "Estimé central (kg)": 3.29,
+    "Estimé haut (kg)": 3.29,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 5.279999999999999,
+    "Estimé central (kg)": 5.279999999999999,
+    "Estimé haut (kg)": 5.279999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": 4.7,
+    "Écart (%)": -0.10984848484848471,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": -0.10984848484848471,
+    "Causes candidates de l'écart": "mesuré < estimé : pièces encore dans les bacs individuels, pièces renvoyées en réparation ou réemployées, pièce consommée ≠ pièce jetée (kit)"
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.7399999999999998,
+    "Estimé central (kg)": 3.7399999999999998,
+    "Estimé haut (kg)": 3.7399999999999998,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": 4.3,
+    "Écart (%)": 0.14973262032085563,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": -0.0022172949002216822,
+    "Causes candidates de l'écart": "mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes ; le cumul réduit l'écart de plus de moitié : décalage temporel probable"
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 4.89,
+    "Estimé central (kg)": 4.89,
+    "Estimé haut (kg)": 4.89,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": 4.6,
+    "Écart (%)": -0.05930470347648263,
+    "Dans la marge": "oui",
+    "Écart cumulé (%)": -0.02228612508986332,
+    "Causes candidates de l'écart": "écart dans la marge d'erreur"
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 3.08,
+    "Estimé central (kg)": 3.08,
+    "Estimé haut (kg)": 3.08,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": 3.6,
+    "Écart (%)": 0.16883116883116883,
+    "Dans la marge": "non",
+    "Écart cumulé (%)": 0.012360211889346726,
+    "Causes candidates de l'écart": "mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes ; le cumul réduit l'écart de plus de moitié : décalage temporel probable"
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 2.16,
+    "Estimé central (kg)": 2.16,
+    "Estimé haut (kg)": 2.16,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": 2.4,
+    "Écart (%)": 0.111111111111111,
+    "Dans la marge": "oui",
+    "Écart cumulé (%)": 0.023498694516971428,
+    "Causes candidates de l'écart": "écart dans la marge d'erreur"
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "Flux": "DIB",
+    "Estimé bas (kg)": 2.98,
+    "Estimé central (kg)": 2.98,
+    "Estimé haut (kg)": 2.98,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": 2.8,
+    "Écart (%)": -0.06040268456375844,
+    "Dans la marge": "oui",
+    "Écart cumulé (%)": 0.012200632625395372,
+    "Causes candidates de l'écart": "écart dans la marge d'erreur"
+   },
+   {
+    "Semaine": "2026-06-01T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.6,
+    "Estimé central (kg)": 0.6,
+    "Estimé haut (kg)": 0.6,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-15T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.6,
+    "Estimé central (kg)": 0.6,
+    "Estimé haut (kg)": 0.6,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-22T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-06-29T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-06T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-13T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.8999999999999999,
+    "Estimé central (kg)": 0.8999999999999999,
+    "Estimé haut (kg)": 0.8999999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-20T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-07-27T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.8999999999999999,
+    "Estimé central (kg)": 0.8999999999999999,
+    "Estimé haut (kg)": 0.8999999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-03T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-10T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.8999999999999999,
+    "Estimé central (kg)": 0.8999999999999999,
+    "Estimé haut (kg)": 0.8999999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-17T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.6,
+    "Estimé central (kg)": 0.6,
+    "Estimé haut (kg)": 0.6,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-08-24T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 1.2,
+    "Estimé central (kg)": 1.2,
+    "Estimé haut (kg)": 1.2,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-07T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.8999999999999999,
+    "Estimé central (kg)": 0.8999999999999999,
+    "Estimé haut (kg)": 0.8999999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-14T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-21T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.6,
+    "Estimé central (kg)": 0.6,
+    "Estimé haut (kg)": 0.6,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-09-28T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.8999999999999999,
+    "Estimé central (kg)": 0.8999999999999999,
+    "Estimé haut (kg)": 0.8999999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-05T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.3,
+    "Estimé central (kg)": 0.3,
+    "Estimé haut (kg)": 0.3,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-12T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 1.2,
+    "Estimé central (kg)": 1.2,
+    "Estimé haut (kg)": 1.2,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-19T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.6,
+    "Estimé central (kg)": 0.6,
+    "Estimé haut (kg)": 0.6,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   },
+   {
+    "Semaine": "2026-10-26T00:00:00",
+    "Flux": "Métal",
+    "Estimé bas (kg)": 0.8999999999999999,
+    "Estimé central (kg)": 0.8999999999999999,
+    "Estimé haut (kg)": 0.8999999999999999,
+    "Marge d'erreur (± kg)": 0.0,
+    "Masse mesurée (kg)": null,
+    "Écart (%)": null,
+    "Dans la marge": "non comparable",
+    "Écart cumulé (%)": null,
+    "Causes candidates de l'écart": "pas de pesée cette semaine"
+   }
+  ],
+  "verdict": [
+   {
+    "Flux": "DEEE",
+    "Semaines comparées": 6,
+    "Semaines dans la marge": 0,
+    "Écart moyen (%)": 0.5553624764835844,
+    "Écart cumulé final (%)": 0.532652645735417,
+    "Couverture poids moyenne": 0.7784154607670267,
+    "Utilisable par le modèle": "non : corriger la cause dominante"
+   },
+   {
+    "Flux": "DIB",
+    "Semaines comparées": 6,
+    "Semaines dans la marge": 3,
+    "Écart moyen (%)": 0.03335317122906828,
+    "Écart cumulé final (%)": 0.012200632625395372,
+    "Couverture poids moyenne": 1.0,
+    "Utilisable par le modèle": "oui"
+   }
+  ],
+  "regle_date_rebut": "plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer"
+ },
+ "priorisation": [
+  {
+   "Référence": "P-1004",
+   "Description": "Gate Driver Board",
+   "Ateliers": "MR",
+   "Pièces": 86,
+   "MMICV total (USD)": 27520.0,
+   "Type de pièce": "Carte électronique",
+   "CRM": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+   "Score risque matière (0-1)": 1.0,
+   "Risque supply retenu": 0.6153846153846154,
+   "Source supply retenue": "délai fourni par les achats",
+   "FRU rebutées (nomenclature)": 132.0,
+   "Fiabilité réemploi (1/rapport)": 1.0638812534359539,
+   "Sur le front de Pareto": true
+  },
+  {
+   "Référence": "P-3005",
+   "Description": "Keypad controller board",
+   "Ateliers": "TSUI",
+   "Pièces": 67,
+   "MMICV total (USD)": 12060.0,
+   "Type de pièce": "Carte électronique",
+   "CRM": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+   "Score risque matière (0-1)": 1.0,
+   "Risque supply retenu": 0.38461538461538464,
+   "Source supply retenue": "délai fourni par les achats",
+   "FRU rebutées (nomenclature)": 55.0,
+   "Fiabilité réemploi (1/rapport)": 2.5633768863603494,
+   "Sur le front de Pareto": true
+  },
+  {
+   "Référence": "P-1001",
+   "Description": "IGBT 400A 1200V",
+   "Ateliers": "MR",
+   "Pièces": 200,
+   "MMICV total (USD)": 6400.0,
+   "Type de pièce": "IGBT / module de puissance",
+   "CRM": "cuivre, bauxite/alumine/aluminium, silicium métal",
+   "Score risque matière (0-1)": 0.75,
+   "Risque supply retenu": 1.0,
+   "Source supply retenue": "délai fourni par les achats",
+   "FRU rebutées (nomenclature)": 132.0,
+   "Fiabilité réemploi (1/rapport)": 0.6052029330717855,
+   "Sur le front de Pareto": true
+  },
+  {
+   "Référence": "P-1002",
+   "Description": "IGBT 400A 600V",
+   "Ateliers": "MR",
+   "Pièces": 244,
+   "MMICV total (USD)": 6100.0,
+   "Type de pièce": "IGBT / module de puissance",
+   "CRM": "cuivre, bauxite/alumine/aluminium, silicium métal",
+   "Score risque matière (0-1)": 0.75,
+   "Risque supply retenu": 1.0,
+   "Source supply retenue": "délai fourni par les achats",
+   "FRU rebutées (nomenclature)": 181.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": true
+  },
+  {
+   "Référence": "P-3002",
+   "Description": "Tête de joystick",
+   "Ateliers": "TSUI",
+   "Pièces": 268,
+   "MMICV total (USD)": 15008.0,
+   "Type de pièce": "Pièce plastique / mécanique",
+   "CRM": "",
+   "Score risque matière (0-1)": 0.0,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 55.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-3001",
+   "Description": "Coque boîtier gris",
+   "Ateliers": "TSUI",
+   "Pièces": 115,
+   "MMICV total (USD)": 13800.0,
+   "Type de pièce": "Pièce plastique / mécanique",
+   "CRM": "",
+   "Score risque matière (0-1)": 0.0,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 40.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-2001",
+   "Description": "Power supply board",
+   "Ateliers": "MR",
+   "Pièces": 52,
+   "MMICV total (USD)": 10920.0,
+   "Type de pièce": "Carte électronique",
+   "CRM": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+   "Score risque matière (0-1)": 1.0,
+   "Risque supply retenu": 0.46153846153846156,
+   "Source supply retenue": "délai fourni par les achats",
+   "FRU rebutées (nomenclature)": 49.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-3004",
+   "Description": "Cable harness boîtier",
+   "Ateliers": "TSUI",
+   "Pièces": 77,
+   "MMICV total (USD)": 10780.0,
+   "Type de pièce": "Câble / faisceau",
+   "CRM": "cuivre",
+   "Score risque matière (0-1)": 0.25,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 40.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-1005",
+   "Description": "Control board assembly",
+   "Ateliers": "MR",
+   "Pièces": 31,
+   "MMICV total (USD)": 9610.0,
+   "Type de pièce": "Carte électronique",
+   "CRM": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+   "Score risque matière (0-1)": 1.0,
+   "Risque supply retenu": 0.6153846153846154,
+   "Source supply retenue": "délai fourni par les achats",
+   "FRU rebutées (nomenclature)": 132.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-6001",
+   "Description": "Mainboard station",
+   "Ateliers": "(non rattaché)",
+   "Pièces": 17,
+   "MMICV total (USD)": 6800.0,
+   "Type de pièce": "Carte électronique",
+   "CRM": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+   "Score risque matière (0-1)": 1.0,
+   "Risque supply retenu": 0.6,
+   "Source supply retenue": "a priori de type",
+   "FRU rebutées (nomenclature)": 6.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-5001",
+   "Description": "Coil preamp board",
+   "Ateliers": "Coils",
+   "Pièces": 54,
+   "MMICV total (USD)": 5130.0,
+   "Type de pièce": "Carte électronique",
+   "CRM": "cuivre, platinoïdes (PGM), tantale, gallium, antimoine",
+   "Score risque matière (0-1)": 1.0,
+   "Risque supply retenu": 0.6,
+   "Source supply retenue": "a priori de type",
+   "FRU rebutées (nomenclature)": 31.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-5002",
+   "Description": "Coil cable",
+   "Ateliers": "Coils",
+   "Pièces": 30,
+   "MMICV total (USD)": 1800.0,
+   "Type de pièce": "Câble / faisceau",
+   "CRM": "cuivre",
+   "Score risque matière (0-1)": 0.25,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 31.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-4001",
+   "Description": "Grille de protection",
+   "Ateliers": "TSUI",
+   "Pièces": 43,
+   "MMICV total (USD)": 1720.0,
+   "Type de pièce": "Pièce plastique / mécanique",
+   "CRM": "",
+   "Score risque matière (0-1)": 0.0,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 15.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-2002",
+   "Description": "Cooling fan 120mm",
+   "Ateliers": "MR",
+   "Pièces": 76,
+   "MMICV total (USD)": 1368.0,
+   "Type de pièce": "Ventilateur / moteur",
+   "CRM": "cuivre, terres rares légères",
+   "Score risque matière (0-1)": 0.5,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 49.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-3003",
+   "Description": "Soufflet caoutchouc",
+   "Ateliers": "TSUI",
+   "Pièces": 370,
+   "MMICV total (USD)": 555.0,
+   "Type de pièce": "Pièce plastique / mécanique",
+   "CRM": "",
+   "Score risque matière (0-1)": 0.0,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 40.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-6002",
+   "Description": "Cooling fan 80mm",
+   "Ateliers": "(non rattaché)",
+   "Pièces": 60,
+   "MMICV total (USD)": 540.0,
+   "Type de pièce": "Ventilateur / moteur",
+   "CRM": "cuivre, terres rares légères",
+   "Score risque matière (0-1)": 0.5,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 6.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-1006",
+   "Description": "Bus resistance 33k ohm 10W",
+   "Ateliers": "MR",
+   "Pièces": 119,
+   "MMICV total (USD)": 535.5,
+   "Type de pièce": "Résistance de puissance",
+   "CRM": "nickel, cuivre",
+   "Score risque matière (0-1)": 0.5,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 132.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-1007",
+   "Description": "Protection fuse 100A high speed",
+   "Ateliers": "MR",
+   "Pièces": 90,
+   "MMICV total (USD)": 162.0,
+   "Type de pièce": "Fusible",
+   "CRM": "cuivre",
+   "Score risque matière (0-1)": 0.25,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 181.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  },
+  {
+   "Référence": "P-1003",
+   "Description": "AL Electrolytic Capacitor 450V 4700uF 105degC",
+   "Ateliers": "MR",
+   "Pièces": 277,
+   "MMICV total (USD)": null,
+   "Type de pièce": "Condensateur électrolytique",
+   "CRM": "bauxite/alumine/aluminium",
+   "Score risque matière (0-1)": 0.25,
+   "Risque supply retenu": null,
+   "Source supply retenue": "aucune",
+   "FRU rebutées (nomenclature)": 132.0,
+   "Fiabilité réemploi (1/rapport)": null,
+   "Sur le front de Pareto": false
+  }
+ ],
+ "rex": {
+  "posterieur": [
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1001",
+    "q0": 0.5871686746987952,
+    "Pièces testées": 41.0,
+    "Pièces bonnes": 22.0,
+    "q moyen": 0.5465036617056461,
+    "q bas (5 %)": 0.43119306206260977,
+    "q haut (95 %)": 0.6583664969653091,
+    "Poids des données": 0.803921568627451,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1002",
+    "q0": 0.627343373493976,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.627343373493976,
+    "q bas (5 %)": 0.3667341594524756,
+    "q haut (95 %)": 0.8523083645792162,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1003",
+    "q0": 0.5458780120481928,
+    "Pièces testées": 40.0,
+    "Pièces bonnes": 7.0,
+    "q moyen": 0.24917560240963854,
+    "q bas (5 %)": 0.1545663046856326,
+    "q haut (95 %)": 0.3536378223547302,
+    "Poids des données": 0.8,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1004",
+    "q0": 0.47110843373493966,
+    "Pièces testées": 38.0,
+    "Pièces bonnes": 13.0,
+    "q moyen": 0.36898092369477914,
+    "q bas (5 %)": 0.25989420249411327,
+    "q haut (95 %)": 0.4859436054272534,
+    "Poids des données": 0.7916666666666666,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1005",
+    "q0": 0.7166204819277109,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.7166204819277109,
+    "q bas (5 %)": 0.4685528020347304,
+    "q haut (95 %)": 0.910663200883362,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1006",
+    "q0": 0.677933734939759,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.677933734939759,
+    "q bas (5 %)": 0.4254833183362979,
+    "q haut (95 %)": 0.8869566387780172,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A100-R",
+    "Pièce": "P-1007",
+    "q0": 0.7322439759036145,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.7322439759036145,
+    "q bas (5 %)": 0.48764538714797584,
+    "q haut (95 %)": 0.9256769000204049,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-1002",
+    "q0": 0.6306790909090909,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.6306790909090909,
+    "q bas (5 %)": 0.37580715948597027,
+    "q haut (95 %)": 0.8562575816371267,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-1007",
+    "q0": 0.6781704545454545,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.6781704545454545,
+    "q bas (5 %)": 0.42937578719058195,
+    "q haut (95 %)": 0.8883315950315324,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-2001",
+    "q0": 0.3295636363636364,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.3295636363636364,
+    "q bas (5 %)": 0.11762243766596686,
+    "q haut (95 %)": 0.5853181658329776,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-A200-R",
+    "Pièce": "P-2002",
+    "q0": 0.47102727272727274,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.47102727272727274,
+    "q bas (5 %)": 0.22827985559780842,
+    "q haut (95 %)": 0.7237982585368566,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3001",
+    "q0": 0.4801539589442815,
+    "Pièces testées": 39.0,
+    "Pièces bonnes": 17.0,
+    "q moyen": 0.444929379376384,
+    "q bas (5 %)": 0.33144473362419374,
+    "q haut (95 %)": 0.5616141006555486,
+    "Poids des données": 0.7959183673469388,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3002",
+    "q0": 0.5143790322580645,
+    "Pièces testées": 46.0,
+    "Pièces bonnes": 34.0,
+    "q moyen": 0.6989962557603686,
+    "q bas (5 %)": 0.5962402463076093,
+    "q haut (95 %)": 0.7940706912098472,
+    "Poids des données": 0.8214285714285714,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3003",
+    "q0": 0.2519868035190616,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.2519868035190616,
+    "q bas (5 %)": 0.06673572320725972,
+    "q haut (95 %)": 0.4920261200674518,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3004",
+    "q0": 0.604016129032258,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.604016129032258,
+    "q bas (5 %)": 0.3486703966725123,
+    "q haut (95 %)": 0.8344867062890486,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B300-R",
+    "Pièce": "P-3005",
+    "q0": 0.6789853372434017,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.6789853372434017,
+    "q bas (5 %)": 0.42601653762705893,
+    "q haut (95 %)": 0.8876491032330892,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "P-3002",
+    "q0": 0.595890410958904,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.595890410958904,
+    "q bas (5 %)": 0.3422352348024697,
+    "q haut (95 %)": 0.8249613804569993,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "P-3005",
+    "q0": 0.821917808219178,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.821917808219178,
+    "q bas (5 %)": 0.6019676890953417,
+    "q haut (95 %)": 0.9691415034414701,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   },
+   {
+    "Type de FRU": "FRU-B400-R",
+    "Pièce": "P-4001",
+    "q0": 0.410958904109589,
+    "Pièces testées": 0.0,
+    "Pièces bonnes": 0.0,
+    "q moyen": 0.410958904109589,
+    "q bas (5 %)": 0.17744306136426236,
+    "q haut (95 %)": 0.6649264984679722,
+    "Poids des données": 0.0,
+    "Transmis au modèle de ligne": "oui"
+   }
+  ],
+  "metriques": [
+   {
+    "Modèle": "Fréquence observée",
+    "Lots": 30.0,
+    "Pièces": 204.0,
+    "Brier": 0.2219108106277797,
+    "Log-perte": 0.6351288214155756,
+    "Écart absolu moyen": 0.13025451508298388,
+    "Couverture IC90": null
+   },
+   {
+    "Modèle": "Bêta-binomial",
+    "Lots": 30.0,
+    "Pièces": 204.0,
+    "Brier": 0.22590328917573488,
+    "Log-perte": 0.6436375227915356,
+    "Écart absolu moyen": 0.1395099780950732,
+    "Couverture IC90": 0.9666666666666667
+   },
+   {
+    "Modèle": "A priori seul",
+    "Lots": 30.0,
+    "Pièces": 204.0,
+    "Brier": 0.25304593509746404,
+    "Log-perte": 0.6992919699262469,
+    "Écart absolu moyen": 0.18969037440082911,
+    "Couverture IC90": null
+   }
+  ],
+  "banc_essai": [
+   {
+    "Politique": "A priori seul",
+    "Regret cumulé moyen (€)": 6879.999999999955,
+    "Regret par pièce (€)": 17.19999999999989,
+    "Part de pièces testées": 0.0,
+    "q estimé final": 0.2
+   },
+   {
+    "Politique": "Glouton",
+    "Regret cumulé moyen (€)": 6879.999999999955,
+    "Regret par pièce (€)": 17.19999999999989,
+    "Part de pièces testées": 0.0,
+    "q estimé final": 0.19999999999999998
+   },
+   {
+    "Politique": "Thompson",
+    "Regret cumulé moyen (€)": 254.67466666666664,
+    "Regret par pièce (€)": 0.6366866666666666,
+    "Part de pièces testées": 0.9629833333333333,
+    "q estimé final": 0.5900951741663606
+   }
+  ]
+ },
+ "a_obtenir": [
+  {
+   "Paramètre": "tri_min",
+   "Donnée": "Tri d'un exemplaire vers son flux de recyclage (minutes)",
+   "Valeurs manquantes": 4,
+   "FRU concernés": 1,
+   "À demander à": "Audit de démontage chronométré"
+  },
+  {
+   "Paramètre": "test_min",
+   "Donnée": "Test d'un exemplaire (minutes)",
+   "Valeurs manquantes": 3,
+   "FRU concernés": 1,
+   "À demander à": "Audit de démontage chronométré, qualité"
+  },
+  {
+   "Paramètre": "extraction_min",
+   "Donnée": "Extraction d'un exemplaire (minutes)",
+   "Valeurs manquantes": 3,
+   "FRU concernés": 1,
+   "À demander à": "Audit de démontage chronométré"
+  },
+  {
+   "Paramètre": "poids_kg",
+   "Donnée": "Poids d'un exemplaire (vide = classement matière)",
+   "Valeurs manquantes": 1,
+   "FRU concernés": 1,
+   "À demander à": "Pesée"
+  },
+  {
+   "Paramètre": "ouverture_min",
+   "Donnée": "Ouverture soignée du FRU, pour extraire des pièces à réemployer (minutes)",
+   "Valeurs manquantes": 1,
+   "FRU concernés": 1,
+   "À demander à": "Audit de démontage chronométré"
+  },
+  {
+   "Paramètre": "prix_recycleur_eur_kg",
+   "Donnée": "Prix payé par le recycleur acheteur (vide = référentiel des grades)",
+   "Valeurs manquantes": 1,
+   "FRU concernés": 1,
+   "À demander à": "Consultation des recycleurs"
+  },
+  {
+   "Paramètre": "valeur_eur",
+   "Donnée": "Valeur d'une pièce réemployée (vide = MMICV × fraction de la ligne)",
+   "Valeurs manquantes": 1,
+   "FRU concernés": 1,
+   "À demander à": "Finance supply chain"
+  }
+ ],
+ "sources": [
+  {
+   "Source": "Extraction R26",
+   "Fichier": "ERC_R26_extraction_20260831_20261101.xlsx",
+   "État": "chargé",
+   "Lignes": 737,
+   "Détail": "20260831 → 20261101",
+   "Sert à": "consommations, FRU rebutées"
+  },
+  {
+   "Source": "Extraction R26",
+   "Fichier": "ERC_R26_extraction_20260601_20260913.xlsx",
+   "État": "chargé",
+   "Lignes": 1030,
+   "Détail": "20260601 → 20260913",
+   "Sert à": "consommations, FRU rebutées"
+  },
+  {
+   "Source": "FRU_info",
+   "Fichier": "FRU_info.xlsx",
+   "État": "chargé",
+   "Lignes": 5,
+   "Détail": "",
+   "Sert à": "atelier et famille de chaque FRU"
+  },
+  {
+   "Source": "Classification matières",
+   "Fichier": "ERC_Classification_Cartes_resultats.xlsx",
+   "État": "chargé",
+   "Lignes": 18,
+   "Détail": "",
+   "Sert à": "type de déchet, benne, poids unitaire"
+  },
+  {
+   "Source": "Référentiel des grades",
+   "Fichier": "ERC_Referentiel_Grades.xlsx",
+   "État": "chargé",
+   "Lignes": 8,
+   "Détail": "",
+   "Sert à": "prix recycleur par catégorie"
+  },
+  {
+   "Source": "QueryComponents",
+   "Fichier": "ERC_Valorisation_MICV_v1.xlsx",
+   "État": "chargé",
+   "Lignes": 23,
+   "Détail": "",
+   "Sert à": "nomenclature de consommation, MMICV de repli"
+  },
+  {
+   "Source": "QueryERC_Flow_In_Out",
+   "Fichier": "ERC_Valorisation_MICV_v1.xlsx",
+   "État": "chargé",
+   "Lignes": 6,
+   "Détail": "",
+   "Sert à": "poids et description des FRU"
+  },
+  {
+   "Source": "Fiche article (vwAllItems)",
+   "Fichier": "poids_items_vwAllItems.csv",
+   "État": "chargé",
+   "Lignes": 19,
+   "Détail": "",
+   "Sert à": "MMICV unitaire (coût standard)"
+  },
+  {
+   "Source": "Fiabilité (cache)",
+   "Fichier": "fiabilite_ELF_references_ERC.csv",
+   "État": "chargé",
+   "Lignes": 132,
+   "Détail": "",
+   "Sert à": "défaillances précoces par référence"
+  },
+  {
+   "Source": "Pièces posées 2022-2023",
+   "Fichier": "poses_2022_2023_par_reference.csv",
+   "État": "chargé",
+   "Lignes": 8,
+   "Détail": "",
+   "Sert à": "dénominateur du taux de défaillance"
+  },
+  {
+   "Source": "Pesées hebdomadaires",
+   "Fichier": "pesees_hebdo.csv",
+   "État": "chargé",
+   "Lignes": 12,
+   "Détail": "",
+   "Sert à": "masse mesurée par semaine et par flux"
+  },
+  {
+   "Source": "Audit de démontage",
+   "Fichier": "audit_demontage.csv",
+   "État": "chargé",
+   "Lignes": 30,
+   "Détail": "",
+   "Sert à": "pièces testées et pièces bonnes (modèle de Rex)"
+  }
+ ],
+ "anomalies": []
+}

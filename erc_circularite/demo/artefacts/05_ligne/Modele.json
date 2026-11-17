@@ -1,0 +1,556 @@
+{
+ "ligne": {
+  "cout_installation_eur": [
+   20000.0,
+   30000.0,
+   45000.0
+  ],
+  "amortissement_ans": 5.0,
+  "couts_fixes_annuels_eur": 6000.0,
+  "heures_operateur_an": 900.0,
+  "taux_horaire_eur": [
+   38.0,
+   42.0,
+   48.0
+  ],
+  "cout_traitement_eur_kg": [
+   0.15,
+   0.35
+  ],
+  "valeur_reemploi_frac": [
+   0.3,
+   0.5,
+   0.7
+  ],
+  "valeur_semaine_eur": 0.5,
+  "taux_change_mmicv": 0.92
+ },
+ "frus": {
+  "FRU-A100-R": {
+   "description": "Amplificateur de gradient (démo)",
+   "atelier": "MR",
+   "rebut_an": [
+    243.45454545454544,
+    312.0,
+    378.1818181818182
+   ],
+   "poids_fru_kg": 79.0,
+   "ouverture_min": [
+    30.0,
+    45.0,
+    70.0
+   ],
+   "ouverture_tri_min": 15.0,
+   "pieces": {
+    "P-1004": {
+     "description": "Gate Driver Board",
+     "n_par_fru": 1.0,
+     "extraction_min": [
+      8.0,
+      10.0,
+      14.0
+     ],
+     "test_min": [
+      15.0,
+      20.0,
+      30.0
+     ],
+     "tri_min": 2.0,
+     "transport_eur": null,
+     "poids_kg": 0.4,
+     "prix_recycleur_eur_kg": 8.0,
+     "valeur_eur": [
+      88.32000000000001,
+      147.20000000000002,
+      206.08
+     ],
+     "delai_semaines": 16.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.25989420249411327,
+      0.36898092369477914,
+      0.4859436054272534
+     ]
+    },
+    "P-1005": {
+     "description": "Control board assembly",
+     "n_par_fru": 1.0,
+     "extraction_min": 10.0,
+     "test_min": 20.0,
+     "tri_min": 2.0,
+     "transport_eur": null,
+     "poids_kg": 0.45,
+     "prix_recycleur_eur_kg": 8.0,
+     "valeur_eur": [
+      85.55999999999999,
+      142.6,
+      199.64
+     ],
+     "delai_semaines": 16.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.4685528020347304,
+      0.7166204819277109,
+      0.910663200883362
+     ]
+    },
+    "P-1001": {
+     "description": "IGBT 400A 1200V",
+     "n_par_fru": 2.0,
+     "extraction_min": 6.0,
+     "test_min": 4.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.35,
+     "prix_recycleur_eur_kg": 2.5,
+     "valeur_eur": [
+      8.832,
+      14.72,
+      20.608
+     ],
+     "delai_semaines": 26.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.43119306206260977,
+      0.5465036617056461,
+      0.6583664969653091
+     ]
+    },
+    "P-1002": {
+     "description": "IGBT 400A 600V",
+     "n_par_fru": 2.0,
+     "extraction_min": 6.0,
+     "test_min": 4.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.35,
+     "prix_recycleur_eur_kg": 2.5,
+     "valeur_eur": [
+      6.8999999999999995,
+      11.5,
+      16.099999999999998
+     ],
+     "delai_semaines": 26.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.3667341594524756,
+      0.627343373493976,
+      0.8523083645792162
+     ]
+    },
+    "P-1006": {
+     "description": "Bus resistance 33k ohm 10W",
+     "n_par_fru": 3.0,
+     "extraction_min": 2.0,
+     "test_min": 1.0,
+     "tri_min": 0.5,
+     "transport_eur": null,
+     "poids_kg": 0.05,
+     "prix_recycleur_eur_kg": 0.5,
+     "valeur_eur": [
+      1.2420000000000002,
+      2.0700000000000003,
+      2.898
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.4254833183362979,
+      0.677933734939759,
+      0.8869566387780172
+     ]
+    },
+    "P-1007": {
+     "description": "Protection fuse 100A high speed",
+     "n_par_fru": 2.0,
+     "extraction_min": 2.0,
+     "test_min": 1.0,
+     "tri_min": 0.5,
+     "transport_eur": null,
+     "poids_kg": 0.08,
+     "prix_recycleur_eur_kg": 0.5,
+     "valeur_eur": [
+      0.4968,
+      0.8280000000000001,
+      1.1592
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.48764538714797584,
+      0.7322439759036145,
+      0.9256769000204049
+     ]
+    },
+    "P-1003": {
+     "description": "AL Electrolytic Capacitor 450V 4700uF 105degC",
+     "n_par_fru": 4.0,
+     "extraction_min": 3.0,
+     "test_min": 2.0,
+     "tri_min": 0.5,
+     "transport_eur": null,
+     "poids_kg": null,
+     "prix_recycleur_eur_kg": 0.6,
+     "valeur_eur": null,
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.1545663046856326,
+      0.24917560240963854,
+      0.3536378223547302
+     ]
+    },
+    "CARCASSE": {
+     "description": "Châssis et reste du FRU",
+     "n_par_fru": 1.0,
+     "poids_kg": 76.44,
+     "prix_recycleur_eur_kg": [
+      0.12,
+      0.25
+     ],
+     "tri_min": 10.0
+    }
+   }
+  },
+  "FRU-A200-R": {
+   "description": "Alimentation de puissance (démo)",
+   "atelier": "MR",
+   "rebut_an": [
+    87.45454545454545,
+    115.81818181818181,
+    141.8181818181818
+   ],
+   "poids_fru_kg": 62.0,
+   "ouverture_min": [
+    25.0,
+    35.0,
+    50.0
+   ],
+   "ouverture_tri_min": 12.0,
+   "pieces": {
+    "P-2001": {
+     "description": "Power supply board",
+     "n_par_fru": 1.0,
+     "extraction_min": 12.0,
+     "test_min": 20.0,
+     "tri_min": 2.0,
+     "transport_eur": null,
+     "poids_kg": 0.6,
+     "prix_recycleur_eur_kg": 8.0,
+     "valeur_eur": [
+      57.96,
+      96.60000000000001,
+      135.24
+     ],
+     "delai_semaines": 12.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.11762243766596686,
+      0.3295636363636364,
+      0.5853181658329776
+     ]
+    },
+    "P-1002": {
+     "description": "IGBT 400A 600V",
+     "n_par_fru": 2.0,
+     "extraction_min": 6.0,
+     "test_min": 4.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.35,
+     "prix_recycleur_eur_kg": 2.5,
+     "valeur_eur": [
+      6.8999999999999995,
+      11.5,
+      16.099999999999998
+     ],
+     "delai_semaines": 26.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.37580715948597027,
+      0.6306790909090909,
+      0.8562575816371267
+     ]
+    },
+    "P-2002": {
+     "description": "Cooling fan 120mm",
+     "n_par_fru": 2.0,
+     "extraction_min": 5.0,
+     "test_min": 3.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.25,
+     "prix_recycleur_eur_kg": 0.5,
+     "valeur_eur": [
+      4.968000000000001,
+      8.280000000000001,
+      11.592
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.22827985559780842,
+      0.47102727272727274,
+      0.7237982585368566
+     ]
+    },
+    "P-1007": {
+     "description": "Protection fuse 100A high speed",
+     "n_par_fru": 2.0,
+     "extraction_min": 2.0,
+     "test_min": 1.0,
+     "tri_min": 0.5,
+     "transport_eur": null,
+     "poids_kg": 0.08,
+     "prix_recycleur_eur_kg": 0.5,
+     "valeur_eur": [
+      0.4968,
+      0.8280000000000001,
+      1.1592
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.42937578719058195,
+      0.6781704545454545,
+      0.8883315950315324
+     ]
+    },
+    "CARCASSE": {
+     "description": "Châssis et reste du FRU",
+     "n_par_fru": 1.0,
+     "poids_kg": 60.04,
+     "prix_recycleur_eur_kg": [
+      0.12,
+      0.25
+     ],
+     "tri_min": 10.0
+    }
+   }
+  },
+  "FRU-B300-R": {
+   "description": "Boîtier de commande (démo)",
+   "atelier": "TSUI",
+   "rebut_an": [
+    70.9090909090909,
+    94.54545454545455,
+    118.18181818181819
+   ],
+   "poids_fru_kg": 5.5,
+   "ouverture_min": [
+    10.0,
+    15.0,
+    25.0
+   ],
+   "ouverture_tri_min": 6.0,
+   "pieces": {
+    "P-3001": {
+     "description": "Coque boîtier gris",
+     "n_par_fru": 1.0,
+     "extraction_min": 5.0,
+     "test_min": 2.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.6,
+     "prix_recycleur_eur_kg": 0.05,
+     "valeur_eur": [
+      33.12,
+      55.2,
+      77.28
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.33144473362419374,
+      0.444929379376384,
+      0.5616141006555486
+     ]
+    },
+    "P-3002": {
+     "description": "Tête de joystick",
+     "n_par_fru": 2.0,
+     "extraction_min": 4.0,
+     "test_min": 3.0,
+     "tri_min": 0.5,
+     "transport_eur": null,
+     "poids_kg": 0.05,
+     "prix_recycleur_eur_kg": 0.05,
+     "valeur_eur": [
+      15.456,
+      25.76,
+      36.064
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.5962402463076093,
+      0.6989962557603686,
+      0.7940706912098472
+     ]
+    },
+    "P-3004": {
+     "description": "Cable harness boîtier",
+     "n_par_fru": 1.0,
+     "extraction_min": 6.0,
+     "test_min": 5.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.3,
+     "prix_recycleur_eur_kg": 1.8,
+     "valeur_eur": [
+      38.64,
+      64.4,
+      90.16
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.3486703966725123,
+      0.604016129032258,
+      0.8344867062890486
+     ]
+    },
+    "P-3005": {
+     "description": "Keypad controller board",
+     "n_par_fru": 1.0,
+     "extraction_min": 7.0,
+     "test_min": 12.0,
+     "tri_min": 1.0,
+     "transport_eur": null,
+     "poids_kg": 0.2,
+     "prix_recycleur_eur_kg": 3.0,
+     "valeur_eur": [
+      49.68,
+      82.8,
+      115.91999999999999
+     ],
+     "delai_semaines": 10.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.42601653762705893,
+      0.6789853372434017,
+      0.8876491032330892
+     ]
+    },
+    "P-3003": {
+     "description": "Soufflet caoutchouc",
+     "n_par_fru": 2.0,
+     "extraction_min": 2.0,
+     "test_min": 1.0,
+     "tri_min": 0.3,
+     "transport_eur": null,
+     "poids_kg": 0.02,
+     "prix_recycleur_eur_kg": 0.05,
+     "valeur_eur": [
+      0.41400000000000003,
+      0.6900000000000001,
+      0.966
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.06673572320725972,
+      0.2519868035190616,
+      0.4920261200674518
+     ]
+    },
+    "CARCASSE": {
+     "description": "Châssis et reste du FRU",
+     "n_par_fru": 1.0,
+     "poids_kg": 4.26,
+     "prix_recycleur_eur_kg": [
+      0.12,
+      0.25
+     ],
+     "tri_min": 10.0
+    }
+   }
+  },
+  "FRU-B400-R": {
+   "description": "Pupitre de table (démo)",
+   "atelier": "TSUI",
+   "rebut_an": [
+    18.90909090909091,
+    35.45454545454545,
+    54.36363636363636
+   ],
+   "poids_fru_kg": 6.3,
+   "ouverture_min": null,
+   "pieces": {
+    "P-3002": {
+     "description": "Tête de joystick",
+     "n_par_fru": 2.0,
+     "extraction_min": null,
+     "test_min": null,
+     "tri_min": null,
+     "transport_eur": null,
+     "poids_kg": 0.05,
+     "prix_recycleur_eur_kg": 0.05,
+     "valeur_eur": [
+      15.456,
+      25.76,
+      36.064
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.3422352348024697,
+      0.595890410958904,
+      0.8249613804569993
+     ]
+    },
+    "P-3005": {
+     "description": "Keypad controller board",
+     "n_par_fru": 1.0,
+     "extraction_min": null,
+     "test_min": null,
+     "tri_min": null,
+     "transport_eur": null,
+     "poids_kg": 0.2,
+     "prix_recycleur_eur_kg": 3.0,
+     "valeur_eur": [
+      49.68,
+      82.8,
+      115.91999999999999
+     ],
+     "delai_semaines": 10.0,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.6019676890953417,
+      0.821917808219178,
+      0.9691415034414701
+     ]
+    },
+    "P-4001": {
+     "description": "Grille de protection",
+     "n_par_fru": 1.0,
+     "extraction_min": null,
+     "test_min": null,
+     "tri_min": null,
+     "transport_eur": null,
+     "poids_kg": 0.3,
+     "prix_recycleur_eur_kg": 0.25,
+     "valeur_eur": [
+      11.040000000000001,
+      18.400000000000002,
+      25.76
+     ],
+     "delai_semaines": null,
+     "valeur_semaine_eur": 0.5,
+     "p_reutilisable": [
+      0.17744306136426236,
+      0.410958904109589,
+      0.6649264984679722
+     ]
+    },
+    "CARCASSE": {
+     "description": "Châssis et reste du FRU",
+     "n_par_fru": 1.0,
+     "poids_kg": 5.699999999999999,
+     "prix_recycleur_eur_kg": null,
+     "tri_min": null
+    }
+   }
+  }
+ }
+}

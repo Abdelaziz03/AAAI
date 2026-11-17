@@ -1,0 +1,20 @@
+﻿Type de FRU;Pièce;Pièces consommées;Réparations du FRU;n_par_fru;Source n_par_fru;p_défaut;Correctifs;q0
+FRU-A100-R;P-1004;86;249;1,0;saisi;0,3453815261044177;neutres : part préventive;0,47110843373493966
+FRU-A100-R;P-1005;31;249;1,0;saisi;0,12449799196787148;neutres : part préventive;0,7166204819277109
+FRU-A100-R;P-1001;200;249;2,0;saisi;0,24096385542168675;tous saisis;0,5871686746987952
+FRU-A100-R;P-1002;170;249;2,0;saisi;0,20481927710843373;tous saisis;0,627343373493976
+FRU-A100-R;P-1006;119;249;3,0;saisi;0,15930388219544847;neutres : part préventive;0,677933734939759
+FRU-A100-R;P-1007;55;249;2,0;saisi;0,11044176706827309;neutres : part préventive;0,7322439759036145
+FRU-A100-R;P-1003;277;249;4,0;saisi;0,2781124497991968;neutres : part préventive;0,5458780120481928
+FRU-A200-R;P-2001;52;110;1,0;saisi;0,4727272727272727;neutres : part préventive;0,3295636363636364
+FRU-A200-R;P-1002;74;110;2,0;saisi;0,2018181818181818;tous saisis;0,6306790909090909
+FRU-A200-R;P-2002;76;110;2,0;saisi;0,34545454545454546;neutres : part préventive;0,47102727272727274
+FRU-A200-R;P-1007;35;110;2,0;saisi;0,1590909090909091;neutres : part préventive;0,6781704545454545
+FRU-B300-R;P-3001;115;341;1,0;saisi;0,33724340175953077;neutres : part préventive;0,4801539589442815
+FRU-B300-R;P-3002;209;341;2,0;saisi;0,3064516129032258;neutres : part préventive;0,5143790322580645
+FRU-B300-R;P-3004;77;341;1,0;saisi;0,22580645161290322;neutres : part préventive;0,604016129032258
+FRU-B300-R;P-3005;54;341;1,0;saisi;0,15835777126099707;neutres : part préventive;0,6789853372434017
+FRU-B300-R;P-3003;370;341;2,0;saisi;0,5425219941348973;neutres : part préventive;0,2519868035190616
+FRU-B400-R;P-3002;59;73;2,0;minimum observé sur un PO, à confirmer;0,4041095890410959;neutres : part préventive, facteur rebut, casse, rendement du test;0,595890410958904
+FRU-B400-R;P-3005;13;73;1,0;minimum observé sur un PO, à confirmer;0,1780821917808219;neutres : part préventive, facteur rebut, casse, rendement du test;0,821917808219178
+FRU-B400-R;P-4001;43;73;1,0;minimum observé sur un PO, à confirmer;0,589041095890411;neutres : part préventive, facteur rebut, casse, rendement du test;0,410958904109589

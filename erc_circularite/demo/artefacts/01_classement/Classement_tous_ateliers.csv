@@ -1,0 +1,20 @@
+﻿Référence;Description;Ateliers;Familles;Pièces;PO;Jours avec sortie;MMICV unitaire (USD);Source MMICV;MMICV total (USD);Part du MMICV total;Rang pièces;Rang MMICV;Catégorie proposée;Benne;Poids unitaire (kg);Source poids;Fabricant;Nature réelle;Niveau de preuve;Kg (poids connus);Pièce posée
+P-1004;Gate Driver Board;MR;Amplificateur;86;86;64;320,0;fiche article;27520,0;0,2103838817813827;9;1,0;Carte B;DEEE;0,4;pesée (démo);Fabricant démo;Gate Driver Board;démo;34,4;Neuve
+P-3002;Tête de joystick;TSUI;Commande;268;228;95;56,0;fiche article;15008,0;0,11473260529705638;3;2,0;Plastique;DIB;0,05;pesée (démo);Fabricant démo;Tête de joystick;démo;13,4;Neuve
+P-3001;Coque boîtier gris;TSUI;Commande;115;115;70;120,0;fiche article;13800,0;0,10549773141653639;7;3,0;Plastique;DIB;0,6;pesée (démo);Fabricant démo;Coque boîtier gris;démo;69,0;Neuve
+P-3005;Keypad controller board;TSUI;Commande;67;67;45;180,0;fiche article;12060,0;0,09219584354227744;12;4,0;Carte C;DEEE;0,2;pesée (démo);Fabricant démo;Keypad controller board;démo;13,4;Neuve
+P-2001;Power supply board;MR;Alimentation;52;52;42;210,0;fiche article;10920,0;0,083480813555694;15;5,0;Carte B;DEEE;0,6;pesée (démo);Fabricant démo;Power supply board;démo;31,2;Neuve
+P-3004;Cable harness boîtier;TSUI;Commande;77;77;59;140,0;fiche article;10780,0;0,0824105467152364;10;6,0;Câbles;DEEE;0,3;pesée (démo);Fabricant démo;Cable harness boîtier;démo;23,099999999999998;Neuve
+P-1005;Control board assembly;MR;Amplificateur;31;31;28;310,0;fiche article;9610,0;0,07346617383426918;17;7,0;Carte B;DEEE;0,45;pesée (démo);Fabricant démo;Control board assembly;démo;13,950000000000001;Neuve
+P-6001;Mainboard station;(non rattaché);;17;17;17;400,0;fiche article;6800,0;0,051984389393655614;19;8,0;;;;;;;;;Neuve
+P-1001;IGBT 400A 1200V;MR;Amplificateur;200;100;65;32,0;fiche article;6400,0;0,048926484135205284;5;9,0;Composant de puissance;DEEE;0,35;pesée (démo);Fabricant démo;IGBT 400A 1200V;démo;70,0;Neuve
+P-1002;IGBT 400A 600V;MR;Alimentation, Amplificateur;244;122;74;25,0;fiche article;6100,0;0,04663305519136753;4;10,0;Composant de puissance;DEEE;0,35;pesée (démo);Fabricant démo;IGBT 400A 600V;démo;85,39999999999999;Neuve
+P-5001;Coil preamp board;Coils;Antenne;54;47;34;95,0;fiche article;5130,0;0,03921763493962548;14;11,0;Carte C;DEEE;0,1;pesée (démo);Fabricant démo;Coil preamp board;démo;5,4;Neuve
+P-5002;Coil cable;Coils;Antenne;30;30;29;60,0;fiche article;1800,0;0,013760573663026486;18;12,0;Câbles;DEEE;0,2;pesée (démo);Fabricant démo;Coil cable;démo;6,0;Neuve
+P-4001;Grille de protection;TSUI;Commande;43;43;37;40,0;fiche article;1720,0;0,013148992611336419;16;13,0;Métal;Métal;0,3;pesée (démo);Fabricant démo;Grille de protection;démo;12,9;Neuve
+P-2002;Cooling fan 120mm;MR;Alimentation;76;63;48;18,0;fiche article;1368,0;0,010458035983900129;11;14,0;Composant standard;DEEE;0,25;pesée (démo);Fabricant démo;Cooling fan 120mm;démo;19,0;Neuve
+P-3003;Soufflet caoutchouc;TSUI;Commande;370;277;106;1,5;fiche article;555,0;0,004242843546099833;1;15,0;Plastique;DIB;0,02;pesée (démo);Fabricant démo;Soufflet caoutchouc;démo;7,4;Neuve
+P-6002;Cooling fan 80mm;(non rattaché);;60;48;38;9,0;fiche article;540,0;0,0041281720989079455;13;16,0;Composant standard;DEEE;0,12;pesée (démo);Fabricant démo;Cooling fan 80mm;démo;7,199999999999999;Neuve
+P-1006;Bus resistance 33k ohm 10W;MR;Amplificateur;119;103;63;4,5;fiche article;535,5;0,00409377066475038;6;17,0;Composant standard;DEEE;0,05;pesée (démo);Fabricant démo;Bus resistance 33k ohm 10W;démo;5,95;Neuve
+P-1007;Protection fuse 100A high speed;MR;Alimentation, Amplificateur;90;86;62;1,8;fiche article;162,0;0,0012384516296723837;8;18,0;Composant standard;DEEE;0,08;pesée (démo);Fabricant démo;Protection fuse 100A high speed;démo;7,2;Neuve
+P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;MR;Amplificateur;277;175;92;;aucune;;;2;;Condensateur;DEEE;;;Fabricant démo;AL Electrolytic Capacitor 450V 4700uF 105degC;démo;;Neuve

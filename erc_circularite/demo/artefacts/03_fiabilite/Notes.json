@@ -1,0 +1,13 @@
+{
+ "lignes_elf": 132,
+ "denominateur": "chargé",
+ "fenetre_elf_jours": 87.0,
+ "garantie_jours": 365,
+ "criteres_actifs": [
+  "MMICV total (USD)",
+  "FRU rebutées (nomenclature)",
+  "Score risque matière (0-1)",
+  "Risque supply retenu",
+  "Fiabilité réemploi (1/rapport)"
+ ]
+}

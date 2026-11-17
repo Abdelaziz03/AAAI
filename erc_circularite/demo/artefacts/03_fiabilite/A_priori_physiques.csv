@@ -1,0 +1,3 @@
+﻿Type de pièce;Mécanisme;Loi;Paramètres à lire;Source
+Condensateur électrolytique;Séchage de l'électrolyte (usure);La vie double tous les 10 °C sous la température nominale;Vie nominale (h) et température nominale, température de service;Fiche du fabricant, mesure dans le FRU
+IGBT / module de puissance;Fatigue en cyclage thermique;Coffin-Manson : nombre de cycles ∝ ΔTj^-n, n ≈ 5;Amplitude de température de jonction ΔTj, constante du module;Fiche du fabricant, conception

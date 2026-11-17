@@ -1,0 +1,8 @@
+﻿Élément;À savoir
+Mode;DÉMONSTRATION (données fictives)
+Période;du 01/06/2026 au 01/11/2026, 154 jours extraits
+MMICV;Coût standard : référence provisoire, ni prix de revente ni valeur de réemploi. Devise à confirmer.
+Nombre de pièces par FRU;Inconnu sans audit de démontage : le maximum observé sur un PO est un minimum.
+Fiabilité;Le fichier de fiabilité ne contient que des défaillances : il donne la forme et un taux précoce, pas une durée de vie.
+Valeurs potentielles;Estimations, distinctes des recettes réelles. Toute entrée inconnue laisse le résultat vide.
+Banc d'essai du modèle de Rex;Simulation synthétique : démontre la méthode, ne décrit pas l'atelier.

@@ -1,0 +1,20 @@
+﻿Référence;Description;FRU rebutées qui l'ont dans leur nomenclature;FRU concernées;Ateliers;Pièces consommées sur la période;MMICV unitaire (USD);Minimum de pièces par FRU (max observé par PO)
+P-3003;Soufflet caoutchouc;40,0;FRU-B300-R;TSUI;370;1,5;2
+P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;132,0;FRU-A100-R;MR;277;;4
+P-3002;Tête de joystick;55,0;FRU-B300-R, FRU-B400-R;TSUI;268;56,0;2
+P-1002;IGBT 400A 600V;181,0;FRU-A100-R, FRU-A200-R;MR;244;25,0;2
+P-1001;IGBT 400A 1200V;132,0;FRU-A100-R;MR;200;32,0;2
+P-1006;Bus resistance 33k ohm 10W;132,0;FRU-A100-R;MR;119;4,5;2
+P-3001;Coque boîtier gris;40,0;FRU-B300-R;TSUI;115;120,0;1
+P-1007;Protection fuse 100A high speed;181,0;FRU-A100-R, FRU-A200-R;MR;90;1,8;2
+P-1004;Gate Driver Board;132,0;FRU-A100-R;MR;86;320,0;1
+P-3004;Cable harness boîtier;40,0;FRU-B300-R;TSUI;77;140,0;1
+P-2002;Cooling fan 120mm;49,0;FRU-A200-R;MR;76;18,0;2
+P-3005;Keypad controller board;55,0;FRU-B300-R, FRU-B400-R;TSUI;67;180,0;1
+P-6002;Cooling fan 80mm;6,0;FRU-W600-R;(non rattaché);60;9,0;2
+P-5001;Coil preamp board;31,0;FRU-C500-R;Coils;54;95,0;2
+P-2001;Power supply board;49,0;FRU-A200-R;MR;52;210,0;1
+P-4001;Grille de protection;15,0;FRU-B400-R;TSUI;43;40,0;1
+P-1005;Control board assembly;132,0;FRU-A100-R;MR;31;310,0;1
+P-5002;Coil cable;31,0;FRU-C500-R;Coils;30;60,0;1
+P-6001;Mainboard station;6,0;FRU-W600-R;(non rattaché);17;400,0;1

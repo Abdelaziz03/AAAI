@@ -1,0 +1,11 @@
+# Données et résultats réels : jamais dans le dépôt
+/artefacts/
+/parametres/*
+!/parametres/.gitkeep
+# Démonstration : sources et paramètres se régénèrent (python -m erc --demo)
+/demo/sources/
+/demo/parametres/
+__pycache__/
+.ipynb_checkpoints/
+.pytest_cache/
+*.pyc
