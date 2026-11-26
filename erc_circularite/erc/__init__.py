@@ -7,4 +7,5 @@
 from .config import ETAPES, charger as charger_config, memoriser_chemins
 from .etapes import Contexte, executer
 
-__all__ = ["ETAPES", "charger_config", "memoriser_chemins", "Contexte", "executer"]
+__version__ = "1.0.0"
+__all__ = ["ETAPES", "charger_config", "memoriser_chemins", "Contexte", "executer", "__version__"]

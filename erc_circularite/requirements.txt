@@ -1,0 +1,11 @@
+# Nécessaires
+numpy>=1.23
+pandas>=1.5
+openpyxl>=3.0
+matplotlib>=3.5
+# Facultatifs : ouvrir et reconstruire les notebooks, comparer au solveur exact dans les tests
+# notebook
+# nbformat
+# nbclient
+# scipy
+# pytest
