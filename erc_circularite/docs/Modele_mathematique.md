@@ -1,11 +1,11 @@
-# Modélisation mathématique : ligne de démontage et de tri des FRU rebutées
+# Modélisation mathématique : ligne de démontage et de tri des FRU scrapées
 
 Formulation du modèle codé dans `erc/ligne.py` (optimisation) et `erc/rex.py` (choix réemploi / recyclage). Les noms de champ sont ceux du classeur `parametres/ERC_Parametres.xlsx` et du code.
 
 ## 0. Le schéma de décision
 
 ```
-Flux des FRU rebutées ──► Démontage ou scrap direct ? ──non──► coût actuel de traitement des déchets
+Flux des FRU scrapées ──► Démontage ou scrap direct ? ──non──► coût actuel de traitement des déchets
    (suivi hebdomadaire)              │oui
                                      ▼
                   coût fixe de la ligne par période + coût variable (temps de démontage et de tri)
@@ -20,7 +20,7 @@ Deux décisions : (A) ouvrir la FRU ou la laisser au recycleur actuel ; (B) pour
 | Symbole | Ensemble |
 |---|---|
 | $t \in T$ | périodes (semaine ou mois ; le code traite une période d'un an) |
-| $f \in F$ | types de FRU rebutées (une ligne de l'onglet « FRU » du classeur de paramètres) |
+| $f \in F$ | types de FRU scrapées (une ligne de l'onglet « FRU » du classeur de paramètres) |
 | $p \in P_f$ | pièces contenues dans une FRU de type $f$ (la carcasse peut être déclarée comme une pièce) |
 | $o \in O = \{1, 2, 3\}$ | devenir d'une pièce : 1 réemploi, 2 recyclage trié, 3 laissée dans la FRU |
 | $s \in S_f$ | plans de traitement d'une FRU $f$ = une option par pièce ; $s_0$ = tout en option 3 = scrap direct |
@@ -29,7 +29,7 @@ Deux décisions : (A) ouvrir la FRU ou la laisser au recycleur actuel ; (B) pour
 
 | Symbole | Sens | Champ | Source |
 |---|---|---|---|
-| $N_{ft}$ | FRU de type $f$ rebutées sur la période | `rebut_an` | vwERT, suivi hebdomadaire |
+| $N_{ft}$ | FRU de type $f$ scrapées sur la période | `scrap_an` | vwERT, suivi hebdomadaire |
 | $m_f$, $m_p$ | masse d'une FRU, d'une pièce (kg) | `poids_fru_kg`, `poids_kg` | pesées |
 | $n_{fp}$ | exemplaires de $p$ dans $f$ | `n_par_fru` | audit de démontage |
 | $t^{ouv}_f$, $t^{tri,ouv}_f$ | ouverture soignée / sommaire d'une FRU (h) | `ouverture_min`, `ouverture_tri_min` | audit chronométré |
@@ -59,7 +59,7 @@ $x_{f s_0 t}$ = FRU en scrap direct (décision A = non). Tout autre $s$ = FRU d�
 1. **Flux connu par période** : $N_{ft}$ vient du suivi hebdomadaire ; le modèle n'est utilisé qu'à la granularité où l'estimé est confirmé par les pesées (§9).
 2. **Linéarité** : temps et valeurs proportionnels au nombre de FRU ; pas d'effet d'apprentissage ni de lot minimal de l'acheteur.
 3. **Capacité = heures opérateur** : la place et le banc de test ne sont pas limitants (contraintes à ajouter si l'audit le montre).
-4. **Indépendance des pièces** d'une même FRU ; le facteur « FRU rebutée » du modèle de Rex corrige en moyenne.
+4. **Indépendance des pièces** d'une même FRU ; le facteur « FRU scrapée » du modèle de Rex corrige en moyenne.
 5. **Demande** : toute pièce réemployable est absorbée par la réparation (sinon ajouter $\sum_f n_{fp}\,q_{fp}\,x \le D_{pt}$).
 6. **Poids inconnu** : aucun traitement évité compté pour la pièce. C'est prudent si le recycleur actuel facture ($c^{trait} \ge 0$) ; s'il paie, la valeur du réemploi est légèrement surestimée, et la pièce est signalée dans « Non compté faute de donnée ».
 7. **Carcasse** : reste chez le recycleur actuel sauf si elle est déclarée comme pièce à trier ; elle porte l'essentiel de la masse.
@@ -67,7 +67,7 @@ $x_{f s_0 t}$ = FRU en scrap direct (décision A = non). Tout autre $s$ = FRU d�
 9. **Valeur de réemploi** $v_p$ : fraction du MMICV, pas un prix de vente ; la tenue en service (taux de défaillance précoce d'une pièce réemployée) s'en retranche via le coût d'une défaillance terrain.
 10. **Entrées facultatives** : transport, délai d'approvisionnement évité, revente au kilo des exemplaires refusés au test et traitement évité ne sont comptés que s'ils sont saisis ; la colonne « Non compté faute de donnée » dit, pièce par pièce, ce qui a été laissé de côté. En revanche un coût de traitement du recycleur actuel inconnu bloque le calcul : la comparaison à la situation actuelle n'aurait pas de sens (saisir 0 si l'enlèvement est gratuit).
 11. **Au plus huit pièces examinées par type de FRU** : au-delà, les pièces dont la meilleure option seule vaut le moins restent dans le FRU ; le plan les nomme dans « Pièces non examinées » et le résultat est alors un minimum garanti.
-12. **Pas de stock entre périodes** : une FRU rebutée en $t$ est traitée ou jetée en $t$ (à lever avec une variable de stock si la place le permet).
+12. **Pas de stock entre périodes** : une FRU scrapée en $t$ est traitée ou jetée en $t$ (à lever avec une variable de stock si la place le permet).
 
 ## 5. Fonctions coûts
 
@@ -103,7 +103,7 @@ $$\max_{x,\,y} \; Z = \sum_{t \in T} \Big[ \sum_{f \in F} \sum_{s \in S_f} g_{fs
 
 sous les contraintes
 
-$$\sum_{s \in S_f} x_{fst} = N_{ft} \quad \forall f, t \qquad \text{(chaque FRU rebutée reçoit un plan)}$$
+$$\sum_{s \in S_f} x_{fst} = N_{ft} \quad \forall f, t \qquad \text{(chaque FRU scrapée reçoit un plan)}$$
 
 $$\sum_{f}\sum_{s} h_{fs}\, x_{fst} \le H_t\, y \quad \forall t \qquad \text{(capacité ; aucune heure sans ligne)}$$
 
@@ -132,14 +132,14 @@ Tout est mesurable sauf $q_{fp}$ : le modèle de Rex est le modèle qui **estime
 | **Choix** | Estimation : Bêta-binomial bayésien par couple (type de FRU, pièce). Décision : échantillonnage de Thompson |
 | **Justification de l'estimation** | Peu de données au départ (quelques FRU auditées) ; fournit une incertitude, nécessaire au Monte-Carlo ; se met à jour chaque semaine sans ré-entraînement ; lisible par l'atelier |
 | **Justification de la décision** | On n'observe l'état d'une pièce que si on la teste. Une règle qui suit la moyenne estimée ne teste jamais une pièce jugée mauvaise au départ et ne corrige donc jamais un a priori trop pessimiste. Thompson tire chaque période un $q$ plausible dans l'a posteriori et optimise la ligne avec ce tirage : les pièces incertaines sont essayées de temps en temps, de moins en moins à mesure que l'audit tranche. C'est un bandit, la forme la plus simple d'apprentissage par renforcement qui règle ce problème |
-| **Paramètres** | A priori $q^0_{fp} = (1 - \rho_f\, d_{fp})(1 - b_p)\,r_p$ avec $d_{fp} = \dfrac{\text{pièces consommées} \times (1 - \text{part préventive})}{\text{FRU réparées} \times n_{fp}}$ ; $\rho_f \ge 1$ facteur « FRU rebutée plus abîmée » ; $b_p$ casse au démontage ; $r_p$ rendement du test. Hyperparamètre : force de l'a priori $N_0$ (pièces équivalentes) |
+| **Paramètres** | A priori $q^0_{fp} = (1 - \rho_f\, d_{fp})(1 - b_p)\,r_p$ avec $d_{fp} = \dfrac{\text{pièces consommées} \times (1 - \text{part préventive})}{\text{FRU réparées} \times n_{fp}}$ ; $\rho_f \ge 1$ facteur « FRU scrapée plus abîmée » ; $b_p$ casse au démontage ; $r_p$ rendement du test. Hyperparamètre : force de l'a priori $N_0$ (pièces équivalentes) |
 | **Entraînement** | Données = audit de démontage (date, type de FRU, pièce, pièces testées, pièces bonnes). A posteriori : $q_{fp} \sim \text{Bêta}(q^0 N_0 + \text{bonnes},\ (1-q^0) N_0 + \text{mauvaises})$. $N_0$ réglé sur la log-perte |
 | **Validation** | Prequentielle : chaque lot d'audit est prédit avec ce que le modèle savait avant, puis sert à le mettre à jour. Aucune donnée ne sert à apprendre et à noter |
 | **Métriques d'estimation** | Brier (0 parfait, 0,25 = pile ou face) ; log-perte ; écart absolu moyen entre taux prédit et observé ; couverture de l'intervalle prédictif à 90 % (cible ≈ 90 %) |
 | **Métrique de décision** | Regret cumulé = gain d'un oracle qui connaîtrait $q$ − gain obtenu ; mesuré sur banc d'essai synthétique (`erc.rex.simuler_politiques`), puis suivi en réel par l'écart entre marge prévue et marge constatée |
 | **Références à battre** | « A priori seul » (consommation, jamais mise à jour) et « fréquence observée » (sans a priori) |
 | **Sortie** | (bas 5 %, moyenne, haut 95 %) de $q_{fp}$ → `p_reutilisable` de la ligne de tri |
-| **Évolution** | Régression logistique ou gradient boosting sur l'âge du donneur, le motif de rebut, l'atelier, quand l'audit dépasse quelques centaines de pièces, et seulement s'ils battent le Bêta-binomial sur ces métriques. Apprentissage par renforcement à plusieurs états : seulement si un stock entre périodes est autorisé, car la décision d'une semaine engage alors les suivantes |
+| **Évolution** | Régression logistique ou gradient boosting sur l'âge du donneur, le motif de scrap, l'atelier, quand l'audit dépasse quelques centaines de pièces, et seulement s'ils battent le Bêta-binomial sur ces métriques. Apprentissage par renforcement à plusieurs états : seulement si un stock entre périodes est autorisé, car la décision d'une semaine engage alors les suivantes |
 
 **Résultat du banc d'essai synthétique** (a priori 0,2 alors que 60 % des pièces sont bonnes, seuil de réemploi 0,27) : la règle « a priori seul » et la règle gloutonne ne testent jamais la pièce et perdent 17 € par pièce ; Thompson en teste 97 %, retrouve $q \approx 0{,}59$ et perd 0,6 € par pièce. Chiffres de simulation, pas de l'ERC.
 
@@ -150,7 +150,27 @@ Fichier d'audit attendu dans le dossier des extractions : `Acquisition/audit_dem
 L'étape « flux » du pipeline (notebook `02_Flux_entree.ipynb`) produit les tableaux qui conditionnent le modèle :
 
 1. **Composant, FRU, type de déchet** : une ligne par couple (FRU, composant), avec benne et poids.
-2. **FRU rebutées par semaine et par type** : c'est $N_{ft}$. Une semaine sans rebut compte pour 0. Le rebut annuel (bas, moyen, haut) en est tiré par ré-échantillonnage des semaines et repris automatiquement par le modèle de ligne.
+2. **FRU scrapées par semaine et par type** : c'est $N_{ft}$. Une semaine sans scrap compte pour 0. Le scrap annuel (bas, moyen, haut) en est tiré par ré-échantillonnage des semaines et repris automatiquement par le modèle de ligne.
 3. **Semaine, valeur estimée et mesurée, marge d'erreur, cause de déviation** : masse estimée (SQL × poids unitaires) avec ses bornes, masse pesée, écart, causes candidates, cause constatée.
 
 Quand l'écart cumulé d'un flux tient dans la marge sur au moins trois semaines, $N_{ft}$, $m_p$ et les types de déchet de ce flux alimentent le modèle ; sinon la cause dominante désigne la donnée à corriger d'abord.
+
+## 10. Cadre formel, valeur de l'information, prévision, composition
+
+Le cadre complet, en anglais et au format d'une revue, est dans `Formal_framework.md`. Il généralise ce document (types d'unités, composants, devenirs, niveaux d'ouverture, ressources) pour couvrir aussi la production, et démontre six propositions, toutes vérifiées numériquement dans `tests/test_information.py` :
+
+| Proposition | Ce qu'elle dit |
+|---|---|
+| 1 | À niveau d'ouverture donné, le choix du devenir de chaque pièce est séparable : pas besoin d'énumérer les plans |
+| 2 | La valeur est concave en heures ; le multiplicateur est la valeur d'une heure de plus |
+| 3 | À l'optimum, au plus un type de FRU est traité de deux façons |
+| 4 | Règle de seuil : réemployer une pièce si sa probabilité d'être bonne dépasse un seuil qui monte quand les heures sont rares |
+| 5 | La valeur au flux moyen majore ce que peut rapporter n'importe quelle politique (stock, prévision, apprentissage par renforcement) : l'écart avec le rejeu semaine par semaine dit si un pilotage plus fin vaut la peine |
+| 6 | Connaître un paramètre incertain a une valeur positive ou nulle, bornée par masse annuelle × écart moyen des prix : on ne cherche la composition d'une pièce que si cela peut changer une décision |
+
+Trois modules s'appuient dessus :
+
+- `erc/information.py` : valeur de l'information et sa borne.
+- `erc/prevision.py` : prévision du flux hebdomadaire de FRU scrapées, pour séries courtes et intermittentes, avec son évaluation et un point d'entrée pour les modèles de fondation de séries temporelles.
+- `erc/cortex.py` et `erc/composition.py` : base de connaissance à sources faillibles, et chaîne qui va d'une nomenclature (code article, description) à la classe matière de chaque pièce avec le moins d'appels possible à un modèle de langage.
+

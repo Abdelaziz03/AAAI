@@ -1,5 +1,5 @@
 {
- "regle_date_rebut": "plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer",
+ "regle_date_scrap": "plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer",
  "granularite": "Benne",
  "semaines_pesees": 6
 }

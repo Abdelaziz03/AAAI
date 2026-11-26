@@ -1,4 +1,4 @@
-"""Classement des pièces consommées, lien avec les FRU rebutées, statistiques par couple (FRU, pièce).
+"""Classement des pièces consommées, lien avec les FRU scrapées, statistiques par couple (FRU, pièce).
 
 Le MMICV est un coût standard : une référence provisoire, ni un prix de revente ni une valeur de réemploi.
 La colonne « Valeur MICV » des extractions n'est pas utilisée : sur une ligne de plusieurs pièces, elle ne vaut pas
@@ -83,22 +83,22 @@ def chiffres_a_verifier(src: Sources, chiffres: pd.DataFrame, cal: pd.DataFrame)
     return pd.DataFrame(lignes, columns=cols)
 
 
-def fru_rebutees(src: Sources) -> tuple[pd.DataFrame, str]:
-    """FRU rebutées par atelier et par type sur la période. Source : onglet FRU_rebutees, sinon la cohorte."""
-    if len(src.fru_rebutees):
-        u = src.fru_rebutees.groupby("FRU")["Unités"].sum().rename("FRU rebutées").reset_index()
-        source = f"onglet FRU_rebutees des extractions ; date de rebut : {src.regle_date_rebut}"
+def fru_scrapees(src: Sources) -> tuple[pd.DataFrame, str]:
+    """FRU scrapées par atelier et par type sur la période. Source : onglet FRU_scrapees, sinon la cohorte."""
+    if len(src.fru_scrapees):
+        u = src.fru_scrapees.groupby("FRU")["Unités"].sum().rename("FRU scrapées").reset_index()
+        source = f"onglet FRU_scrapees des extractions ; date de scrap : {src.regle_date_scrap}"
     elif len(src.cohorte) and {"FRU ITEM", "Statut", "Unites"} <= set(src.cohorte.columns):
         co = src.cohorte[src.cohorte["Statut"].astype(str).eq("Scrapped")]
-        u = co.groupby(co["FRU ITEM"].astype(str))["Unites"].sum().rename("FRU rebutées").reset_index().rename(columns={"FRU ITEM": "FRU"})
-        source = "FRU_statut_cohorte (pas d'onglet FRU_rebutees) : cohorte de PO, pas un flux daté"
+        u = co.groupby(co["FRU ITEM"].astype(str))["Unites"].sum().rename("FRU scrapées").reset_index().rename(columns={"FRU ITEM": "FRU"})
+        source = "FRU_statut_cohorte (pas d'onglet FRU_scrapees) : cohorte de PO, pas un flux daté"
     else:
-        return pd.DataFrame(columns=["Atelier", "FRU", "Description FRU", "FRU rebutées", "Poids FRU (kg)", "Masse rebutée (kg)"]), "aucune source de FRU rebutées"
+        return pd.DataFrame(columns=["Atelier", "FRU", "Description FRU", "FRU scrapées", "Poids FRU (kg)", "Masse scrapée (kg)"]), "aucune source de FRU scrapées"
     u["Atelier"] = u["FRU"].map(src.atelier_fru).fillna("(non rattaché)")
     u["Description FRU"] = u["FRU"].map(src.desc_fru)
     u["Poids FRU (kg)"] = u["FRU"].map(src.poids_fru)
-    u["Masse rebutée (kg)"] = u["FRU rebutées"] * u["Poids FRU (kg)"]
-    return u[["Atelier", "FRU", "Description FRU", "FRU rebutées", "Poids FRU (kg)", "Masse rebutée (kg)"]].sort_values("FRU rebutées", ascending=False), source
+    u["Masse scrapée (kg)"] = u["FRU scrapées"] * u["Poids FRU (kg)"]
+    return u[["Atelier", "FRU", "Description FRU", "FRU scrapées", "Poids FRU (kg)", "Masse scrapée (kg)"]].sort_values("FRU scrapées", ascending=False), source
 
 
 def couples_fru_piece(src: Sources) -> pd.DataFrame:
@@ -133,18 +133,18 @@ def couples_fru_piece(src: Sources) -> pd.DataFrame:
     return g[cols].sort_values(["FRU", "Pièces consommées"], ascending=[True, False]).reset_index(drop=True)
 
 
-def composants_fru_rebutees(src: Sources, rebut: pd.DataFrame, couples: pd.DataFrame) -> pd.DataFrame:
-    """Pièces présentes dans la nomenclature de consommation des FRU rebutées. Le nombre de pièces par FRU reste
+def composants_fru_scrapees(src: Sources, scrap: pd.DataFrame, couples: pd.DataFrame) -> pd.DataFrame:
+    """Pièces présentes dans la nomenclature de consommation des FRU scrapées. Le nombre de pièces par FRU reste
     inconnu jusqu'à l'audit de démontage : seul le minimum observé par PO est donné."""
-    cols = ["Référence", "Description", "FRU rebutées qui l'ont dans leur nomenclature", "FRU concernées", "Ateliers",
+    cols = ["Référence", "Description", "FRU scrapées qui l'ont dans leur nomenclature", "FRU concernées", "Ateliers",
             "Pièces consommées sur la période", "MMICV unitaire (USD)", "Minimum de pièces par FRU (max observé par PO)"]
-    if not len(rebut):
+    if not len(scrap):
         return pd.DataFrame(columns=cols)
     bom = pd.concat([couples[["FRU", "Pièce"]], src.qc.rename(columns={"FRU ITEM": "FRU", "Component ITEM": "Pièce"})[["FRU", "Pièce"]]]).drop_duplicates()
-    lien = rebut.merge(bom, on="FRU", how="inner")
+    lien = scrap.merge(bom, on="FRU", how="inner")
     if not len(lien):
         return pd.DataFrame(columns=cols)
-    c = lien.groupby("Pièce").agg(**{"FRU rebutées qui l'ont dans leur nomenclature": ("FRU rebutées", "sum"),
+    c = lien.groupby("Pièce").agg(**{"FRU scrapées qui l'ont dans leur nomenclature": ("FRU scrapées", "sum"),
                                      "FRU concernées": ("FRU", _joint), "Ateliers": ("Atelier", _joint)}).reset_index().rename(columns={"Pièce": "Référence"})
     c["Description"] = c["Référence"].map(src.desc_piece)
     c["Pièces consommées sur la période"] = c["Référence"].map(src.ev.groupby("Component ITEM")["Qte"].sum()).fillna(0)
@@ -163,14 +163,14 @@ def priorisation(cl: pd.DataFrame, contenu: pd.DataFrame, fiab: pd.DataFrame | N
     t["Risque supply retenu"] = t["Score risque supply (0-1)"].fillna(t["A priori supply (type)"])
     t["Source supply retenue"] = np.where(t["Score risque supply (0-1)"].notna(), "délai fourni par les achats",
                                           np.where(t["A priori supply (type)"].notna(), "a priori de type", "aucune"))
-    col = "FRU rebutées qui l'ont dans leur nomenclature"
-    t["FRU rebutées (nomenclature)"] = t["Référence"].map(contenu.set_index("Référence")[col]).fillna(0) if len(contenu) else np.nan
+    col = "FRU scrapées qui l'ont dans leur nomenclature"
+    t["FRU scrapées (nomenclature)"] = t["Référence"].map(contenu.set_index("Référence")[col]).fillna(0) if len(contenu) else np.nan
     t["Fiabilité réemploi (1/rapport)"] = np.nan
     if fiab is not None and len(fiab) and "Rapport au neuf (taux)" in fiab and fiab["Rapport au neuf (taux)"].notna().any():
         from .sources import base_ref
         r = fiab[fiab["Origine posée"].ne("Neuve")].groupby("Référence")["Rapport au neuf (taux)"].min()
         t["Fiabilité réemploi (1/rapport)"] = 1 / t["Référence"].astype(str).map(base_ref).map(r)
-    criteres = ["MMICV total (USD)", "FRU rebutées (nomenclature)", "Score risque matière (0-1)", "Risque supply retenu", "Fiabilité réemploi (1/rapport)"]
+    criteres = ["MMICV total (USD)", "FRU scrapées (nomenclature)", "Score risque matière (0-1)", "Risque supply retenu", "Fiabilité réemploi (1/rapport)"]
     actifs = [c for c in criteres if t[c].notna().any()]
     t["Sur le front de Pareto"] = risques.front_pareto(t, actifs) if actifs else False
     t["Note (poids égaux, indicatif)"] = risques.score_pondere(t, {c: 1 for c in actifs}) if actifs else np.nan

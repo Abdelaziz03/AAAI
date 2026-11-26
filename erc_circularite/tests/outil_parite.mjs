@@ -77,7 +77,7 @@ function casDeVitesse() {
                     tri_min: 0.5 + 2 * alea(), p_reutilisable: alea(), valeur_eur: 5 + 200 * alea(), poids_kg: 0.05 + alea(),
                     prix_recycleur_eur_kg: 0.1 + 8 * alea(), delai_semaines: null, valeur_semaine_eur: null, transport_eur: null });
     }
-    frus.push({ fru: `FRU-${f}`, rebut_an: 50 + 300 * alea(), poids_fru_kg: 5 + 70 * alea(), ouverture_min: 10 + 40 * alea(),
+    frus.push({ fru: `FRU-${f}`, scrap_an: 50 + 300 * alea(), poids_fru_kg: 5 + 70 * alea(), ouverture_min: 10 + 40 * alea(),
                 ouverture_tri_min: 5 + 10 * alea(), pieces });
   }
   const ligne = { heures_operateur_an: null, taux_horaire_eur: 42, cout_traitement_eur_kg: 0.25, cout_installation_eur: 30000,

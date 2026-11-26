@@ -10,7 +10,7 @@ Modèle retenu : Bêta-binomial bayésien par (type de FRU, pièce).
   a posteriori : Bêta(q0·N0 + bonnes ; (1 − q0)·N0 + mauvaises) → moyenne et intervalle, passés à la ligne de tri.
 Justification : peu de données au départ (quelques FRU auditées), besoin d'une incertitude pour le Monte-Carlo,
 mise à jour sans ré-entraînement, lisible par l'atelier. Il est comparé à deux références plus simples ; un modèle
-plus riche (régression logistique ou gradient boosting sur l'âge, le motif de rebut, l'atelier) ne le remplace
+plus riche (régression logistique ou gradient boosting sur l'âge, le motif de scrap, l'atelier) ne le remplace
 que s'il le bat sur les métriques ci-dessous.
 
 Entraînement et métriques : évaluation « prequentielle » — chaque lot d'audit est d'abord prédit avec ce que le

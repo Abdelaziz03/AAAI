@@ -189,19 +189,19 @@ def test_rapprochement_marge_cause_et_cumul():
     assert rap.loc[rap["Flux"].eq("DIB"), "Dans la marge"].eq("non comparable").all()   # un flux jamais pesé reste visible
 
 
-def test_fru_rebutees_par_semaine_et_rebut_annuel():
+def test_fru_scrapees_par_semaine_et_scrap_annuel():
     couverts = set(pd.date_range("2026-09-07", "2026-10-06"))                           # 4 semaines complètes + 2 jours
-    fr = pd.DataFrame({"Date rebut": pd.to_datetime(["2026-09-08", "2026-09-09", "2026-09-22", "2026-10-06", "2026-11-30"]),
+    fr = pd.DataFrame({"Date scrap": pd.to_datetime(["2026-09-08", "2026-09-09", "2026-09-22", "2026-10-06", "2026-11-30"]),
                        "FRU": ["F"] * 5, "Unités": [1, 2, 4, 1, 9]})
     f = X.flux_fru_hebdo(fr, couverts, pd.Series({"F": 10.0})).sort_values("Semaine").reset_index(drop=True)
-    assert list(f["FRU rebutées"]) == [3, 0, 4, 0, 1]                                    # semaines sans rebut = 0 ; rebut hors période écarté
+    assert list(f["FRU scrapées"]) == [3, 0, 4, 0, 1]                                    # semaines sans scrap = 0 ; scrap hors période écarté
     assert list(f["Semaine complète"]) == [True, True, True, True, False]
     assert (f["Semaine"].dt.weekday == 0).all() and math.isclose(f["Masse estimée (kg)"].sum(), 80.0)
-    a, b = X.rebut_annuel(f), X.rebut_annuel(f)
-    pd.testing.assert_frame_equal(a.drop(columns="rebut_an"), b.drop(columns="rebut_an"))
+    a, b = X.scrap_annuel(f), X.scrap_annuel(f)
+    pd.testing.assert_frame_equal(a.drop(columns="scrap_an"), b.drop(columns="scrap_an"))
     r = a.iloc[0]
-    assert r["Semaines complètes"] == 4 and math.isclose(r["Rebut annuel moyen"], (3 + 0 + 4 + 0) / 4 * 52)
-    assert r["Rebut annuel bas (5 %)"] <= r["Rebut annuel moyen"] <= r["Rebut annuel haut (95 %)"]
+    assert r["Semaines complètes"] == 4 and math.isclose(r["Scrap annuel moyen"], (3 + 0 + 4 + 0) / 4 * 52)
+    assert r["Scrap annuel bas (5 %)"] <= r["Scrap annuel moyen"] <= r["Scrap annuel haut (95 %)"]
 
 
 # ------------------------------------------------------------------ risques

@@ -88,7 +88,7 @@ def scenario_aleatoire(lg0: dict, fr0: dict, rng: np.random.Generator, i: int) -
     pool = [(p, e) for d in fr0.values() for p, e in d.get("pieces", {}).items() if "extraction_min" in e]
     for f, d in list(fr.items()):
         u = rng.random()
-        d["rebut_an"] = None if u < 0.05 else 0.0 if u < 0.15 else float((d.get("rebut_an") or 60.0) * rng.uniform(0.2, 3.0))
+        d["scrap_an"] = None if u < 0.05 else 0.0 if u < 0.15 else float((d.get("scrap_an") or 60.0) * rng.uniform(0.2, 3.0))
         if rng.random() < 0.06:
             d["poids_fru_kg"] = None
         d["ouverture_min"] = None if rng.random() < 0.06 else float((d.get("ouverture_min") or 20.0) * rng.uniform(0.3, 2.0))
@@ -130,10 +130,10 @@ def scenario_aleatoire(lg0: dict, fr0: dict, rng: np.random.Generator, i: int) -
             if e.get("n_par_fru") is not None:
                 e["n_par_fru"] = float(max(1, round(e["n_par_fru"])))
             pieces[f"X-{j:02d}"] = e
-        fr["FRU-GROS-R"] = {"description": "FRU fictif de plus de 8 pièces", "rebut_an": float(rng.uniform(20, 200)), "poids_fru_kg": 30.0,
+        fr["FRU-GROS-R"] = {"description": "FRU fictif de plus de 8 pièces", "scrap_an": float(rng.uniform(20, 200)), "poids_fru_kg": 30.0,
                             "ouverture_min": float(rng.uniform(10, 50)), "ouverture_tri_min": float(rng.uniform(3, 15)), "pieces": pieces}
     if i % 11 == 5:
-        fr["FRU-VIDE-R"] = {"description": "FRU fictif sans pièce", "rebut_an": 12.0, "poids_fru_kg": 4.0, "ouverture_min": 10.0, "pieces": {}}
+        fr["FRU-VIDE-R"] = {"description": "FRU fictif sans pièce", "scrap_an": 12.0, "poids_fru_kg": 4.0, "ouverture_min": 10.0, "pieces": {}}
     libres = _heures_libres(lg, fr)
     facteur = [None, 0.0, 0.05, 0.2, 0.4, 0.6, 0.8, 0.95, 1.0, 1.3, 2.5][i % 11]
     lg["heures_operateur_an"] = None if facteur is None else float(libres * facteur) if libres > 0 else float(rng.uniform(0, 500))
@@ -207,7 +207,7 @@ def comparer_plan(detail: pd.DataFrame, plan: list, nom: str):
             continue
         assert _ensemble(py["1 Réemploi"]) == _ensemble(js["1 Réemploi"]), f"{ou} : réemploi {py['1 Réemploi']!r} / {js['1 Réemploi']!r}"
         assert _ensemble(py["2 Recyclage"]) == _ensemble(js["2 Recyclage"]), f"{ou} : recyclage {py['2 Recyclage']!r} / {js['2 Recyclage']!r}"
-        for c in ("FRU traitées / an", "FRU rebutées / an", "Heures par FRU", "Marge par FRU (€)", "Marge par heure (€)", "Heures / an",
+        for c in ("FRU traitées / an", "FRU scrapées / an", "Heures par FRU", "Marge par FRU (€)", "Marge par heure (€)", "Heures / an",
                   "Marge variable / an (€)", "Kg détournés / an"):
             meme_nombre(py[c], js[c], f"{ou}, {c}")
 
@@ -264,8 +264,8 @@ def parite(base, ctx, donnees, tmp_path_factory):
         pytest.skip("node n'est pas installé : parité JavaScript / Python non vérifiée")
     liste = scenarios(base)
     cas = [{"nom": nom, "ligne": lg, "frus": en_listes(fr)} for nom, lg, fr in liste]
-    flux = ctx.res["flux"]["FRU rebutées par semaine"]
-    cas[0]["flux"] = [{"Semaine": pd.Timestamp(r["Semaine"]).isoformat(), "FRU": r["FRU"], "FRU rebutées": float(r["FRU rebutées"])}
+    flux = ctx.res["flux"]["FRU scrapées par semaine"]
+    cas[0]["flux"] = [{"Semaine": pd.Timestamp(r["Semaine"]).isoformat(), "FRU": r["FRU"], "FRU scrapées": float(r["FRU scrapées"])}
                       for r in flux.to_dict("records")]
     cas.append({"nom": "données de l'outil", "donnees": donnees, "monte_carlo": {"n": 400, "graine": 2026}})
     sortie = lancer_node(cas, tmp_path_factory.mktemp("parite"))
@@ -287,7 +287,7 @@ def test_scenarios_assez_varies(base):
         illimites += lg.get("heures_operateur_an") is None
         incomplets += bool(res["Types de FRU incomplets"])
         gros += any(len(x.get("pieces", {})) > mod_ligne.MAX_PIECES_ENUM for x in fr.values())
-        zeros += any(x.get("rebut_an") == 0 for x in fr.values())
+        zeros += any(x.get("scrap_an") == 0 for x in fr.values())
         negatifs += bool((lg.get("cout_traitement_eur_kg") or 0) < 0)
         assert d is not None
     assert satures >= 10 and libres >= 10 and illimites >= 3 and incomplets >= 10 and gros >= 10 and zeros >= 5 and negatifs >= 3, \
@@ -320,7 +320,7 @@ def test_parite_options_par_piece(parite):
 def test_parite_periode_par_periode(parite, ctx):
     liste, sortie = parite
     modele = ctx.res["ligne"]["Modèle"]
-    py = mod_ligne.resultat_par_periode(modele["ligne"], modele["frus"], ctx.res["flux"]["FRU rebutées par semaine"])
+    py = mod_ligne.resultat_par_periode(modele["ligne"], modele["frus"], ctx.res["flux"]["FRU scrapées par semaine"])
     js = sortie["resultats"][0]["periodes"]
     assert len(py) == len(js["lignes"]) > 0
     for a, b in zip(py.to_dict("records"), js["lignes"]):
@@ -343,7 +343,7 @@ def test_conversion_des_donnees_de_l_outil(parite, base, donnees):
     assert [d["fru"] for d in js["modele"]["frus"]] == list(fr)
     for d in js["modele"]["frus"]:
         py = fr[d["fru"]]
-        for k in ("rebut_an", "poids_fru_kg", "ouverture_min"):
+        for k in ("scrap_an", "poids_fru_kg", "ouverture_min"):
             meme_nombre(py.get(k), d[k], f"{d['fru']}.{k}")
         for k in ("ouverture_tri_min", "taux_horaire_eur"):       # inconnus : clé absente des deux côtés
             assert (k in d) == (py.get(k) is not None), f"{d['fru']}.{k}"

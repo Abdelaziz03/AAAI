@@ -1,4 +1,4 @@
-﻿Référence;Description;FRU rebutées qui l'ont dans leur nomenclature;FRU concernées;Ateliers;Pièces consommées sur la période;MMICV unitaire (USD);Minimum de pièces par FRU (max observé par PO)
+﻿Référence;Description;FRU scrapées qui l'ont dans leur nomenclature;FRU concernées;Ateliers;Pièces consommées sur la période;MMICV unitaire (USD);Minimum de pièces par FRU (max observé par PO)
 P-3003;Soufflet caoutchouc;40,0;FRU-B300-R;TSUI;370,0;1,5;2,0
 P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;132,0;FRU-A100-R;MR;277,0;;4,0
 P-3002;Tête de joystick;55,0;FRU-B300-R, FRU-B400-R;TSUI;268,0;56,0;2,0

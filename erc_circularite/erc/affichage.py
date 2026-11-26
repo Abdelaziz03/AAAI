@@ -39,7 +39,7 @@ COLONNES_POURCENT = {
     "Écart absolu moyen", "Écart absolu",
 }
 # Colonnes de dates (dans les fichiers : AAAA-MM-JJ) affichées JJ/MM/AAAA.
-COLONNES_DATE = {"Semaine", "Date", "Date rebut", "Jour"}
+COLONNES_DATE = {"Semaine", "Date", "Date scrap", "Jour"}
 # Colonnes d'identifiants : gardées telles qu'elles sont écrites dans le fichier (pas de séparateur de milliers).
 COLONNES_TEXTE = {"Référence", "Pièce", "FRU", "Type de FRU", "FRU ITEM", "Component ITEM", "Paramètre", "Mois"}
 # Colonnes de texte qui contiennent une valeur ou une plage « bas | haut » : affichées avec la virgule décimale.
@@ -48,8 +48,8 @@ COLONNES_PLAGE = {"Valeur"}
 LIBELLES_NOTES = {
     "mode": "Mode", "demo": "Démonstration", "periode": "Période", "jours_extraits": "Jours extraits", "debut": "Premier jour extrait",
     "fin": "Dernier jour extrait", "lignes_consommation": "Lignes de consommation lues", "pieces_consommees": "Pièces consommées",
-    "fru_rebutees": "FRU rebutées", "regle_date_rebut": "Date retenue pour le rebut", "ateliers_prioritaires": "Ateliers prioritaires",
-    "classeur_parametres": "Classeur de paramètres", "genere_le": "Généré le", "source_fru_rebutees": "Source des FRU rebutées",
+    "fru_scrapees": "FRU scrapées", "regle_date_scrap": "Date retenue pour le scrap", "ateliers_prioritaires": "Ateliers prioritaires",
+    "classeur_parametres": "Classeur de paramètres", "genere_le": "Généré le", "source_fru_scrapees": "Source des FRU scrapées",
     "classeur_parametres_cree": "Classeur de paramètres créé à cette exécution", "criteres_actifs": "Critères actifs",
     "criteres_inactifs": "Critères inactifs faute de données", "granularite": "Granularité du suivi", "semaines_pesees": "Semaines pesées",
     "lignes_elf": "Défaillances lues dans le fichier de fiabilité", "denominateur": "Pièces posées (dénominateur)",

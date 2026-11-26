@@ -17,7 +17,7 @@ from .config import Config
 DEBUT, FIN = "2026-06-01", "2026-11-01"                 # 22 semaines complètes, lundi → dimanche
 SOURCE_DEMO = "DÉMO : valeur fictive"
 
-# FRU : description, atelier, famille, poids kg, réparations par semaine, rebuts par semaine
+# FRU : description, atelier, famille, poids kg, réparations par semaine, scraps par semaine
 FRUS = {
     "FRU-A100-R": ("Amplificateur de gradient (démo)", "MR", "Amplificateur", 79.0, 12, 5.0),
     "FRU-A200-R": ("Alimentation de puissance (démo)", "MR", "Alimentation", 62.0, 6, 1.5),
@@ -60,7 +60,7 @@ NOMENCLATURE = {
 }
 PRIX_GRADES = {"Carte B": 8.0, "Carte C": 3.0, "Composant de puissance": 2.5, "Condensateur": 0.6, "Câbles": 1.8,
                "Composant standard": 0.5, "Plastique": 0.05, "Métal": 0.25}
-# Vérité du simulateur pour l'audit de démontage : part des pièces réellement réutilisables dans un FRU rebuté
+# Vérité du simulateur pour l'audit de démontage : part des pièces réellement réutilisables dans un FRU scrapé
 Q_VRAI = {("FRU-A100-R", "P-1001"): 0.55, ("FRU-A100-R", "P-1004"): 0.35, ("FRU-A100-R", "P-1003"): 0.20,
           ("FRU-B300-R", "P-3001"): 0.50, ("FRU-B300-R", "P-3002"): 0.65}
 # Temps (extraction, test, tri) en minutes par pièce, pour le classeur de paramètres de la démo
@@ -99,7 +99,7 @@ def generer(cfg: Config, forcer: bool = False) -> bool:
                         ev.append((j, f"PO{po}", fru, piece, PIECES[piece][0], q, round(q * PIECES[piece][1] * rng.uniform(0.9, 1.1), 2)))
     ev = pd.DataFrame(ev, columns=["Jour", "PO", "FRU ITEM", "Component ITEM", "Component Description", "Qte", "Valeur MICV"])
 
-    # ---- FRU rebutées : flux irrégulier (semaines creuses et semaines chargées)
+    # ---- FRU scrapées : flux irrégulier (semaines creuses et semaines chargées)
     lundis = pd.date_range(DEBUT, FIN, freq="W-MON")
     reb, serie = [], 5000
     for lundi in lundis:
@@ -123,7 +123,7 @@ def generer(cfg: Config, forcer: bool = False) -> bool:
         f = cfg.projet / f"ERC_R26_extraction_{a}_{b}.xlsx"
         with pd.ExcelWriter(f, engine="openpyxl") as w:
             ev[(ev["Jour"] >= a) & (ev["Jour"] <= b)].to_excel(w, sheet_name="Composants_jour", index=False)
-            reb[(reb["Date statut"] >= a) & (reb["Date statut"] <= b)].to_excel(w, sheet_name="FRU_rebutees", index=False)
+            reb[(reb["Date statut"] >= a) & (reb["Date statut"] <= b)].to_excel(w, sheet_name="FRU_scrapees", index=False)
             cohorte.to_excel(w, sheet_name="FRU_statut_cohorte", index=False)
         os.utime(f, (1_780_000_000 + k * 86400, 1_780_000_000 + k * 86400))
 
@@ -187,8 +187,76 @@ def generer(cfg: Config, forcer: bool = False) -> bool:
             aud.append({"Date": (pd.Timestamp("2026-09-21") + pd.Timedelta(weeks=k)).strftime("%d/%m/%Y"), "Type de FRU": fru, "Pièce": piece,
                         "Pièces testées": n, "Pièces bonnes": int(rng.binomial(n, q))})
     _csv(pd.DataFrame(aud), cfg.projet / "Acquisition" / "audit_demontage.csv")
+    # ---- nomenclature et validations humaines, pour la chaîne de composition
+    liens = [(piece, fru, n) for fru, pieces in NOMENCLATURE.items() for piece, (n, _, _) in pieces.items()]
+    bom = [{"Code article": pc, "Désignation": PIECES[pc][0], "FRU": fru, "Qté": n, "Fabricant": FABRICANTS.get(pc, (None, None))[0],
+            "Référence fabricant": FABRICANTS.get(pc, (None, None))[1], "Conception interne": "oui" if pc in INTERNES else "non",
+            "Poids (kg)": POIDS_BOM.get(pc)} for pc, fru, n in liens]
+    bom += [{"Code article": pc, "Désignation": d, "FRU": None, "Qté": None, "Fabricant": None, "Référence fabricant": None, "Conception interne": "non"}
+            for pc, d in HORS_FLUX.items()]
+    (cfg.projet / "BOM").mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(bom).to_excel(cfg.projet / "BOM" / "BOM_demo.xlsx", index=False)
+    _csv(pd.DataFrame([{"PN": pc, "Classe validée": c, "Validateur": "expert matière (démo)", "Commentaire": ""} for pc, c in VALIDATIONS.items()]),
+         cfg.projet / "Acquisition" / "validations_composition.csv")
     temoin.write_text("Sources FICTIVES générées par erc.demo. Aucune donnée d'entreprise.\n", encoding="utf-8")
     return True
+
+
+# --------------------------------------------------------------------------- composition : nomenclature, règles, fournisseurs fictifs
+FABRICANTS = {"P-1001": ("Fabricant Alpha (démo)", "ALP-IG1200"), "P-1002": ("Fabricant Alpha (démo)", "ALP-IG600"),
+              "P-1003": ("Fabricant Bêta (démo)", "BET-C4700"), "P-1004": ("Fabricant Gamma (démo)", "GAM-GDB1"),
+              "P-1005": ("Fabricant Gamma (démo)", "GAM-CTL2"), "P-2001": ("Fabricant Gamma (démo)", "GAM-PSU3"),
+              "P-2002": ("Fabricant Delta (démo)", "DEL-FAN120"), "P-3004": ("Fabricant Delta (démo)", "DEL-HRN7"),
+              "P-3005": ("Fabricant Gamma (démo)", "GAM-KPD4"), "P-5001": ("Fabricant Gamma (démo)", "GAM-PRE5"),
+              "P-6001": ("Fabricant Epsilon (démo)", "EPS-MB9")}
+POIDS_BOM = {"P-6001": 0.9}                                    # poids donné par la nomenclature quand le classement matière ne l'a pas
+INTERNES = {"P-3001", "P-3002", "P-4001"}                         # conception interne : jamais de recherche extérieure
+HORS_FLUX = {"P-9001": "Vis M4 inox", "P-9002": "Radiateur aluminium extrudé"}     # dans la nomenclature, jamais consommées
+VALIDATIONS = {"P-1001": "Composant de puissance", "P-1004": "Carte B", "P-2001": "Carte B", "P-3005": "Carte C",
+               "P-3001": "Plastique", "P-1007": "Composant standard"}
+# Règles volontairement imparfaites : « board » donne « Carte B », ce qui est faux pour les cartes de classe C.
+REGLES = [(r"\bigbt\b", "Composant de puissance"), (r"board|carte", "Carte B"), (r"capacitor|condensateur", "Condensateur"),
+          (r"cable|harness|câble", "Câbles"), (r"fuse|resist|\bfan\b", "Composant standard"),
+          (r"coque|joystick|soufflet", "Plastique"), (r"grille|vis |radiateur", "Métal")]
+# Documents que rendrait une collecte, par référence de fabricant. La balise [[classe : …]] tient lieu de contenu que
+# le modèle fictif « lit » ; un document sur six est rédigé de façon trompeuse pour montrer qu'un modèle peut se tromper.
+DOCUMENTS = {
+    "GAM-PRE5": [{"origine": "fabricant-gamma.example/fiches/GAM-PRE5", "nature": "document",
+                  "texte": "Fiche produit GAM-PRE5. Assemblage électronique de petite taille. [[classe : Carte C]] Conforme RoHS."}],
+    "GAM-CTL2": [{"origine": "fabricant-gamma.example/fiches/GAM-CTL2", "nature": "document",
+                  "texte": "Fiche produit GAM-CTL2. Assemblage électronique multicouche. [[classe : Carte B]] Conforme RoHS."}],
+    "EPS-MB9": [{"origine": "fabricant-epsilon.example/fiches/EPS-MB9", "nature": "document",
+                 "texte": "Fiche produit EPS-MB9. Assemblage électronique à forte densité. [[classe : Carte B]]"},
+                {"origine": "distributeur.example/EPS-MB9", "nature": "document",
+                 "texte": "Annonce EPS-MB9. Module à dissipation thermique. [[classe : Composant de puissance]]"}],
+    "BET-C4700": [{"origine": "fabricant-beta.example/declaration/BET-C4700", "nature": "déclaration fabricant",
+                   "texte": "Déclaration matière BET-C4700 : aluminium electrolytic capacitor, électrolyte, boîtier aluminium."}],
+    "DEL-FAN120": [{"origine": "fabricant-delta.example/fiches/DEL-FAN120", "nature": "document",
+                    "texte": "Fiche DEL-FAN120 : ventilateur axial, moteur à courant continu. [[classe : Composant standard]]"}],
+}
+
+
+def collecteur_fictif(requete: dict) -> list:
+    """Collecte FICTIVE pour la démonstration : rend les documents inventés ci-dessus, sans aucun accès au réseau."""
+    return DOCUMENTS.get(requete.get("reference_fabricant"), [])
+
+
+class ModeleFictif:
+    """Modèle de langage FICTIF pour la démonstration : il « lit » la balise [[classe : …]] du document. Aucun modèle
+    réel n'est appelé. Même interface que erc.composition.ModeleLocal."""
+
+    def __init__(self):
+        self.appels = 0
+
+    def extraire(self, texte, classes):
+        import re
+        self.appels += 1
+        m = re.search(r"\[\[classe : ([^\]]+)\]\]", texte)
+        return (m.group(1), m.group(0)) if m and m.group(1) in list(classes) else (None, "")
+
+    def valider(self, classe, texte):
+        self.appels += 1
+        return f"[[classe : {classe}]]" in texte
 
 
 def remplir_parametres(tables: dict) -> dict:
@@ -203,7 +271,7 @@ def remplir_parametres(tables: dict) -> dict:
     for i, r in fru.iterrows():
         if r["FRU"] in OUVERTURE:
             fru.at[i, "ouverture_min"], fru.at[i, "ouverture_tri_min"] = OUVERTURE[r["FRU"]]
-            fru.at[i, "facteur_rebut"], fru.at[i, "Source"] = 1.3, SOURCE_DEMO
+            fru.at[i, "facteur_scrap"], fru.at[i, "Source"] = 1.3, SOURCE_DEMO
     tables["FRU"] = fru
     pc = tables["Pieces"].astype(object)
     for i, r in pc.iterrows():
@@ -223,6 +291,7 @@ def remplir_parametres(tables: dict) -> dict:
         if r["Référence"] in DELAIS:
             sp.at[i, "Délai (semaines)"], sp.at[i, "Source"] = DELAIS[r["Référence"]], SOURCE_DEMO
     tables["Supply"] = sp
+    tables["Regles_composition"] = pd.DataFrame([{"Motif": m, "Classe": c, "Source": SOURCE_DEMO} for m, c in REGLES])
     tables["Chiffres_a_verifier"] = pd.DataFrame([{"Libellé": "IGBT, toutes références (chiffre annoncé en revue, démo)", "Motif": r"\bigbt\b",
                                                    "Atelier": "MR", "Valeur par mois": 150}])
     return tables

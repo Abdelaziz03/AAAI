@@ -1,4 +1,4 @@
-﻿Type de FRU;Décision;1 Réemploi;2 Recyclage;FRU traitées / an;FRU rebutées / an;Heures par FRU;Marge par FRU (€);Marge par heure (€);Heures / an;Marge variable / an (€);Kg détournés / an;Entrées manquantes;Pièces non examinées
+﻿Type de FRU;Décision;1 Réemploi;2 Recyclage;FRU traitées / an;FRU scrapées / an;Heures par FRU;Marge par FRU (€);Marge par heure (€);Heures / an;Marge variable / an (€);Kg détournés / an;Entrées manquantes;Pièces non examinées
 FRU-A100-R;traiter;P-1005, P-1004, P-1001, P-1002;CARCASSE;290,5714285714288;312,0;2,583333333333333;143,32605612336354;55,48105398323751;750,6428571428576;41646,45687927452;22865,065714285734;;
 FRU-A100-R;traiter;P-1005, P-1001, P-1002;CARCASSE, P-1004;21,428571428571217;312,0;2,1166666666666663;119,87377105087015;56,63327766182843;45,3571428571424;2568,7236653757636;1686,2142857142694;;
 FRU-A200-R;jeter telle quelle;;;0,0;115,81818181818181;0,0;0,0;;0,0;0,0;0,0;;

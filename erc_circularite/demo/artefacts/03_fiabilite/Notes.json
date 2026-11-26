@@ -5,7 +5,7 @@
  "garantie_jours": 365,
  "criteres_actifs": [
   "MMICV total (USD)",
-  "FRU rebutées (nomenclature)",
+  "FRU scrapées (nomenclature)",
   "Score risque matière (0-1)",
   "Risque supply retenu",
   "Fiabilité réemploi (1/rapport)"

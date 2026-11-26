@@ -8,7 +8,7 @@
 (ligne);;valeur_reemploi_frac;0.3 | 0.5 | 0.7;saisi : DÉMO : valeur fictive;saisi
 (ligne);;valeur_semaine_eur;0.5;saisi : DÉMO : valeur fictive;saisi
 (ligne);;taux_change_mmicv;0.92;saisi : DÉMO : valeur fictive;saisi
-FRU-A100-R;;rebut_an;243.455 | 312 | 378.182;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-A100-R;;scrap_an;243.455 | 312 | 378.182;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
 FRU-A100-R;;poids_fru_kg;79;auto : fiche du FRU (Net weight);tiré des données
 FRU-A100-R;;ouverture_min;30 | 45 | 70;saisi : DÉMO : valeur fictive;saisi
 FRU-A100-R;;ouverture_tri_min;15;saisi : DÉMO : valeur fictive;saisi
@@ -92,7 +92,7 @@ FRU-A100-R;P-1003;p_reutilisable;0.206761 | 0.301013 | 0.403133;auto : modèle d
 FRU-A100-R;CARCASSE;poids_kg;76.44;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
 FRU-A100-R;CARCASSE;prix_recycleur_eur_kg;0.12 | 0.25;saisi : DÉMO : valeur fictive;saisi
 FRU-A100-R;CARCASSE;tri_min;10;saisi : DÉMO : valeur fictive;saisi
-FRU-A200-R;;rebut_an;87.4545 | 115.818 | 141.818;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-A200-R;;scrap_an;87.4545 | 115.818 | 141.818;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
 FRU-A200-R;;poids_fru_kg;62;auto : fiche du FRU (Net weight);tiré des données
 FRU-A200-R;;ouverture_min;25 | 35 | 50;saisi : DÉMO : valeur fictive;saisi
 FRU-A200-R;;ouverture_tri_min;12;saisi : DÉMO : valeur fictive;saisi
@@ -143,7 +143,7 @@ FRU-A200-R;P-1007;p_reutilisable;0.426225 | 0.67817 | 0.887837;auto : modèle de
 FRU-A200-R;CARCASSE;poids_kg;60.04;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
 FRU-A200-R;CARCASSE;prix_recycleur_eur_kg;0.12 | 0.25;saisi : DÉMO : valeur fictive;saisi
 FRU-A200-R;CARCASSE;tri_min;10;saisi : DÉMO : valeur fictive;saisi
-FRU-B300-R;;rebut_an;70.9091 | 94.5455 | 118.182;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-B300-R;;scrap_an;70.9091 | 94.5455 | 118.182;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
 FRU-B300-R;;poids_fru_kg;5.5;auto : fiche du FRU (Net weight);tiré des données
 FRU-B300-R;;ouverture_min;10 | 15 | 25;saisi : DÉMO : valeur fictive;saisi
 FRU-B300-R;;ouverture_tri_min;6;saisi : DÉMO : valeur fictive;saisi
@@ -205,7 +205,7 @@ FRU-B300-R;P-3003;p_reutilisable;0.0684471 | 0.251987 | 0.494021;auto : modèle 
 FRU-B300-R;CARCASSE;poids_kg;4.26;auto : poids du FRU moins les pièces listées au poids connu;tiré des données
 FRU-B300-R;CARCASSE;prix_recycleur_eur_kg;0.12 | 0.25;saisi : DÉMO : valeur fictive;saisi
 FRU-B300-R;CARCASSE;tri_min;10;saisi : DÉMO : valeur fictive;saisi
-FRU-B400-R;;rebut_an;18.9091 | 35.4545 | 54.3636;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
+FRU-B400-R;;scrap_an;18.9091 | 35.4545 | 54.3636;auto : suivi hebdomadaire (22 semaines complètes);tiré des données
 FRU-B400-R;;poids_fru_kg;6.3;auto : fiche du FRU (Net weight);tiré des données
 FRU-B400-R;;ouverture_min;;manquant;manquant
 FRU-B400-R;;ouverture_tri_min;;manquant;manquant

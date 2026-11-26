@@ -7,14 +7,14 @@
  "fin": "2026-11-01T00:00:00",
  "lignes_consommation": 1767,
  "pieces_consommees": 2276.0,
- "fru_rebutees": 273.0,
- "regle_date_rebut": "plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer",
+ "fru_scrapees": 273.0,
+ "regle_date_scrap": "plus tardive des dates de la ligne (Date creation PO, Date reception, Date diagnostic, Date statut) : à confirmer",
  "ateliers_prioritaires": [
   "MR",
   "TSUI"
  ],
  "classeur_parametres": "présent",
- "genere_le": "2026-11-17T22:12:52",
+ "genere_le": "2026-11-26T12:06:34",
  "Mode": "DÉMONSTRATION (données fictives)",
  "Dossier": "demo",
  "Extractions (projet)": "ERC_Flux_Dechets_Ateliers",

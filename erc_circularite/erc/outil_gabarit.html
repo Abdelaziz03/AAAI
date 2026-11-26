@@ -421,8 +421,8 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
   <header class="entete">
     <p class="sur-titre">Outil de décision ERC</p>
-    <h1>Ligne de démontage et de tri des FRU rebutées</h1>
-    <p class="chapeau">Faut-il installer la ligne, et que faire de chaque type de FRU rebuté : réemployer ses pièces, les trier pour un recycleur, ou le laisser au recycleur actuel ? La page recalcule le modèle du dossier dès qu'une hypothèse change. Tous les montants sont des estimations tirées des hypothèses, pas des résultats mesurés.</p>
+    <h1>Ligne de démontage et de tri des FRU scrapées</h1>
+    <p class="chapeau">Faut-il installer la ligne, et que faire de chaque type de FRU scrapé : réemployer ses pièces, les trier pour un recycleur, ou le laisser au recycleur actuel ? La page recalcule le modèle du dossier dès qu'une hypothèse change. Tous les montants sont des estimations tirées des hypothèses, pas des résultats mesurés.</p>
   </header>
 
   <nav class="sommaire" aria-label="Sections de l'outil" id="sommaire">
@@ -473,7 +473,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
     <section id="comparaison" aria-labelledby="t-comparaison">
       <div class="tete-section"><h2 id="t-comparaison" tabindex="-1">Actuel contre ligne</h2></div>
-      <p class="intro">Aujourd'hui, chaque FRU rebuté part entier chez le recycleur actuel. Avec la ligne, une partie de la masse quitte cette benne, les pièces réemployées ou vendues au kilo rapportent, et la ligne a ses coûts fixes. Montants par an ; un coût est négatif.</p>
+      <p class="intro">Aujourd'hui, chaque FRU scrapé part entier chez le recycleur actuel. Avec la ligne, une partie de la masse quitte cette benne, les pièces réemployées ou vendues au kilo rapportent, et la ligne a ses coûts fixes. Montants par an ; un coût est négatif.</p>
       <div class="deux">
         <figure class="cadre">
           <figcaption>De la situation actuelle à la ligne, poste par poste</figcaption>
@@ -492,10 +492,10 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
     <section id="plan" aria-labelledby="t-plan">
       <div class="tete-section"><h2 id="t-plan" tabindex="-1">Plan par type de FRU</h2></div>
-      <p class="intro">Pour chaque type de FRU rebuté : le traiter sur la ligne ou le laisser au recycleur actuel, et quelles pièces réemployer ou trier. Ouvrez un type pour voir la valeur des trois devenirs de chaque pièce et corriger ses paramètres.</p>
+      <p class="intro">Pour chaque type de FRU scrapé : le traiter sur la ligne ou le laisser au recycleur actuel, et quelles pièces réemployer ou trier. Ouvrez un type pour voir la valeur des trois devenirs de chaque pièce et corriger ses paramètres.</p>
       <div class="tableau-zone zone-plan"><table id="plan-table">
         <thead><tr>
-          <th>Type de FRU</th><th>Description</th><th class="n">Rebutés / an</th><th>Décision</th><th>Pièces réemployées</th><th>Pièces recyclées</th>
+          <th>Type de FRU</th><th>Description</th><th class="n">Scrapés / an</th><th>Décision</th><th>Pièces réemployées</th><th>Pièces recyclées</th>
           <th class="n">FRU traités / an</th><th class="n">Heures / an</th><th class="n">Marge par FRU</th><th class="n">Marge / an</th>
         </tr></thead>
         <tfoot id="plan-pied"></tfoot>
@@ -543,13 +543,13 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
     <section id="flux" aria-labelledby="t-flux">
       <div class="tete-section"><h2 id="t-flux" tabindex="-1">Flux d'entrée</h2></div>
-      <p class="intro" id="flux-intro">Le modèle part du nombre de FRU rebutés chaque semaine. Ces chiffres viennent des extractions ; ils ne changent pas avec les hypothèses de la page.</p>
+      <p class="intro" id="flux-intro">Le modèle part du nombre de FRU scrapés chaque semaine. Ces chiffres viennent des extractions ; ils ne changent pas avec les hypothèses de la page.</p>
       <figure class="cadre">
-        <figcaption>FRU rebutés par semaine, tous types confondus</figcaption>
+        <figcaption>FRU scrapés par semaine, tous types confondus</figcaption>
         <div class="legende" id="flux-legende" aria-hidden="true" hidden><span><i class="l-s1"></i>Semaine complète</span><span><i class="l-neutre"></i>Semaine incomplète dans l'extraction</span></div>
         <div class="graphe" id="g-flux"></div>
         <details class="valeurs"><summary>Voir les valeurs</summary>
-          <div class="tableau-zone"><table><thead><tr><th>Semaine du</th><th class="n">FRU rebutés</th><th>Semaine complète dans l'extraction</th></tr></thead><tbody id="flux-corps"></tbody></table></div>
+          <div class="tableau-zone"><table><thead><tr><th>Semaine du</th><th class="n">FRU scrapés</th><th>Semaine complète dans l'extraction</th></tr></thead><tbody id="flux-corps"></tbody></table></div>
         </details>
       </figure>
       <h3 class="sous-titre">Par type de FRU</h3>
@@ -583,14 +583,14 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
     <section id="preselection" aria-labelledby="t-preselection">
       <div class="tete-section"><h2 id="t-preselection" tabindex="-1">Pré-sélection des pièces</h2></div>
-      <p class="intro">Les pièces consommées classées selon plusieurs critères à la fois : valeur, gisement dans les FRU rebutés, risque sur les matières, risque d'approvisionnement. Une pièce est sur le front de Pareto quand aucune autre ne fait mieux sur tous les critères : ce sont les premières à étudier.</p>
+      <p class="intro">Les pièces consommées classées selon plusieurs critères à la fois : valeur, gisement dans les FRU scrapés, risque sur les matières, risque d'approvisionnement. Une pièce est sur le front de Pareto quand aucune autre ne fait mieux sur tous les critères : ce sont les premières à étudier.</p>
       <div class="tableau-zone"><table class="souple"><thead id="preselection-tete"></thead><tbody id="preselection-corps"></tbody></table></div>
       <p class="note">MMICV : coût standard de la pièce, repère provisoire ; ce n'est ni un prix de revente ni une valeur de réemploi. Risque matière : présence de matières premières critiques, listées sous la barre. Fiabilité du réemploi : 1 = autant de défaillances précoces qu'une pièce neuve ; plus grand = moins de défaillances.</p>
     </section>
 
     <section id="rex" aria-labelledby="t-rex">
       <div class="tete-section"><h2 id="t-rex" tabindex="-1">Modèle de Rex</h2></div>
-      <p class="intro">Le modèle de Rex estime la probabilité qu'une pièce extraite d'un FRU rebuté soit réutilisable. Il part de la consommation (a priori) et se corrige avec les pièces testées lors de l'audit de démontage. Plus il y a de pièces testées, plus l'intervalle se resserre.</p>
+      <p class="intro">Le modèle de Rex estime la probabilité qu'une pièce extraite d'un FRU scrapé soit réutilisable. Il part de la consommation (a priori) et se corrige avec les pièces testées lors de l'audit de démontage. Plus il y a de pièces testées, plus l'intervalle se resserre.</p>
       <div class="tableau-zone"><table><thead><tr><th>Type de FRU</th><th>Pièce</th><th class="col-intervalle">Probabilité réutilisable<span class="echelle-pct" aria-hidden="true"><span>0 %</span><span>50 %</span><span>100 %</span></span></th><th class="n">Estimation</th><th class="n">Intervalle à 90 %</th><th class="n">A priori</th><th class="n">Pièces testées</th><th class="n">dont bonnes</th></tr></thead><tbody id="rex-corps"></tbody></table></div>
       <p class="note">Point : estimation. Bande : intervalle à 90 %. Trait vertical : a priori tiré de la consommation, avant tout test.</p>
       <h3 class="sous-titre">Qualité des prévisions</h3>
@@ -749,7 +749,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
   // ------------------------------------------------------------------ libellés
   var NOMS = {
-    rebut_an: "FRU rebutés par an", poids_fru_kg: "poids du FRU", ouverture_min: "temps d'ouverture soignée",
+    scrap_an: "FRU scrapés par an", poids_fru_kg: "poids du FRU", ouverture_min: "temps d'ouverture soignée",
     ouverture_tri_min: "temps d'ouverture sommaire", taux_horaire_eur: "coût horaire d'un opérateur", n_par_fru: "nombre par FRU",
     extraction_min: "temps d'extraction", test_min: "temps de test", tri_min: "temps de tri", p_reutilisable: "probabilité réutilisable",
     valeur_eur: "valeur de réemploi", poids_kg: "poids de la pièce", prix_recycleur_eur_kg: "prix du recycleur",
@@ -772,7 +772,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     temps: { court: "Temps de démontage, de test et de tri", aide: "Multiplie les temps d'ouverture, d'extraction, de test et de tri." }
   };
   var CHAMPS_FRU = [
-    { k: "rebut_an", lib: "FRU rebutés par an", dec: 1, min: 0, bloquant: true },
+    { k: "scrap_an", lib: "FRU scrapés par an", dec: 1, min: 0, bloquant: true },
     { k: "poids_fru_kg", lib: "Poids du FRU (kg)", dec: 2, min: 0, bloquant: true },
     { k: "ouverture_min", lib: "Ouverture soignée (min)", dec: 1, min: 0, bloquant: true },
     { k: "ouverture_tri_min", lib: "Ouverture sommaire, pour trier (min)", dec: 1, min: 0, vide: "= ouverture soignée" },
@@ -1142,7 +1142,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
   }
   function miniColonnes(valeurs) {
     var n = valeurs.length, w = 4, H = 22, max = Math.max.apply(null, valeurs.concat([1]));
-    var svg = s("svg", { viewBox: "0 0 " + (n * w) + " " + H, width: n * w, height: H, role: "img", "aria-label": "FRU rebutés chaque semaine, de " + nb(Math.min.apply(null, valeurs)) + " à " + nb(max) });
+    var svg = s("svg", { viewBox: "0 0 " + (n * w) + " " + H, width: n * w, height: H, role: "img", "aria-label": "FRU scrapés chaque semaine, de " + nb(Math.min.apply(null, valeurs)) + " à " + nb(max) });
     s("rect", { x: 0, y: H - 1, width: n * w, height: 1, class: "g-neutre" }, svg);
     valeurs.forEach(function (v, i) { if (v > 0) s("rect", { x: i * w, y: H - 1 - (H - 2) * v / max, width: w - 1, height: (H - 2) * v / max, class: "g-s1" }, svg); });
     return svg;
@@ -1199,14 +1199,14 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     frus.forEach(function (f) {
       var man = M.manques(f, lg.taux_horaire_eur);
       if (!man.length) return;
-      if (inc(f.rebut_an)) noter("rebut_an", 1);
+      if (inc(f.scrap_an)) noter("scrap_an", 1);
       if (!man.some(function (x) { return x.indexOf("aucune option calculable") === 0; })) return;
       var mp = manquesPieces(f);
       if (mp.ouverture) noter("ouverture_min", 1);
       mp.ordre.forEach(function (k) { noter(k, mp.comptes[k]); });
     });
     ordre.forEach(function (k) {
-      var fruNiveau = k === "rebut_an" || k === "ouverture_min";
+      var fruNiveau = k === "scrap_an" || k === "ouverture_min";
       m.push(NOMS[k] + " (" + (fruNiveau ? pluriel(comptes[k], "type de FRU", "types de FRU") : pluriel(comptes[k], "pièce", "pièces")) + ")");
     });
     if (inc(lg.cout_installation_eur)) m.push("l'investissement d'installation");
@@ -1228,7 +1228,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     var nTypes = calc.modele.frus.length, nInc = r["Types de FRU incomplets"], manque = ceQuiManque();
     var phrase, etatLigne, hero = gain, heroLib = "Gain annuel par rapport à la situation actuelle";
     if (!nTypes) {
-      phrase = "Le gain ne peut pas être calculé : le dossier ne contient aucun type de FRU rebuté."; etatLigne = "incomplet";
+      phrase = "Le gain ne peut pas être calculé : le dossier ne contient aucun type de FRU scrapé."; etatLigne = "incomplet";
     } else if (nInc === nTypes) {
       phrase = "Le gain ne peut pas être calculé : aucun type de FRU n'a encore toutes ses données."; etatLigne = "incomplet";
     } else if (inc(res)) {
@@ -1265,7 +1265,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
 
     // Chiffres clés
     var cap = r["Capacité (h/an)"], hUtil = r["Heures utilisées / an"], occ = r["Taux d'occupation"], mu = r["Valeur d'une heure opérateur en plus (€ net)"];
-    var masse = r["Masse des FRU rebutées (kg/an)"], det = r["Masse détournée de la benne (kg/an)"], seuil = r["Seuil de rentabilité (FRU / an)"], roi = r["Retour sur investissement (ans)"];
+    var masse = r["Masse des FRU scrapées (kg/an)"], det = r["Masse détournée de la benne (kg/an)"], seuil = r["Seuil de rentabilité (FRU / an)"], roi = r["Retour sur investissement (ans)"];
     var mcOk = aJour(mc), jauge = null, sansCouts = inc(calc.modele.ligne.cout_installation_eur) || inc(calc.modele.ligne.couts_fixes_annuels_eur);
     if (!inc(occ)) jauge = h("span", { class: "jauge" + (occ >= 0.995 ? " pleine" : ""), "aria-hidden": "true" }, h("span", { style: "width:" + Math.max(0, Math.min(100, occ * 100)).toFixed(1) + "%" }));
     remplir($("decision-reperes"),
@@ -1281,7 +1281,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
       repere("Valeur d'une heure opérateur en plus", inc(mu) ? h("span", { class: "inconnu", text: INCONNU }) : eur(mu, mu && mu < 100 ? 2 : 0),
              inc(mu) ? "Aucun type de FRU calculable." : mu > 0 ? "Marge nette qu'apporterait une heure de plus : argument pour négocier des heures." : "0 : la capacité n'est pas saturée."),
       repere("Masse détournée de la benne actuelle", inc(det) ? h("span", { class: "inconnu", text: INCONNU }) : [nb(det), h("small", { text: " kg / an" })],
-             inc(det) ? "Aucun type de FRU calculable." : inc(masse) || !masse ? "Masse totale rebutée inconnue (poids d'un FRU manquant)." : pct(det / masse) + " des " + unite(masse, "kg", 0) + " rebutés par an, réemployés ou triés.")
+             inc(det) ? "Aucun type de FRU calculable." : inc(masse) || !masse ? "Masse totale scrapée inconnue (poids d'un FRU manquant)." : pct(det / masse) + " des " + unite(masse, "kg", 0) + " scrapés par an, réemployés ou triés.")
     );
   }
 
@@ -1390,9 +1390,9 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
         h("td", { class: "n", text: eur(l["Actuel"]) }), h("td", { class: "n", text: eur(l["Avec la ligne"]) }), h("td", { class: "n", text: signe(l["Écart"]) })));
     });
     var a = calc.scen.attrs;
-    $("comparaison-note").textContent = inc(a["Masse rebutée (kg/an)"]) ? "Masse rebutée par an inconnue : il manque le poids ou le nombre de FRU rebutés d'au moins un type."
-      : inc(a["Masse détournée (kg/an)"]) ? "Masse rebutée : " + unite(a["Masse rebutée (kg/an)"], "kg", 0) + " par an. La masse sortie de la benne actuelle n'est pas calculable tant qu'aucun type de FRU n'est complet."
-      : "Masse rebutée : " + unite(a["Masse rebutée (kg/an)"], "kg", 0) + " par an, dont " + unite(a["Masse détournée (kg/an)"], "kg", 0) + " sortis de la benne actuelle" +
+    $("comparaison-note").textContent = inc(a["Masse scrapée (kg/an)"]) ? "Masse scrapée par an inconnue : il manque le poids ou le nombre de FRU scrapés d'au moins un type."
+      : inc(a["Masse détournée (kg/an)"]) ? "Masse scrapée : " + unite(a["Masse scrapée (kg/an)"], "kg", 0) + " par an. La masse sortie de la benne actuelle n'est pas calculable tant qu'aucun type de FRU n'est complet."
+      : "Masse scrapée : " + unite(a["Masse scrapée (kg/an)"], "kg", 0) + " par an, dont " + unite(a["Masse détournée (kg/an)"], "kg", 0) + " sortis de la benne actuelle" +
         (inc(a["Part détournée"]) ? "" : " (" + pct(a["Part détournée"]) + ")") + ". L'écart total est le gain annuel de la ligne.";
     dessinerCascade($("g-comparaison"), calc.scen);
   }
@@ -1440,7 +1440,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
       vues.push(vue);
       table.insertBefore(h("tbody", { id: "plan-fru-" + i }, tr, trD), pied);
     });
-    if (!etat.frus.length) table.insertBefore(h("tbody", null, h("tr", null, h("td", { colspan: 10, class: "inconnu", text: "Le dossier ne contient aucun type de FRU rebuté." }))), pied);
+    if (!etat.frus.length) table.insertBefore(h("tbody", null, h("tr", null, h("td", { colspan: 10, class: "inconnu", text: "Le dossier ne contient aucun type de FRU scrapé." }))), pied);
   }
   function construireDetail(i) {
     var f = etat.frus[i], vue = vues[i];
@@ -1475,8 +1475,8 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
   }
   function decrireManques(f) {
     var lg = calc.modele.ligne, t = [];
-    if (inc(f.rebut_an)) t.push("le nombre de FRU rebutés par an");
-    else if (f.rebut_an < 0) t.push("un nombre de FRU rebutés par an positif");
+    if (inc(f.scrap_an)) t.push("le nombre de FRU scrapés par an");
+    else if (f.scrap_an < 0) t.push("un nombre de FRU scrapés par an positif");
     if (inc(possede(f, "taux_horaire_eur") ? f.taux_horaire_eur : lg.taux_horaire_eur)) t.push("le coût horaire d'un opérateur");
     if (inc(lg.cout_traitement_eur_kg)) t.push("le coût de traitement du recycleur actuel (0 si l'enlèvement est gratuit)");
     var dispo = M.optionsDisponibles(f);
@@ -1495,9 +1495,9 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     etat.frus.forEach(function (f, i) {
       var vue = vues[i], fm = calc.modele.frus[i], L = lignes.filter(function (r) { return r["Type de FRU"] === f.fru; });
       while (vue.tr.children.length > 2) vue.tr.removeChild(vue.tr.lastChild);
-      var rebut = h("td", { class: "n", text: nb(fm.rebut_an, fm.rebut_an !== null && fm.rebut_an % 1 ? 1 : 0) });
+      var scrap = h("td", { class: "n", text: nb(fm.scrap_an, fm.scrap_an !== null && fm.scrap_an % 1 ? 1 : 0) });
       if (!L.length || L[0]["Décision"] === "incomplet") {
-        ajouter(vue.tr, [rebut, h("td", null, puce("incomplet", "alerte")),
+        ajouter(vue.tr, [scrap, h("td", null, puce("incomplet", "alerte")),
           h("td", { colspan: 6, class: "manque", text: "Il manque : " + decrireManques(fm).join(" ; ") + "." })]);
       } else {
         var n = 0, hh = 0, mm = 0;
@@ -1506,16 +1506,16 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
         tot.n += n; tot.h += hh; tot.m += mm; tot.ok++;
         var dec = h("td", null, traite ? puce("traiter", "plein") : puce("laisser", ""));
         if (traite && L.length > 1) dec.appendChild(h("div", { class: "mini discret", text: "2 plans : capacité saturée" }));
-        else if (traite && n < fm.rebut_an - 1e-6) dec.appendChild(h("div", { class: "mini discret", text: "en partie : capacité saturée" }));
+        else if (traite && n < fm.scrap_an - 1e-6) dec.appendChild(h("div", { class: "mini discret", text: "en partie : capacité saturée" }));
         var re = h("td", { text: traite ? (P.reemploi.join(", ") || "aucune") : "" }), rc = h("td", { text: traite ? (P.recyclage.join(", ") || "aucune") : "" });
         if (traite && L.length > 1) {
           re.appendChild(h("div", { class: "mini discret", text: "pour " + nb(P["FRU traitées / an"]) + " FRU ; pour " + nb(L[1]["FRU traitées / an"]) + " autres : " + (L[1].reemploi.join(", ") || "aucune") }));
           if (L[1].recyclage.join() !== P.recyclage.join()) rc.appendChild(h("div", { class: "mini discret", text: "autres : " + (L[1].recyclage.join(", ") || "aucune") }));
         }
-        ajouter(vue.tr, [rebut, dec, re, rc, h("td", { class: "n", text: nb(n) }), h("td", { class: "n", text: nb(hh) }),
+        ajouter(vue.tr, [scrap, dec, re, rc, h("td", { class: "n", text: nb(n) }), h("td", { class: "n", text: nb(hh) }),
           h("td", { class: "n", text: traite && n ? eur(mm / n, 2) : "" }), h("td", { class: "n", text: eur(mm) })]);
       }
-      if (!inc(fm.rebut_an)) tot.reb += fm.rebut_an;
+      if (!inc(fm.scrap_an)) tot.reb += fm.scrap_an;
       if (vue.ouvert) majDetail(i);
     });
     remplir($("plan-pied"), etat.frus.length ? h("tr", null, h("th", { scope: "row", text: "Total" }), h("td", { text: pluriel(tot.ok, "type calculé", "types calculés") + " sur " + nb(etat.frus.length) }),
@@ -1690,7 +1690,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     hebdo.forEach(function (r) {
       var sem = r.Semaine;
       if (!parSemaine[sem]) { parSemaine[sem] = { n: 0, complete: true, detail: [] }; semaines.push(sem); }
-      var v = inc(r["FRU rebutées"]) ? 0 : r["FRU rebutées"];
+      var v = inc(r["FRU scrapées"]) ? 0 : r["FRU scrapées"];
       parSemaine[sem].n += v;
       if (r["Semaine complète"] === false) parSemaine[sem].complete = false;
       (parFru[r.FRU] = parFru[r.FRU] || {})[sem] = v;
@@ -1700,22 +1700,22 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     $("flux-legende").hidden = !incompletes;
     dessinerColonnes($("g-flux"), semaines.map(function (x) {
       var p = parSemaine[x];
-      return { t: dateCourte(x), v: p.n, classe: p.complete ? "g-s1" : "g-neutre", titre: "Semaine du " + dateCourte(x) + (p.complete ? "" : " (incomplète)"), lignes: [["FRU rebutés", nb(p.n)]] };
-    }), { description: "FRU rebutés par semaine sur " + nb(semaines.length) + " semaines.", vide: "Aucun FRU rebuté daté dans les extractions." });
+      return { t: dateCourte(x), v: p.n, classe: p.complete ? "g-s1" : "g-neutre", titre: "Semaine du " + dateCourte(x) + (p.complete ? "" : " (incomplète)"), lignes: [["FRU scrapés", nb(p.n)]] };
+    }), { description: "FRU scrapés par semaine sur " + nb(semaines.length) + " semaines.", vide: "Aucun FRU scrapé daté dans les extractions." });
     remplir($("flux-corps"), semaines.map(function (x) {
       return h("tr", null, h("td", { text: dateCourte(x) }), h("td", { class: "n", text: nb(parSemaine[x].n) }), h("td", { text: parSemaine[x].complete ? "oui" : "non" }));
     }));
     var dansModele = {};
     etat.frus.forEach(function (f) { dansModele[f.fru] = true; });
-    var ra = liste(D.flux.rebut_annuel);
+    var ra = liste(D.flux.scrap_annuel);
     remplir($("flux-types"), ra.length ? ra.map(function (r) {
       var serie = semaines.map(function (x) { return (parFru[r.FRU] || {})[x] || 0; });
       return h("tr", null, h("th", { scope: "row", class: "ref", text: r.FRU }), h("td", null, serie.length ? miniColonnes(serie) : null), h("td", { class: "n", text: nb(r["Moyenne hebdo"], 1) }),
-        h("td", { class: "n", text: nb(r["Rebut annuel bas (5 %)"]) }), h("td", { class: "n", text: nb(r["Rebut annuel moyen"]) }), h("td", { class: "n", text: nb(r["Rebut annuel haut (95 %)"]) }),
+        h("td", { class: "n", text: nb(r["Scrap annuel bas (5 %)"]) }), h("td", { class: "n", text: nb(r["Scrap annuel moyen"]) }), h("td", { class: "n", text: nb(r["Scrap annuel haut (95 %)"]) }),
         h("td", null, dansModele[r.FRU] ? puce("oui", "accent") : h("span", { class: "discret", text: "non : absent du classeur de paramètres" })));
-    }) : h("tr", null, h("td", { colspan: 7, class: "inconnu", text: "Rebut annuel non calculé : pas assez de semaines complètes." })));
-    $("flux-regle").textContent = (ra.length ? "Rebut annuel : bas et haut encadrent 90 % des années simulées en rééchantillonnant les semaines complètes. " : "") +
-      (D.flux.regle_date_rebut ? "Date du rebut retenue : " + D.flux.regle_date_rebut + "." : "");
+    }) : h("tr", null, h("td", { colspan: 7, class: "inconnu", text: "Scrap annuel non calculé : pas assez de semaines complètes." })));
+    $("flux-regle").textContent = (ra.length ? "Scrap annuel : bas et haut encadrent 90 % des années simulées en rééchantillonnant les semaines complètes. " : "") +
+      (D.flux.regle_date_scrap ? "Date du scrap retenue : " + D.flux.regle_date_scrap + "." : "");
 
     // Estimé contre pesé, un petit graphique par flux
     var rap = liste(D.flux.rapprochement), verdicts = {}, parFlux = {}, ordre = [];
@@ -1749,7 +1749,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
   function rendrePeriodes() {
     var L = periodes.lignes, a = periodes.attrs, ok = aJour(periodes);
     var t = [];
-    if (!L.length) t.push("Le rejeu semaine par semaine n'est pas disponible : il faut des FRU rebutés datés.");
+    if (!L.length) t.push("Le rejeu semaine par semaine n'est pas disponible : il faut des FRU scrapés datés.");
     else {
       var pp = a["Résultat annualisé, période par période (€)"], an = a["Résultat du modèle annuel au flux moyen (€)"], cv = a["Coût de la variabilité du flux (€/an)"];
       if (inc(pp) || inc(an)) t.push("Le résultat semaine par semaine ne peut pas être calculé avec " + (periodes.origine === "dossier" ? "les données du dossier" : "ces hypothèses") + ".");
@@ -1803,7 +1803,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     if (a("Ateliers")) cols.push(["Ateliers", null]);
     if (a("Pièces")) cols.push(["Pièces consommées", "n"]);
     if (mmicv) cols.push([mmicv, "n"]);
-    if (a("FRU rebutées (nomenclature)")) cols.push(["FRU rebutés concernés", "n"]);
+    if (a("FRU scrapées (nomenclature)")) cols.push(["FRU scrapés concernés", "n"]);
     if (a("Score risque matière (0-1)")) cols.push(["Risque matière (0 à 1)", null]);
     if (a("Risque supply retenu")) cols.push(["Risque d'approvisionnement (0 à 1)", null]);
     if (a("Fiabilité réemploi (1/rapport)")) cols.push(["Fiabilité du réemploi", "n"]);
@@ -1814,7 +1814,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
       if (a("Ateliers")) tr.appendChild(cellule(r["Ateliers"]));
       if (a("Pièces")) tr.appendChild(cellule(r["Pièces"], 0));
       if (mmicv) tr.appendChild(cellule(r[mmicv], 0));
-      if (a("FRU rebutées (nomenclature)")) tr.appendChild(cellule(r["FRU rebutées (nomenclature)"], 0));
+      if (a("FRU scrapées (nomenclature)")) tr.appendChild(cellule(r["FRU scrapées (nomenclature)"], 0));
       if (a("Score risque matière (0-1)")) {
         var tm = barre01(r["Score risque matière (0-1)"]);
         if (r["CRM"]) tm.appendChild(h("div", { class: "mini discret", text: r["CRM"] }));

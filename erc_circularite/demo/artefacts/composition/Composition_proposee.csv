@@ -1,0 +1,22 @@
+﻿PN;Description;Classe retenue;Probabilité;Statut;Sources;Preuves;Enjeu (€/an, borne);Appels au modèle;Coût des acquisitions (€);Prochaine action
+P-1001;IGBT 400A 1200V;Composant de puissance;1,0;validée;validation humaine;2;0,0;0;0,0;aucune
+P-1002;IGBT 400A 600V;Composant de puissance;0,9996789956129398;acceptée;analogie, classement antérieur, règle;3;0,18950266979597155;0;0,0;aucune : contrôle par sondage
+P-1003;AL Electrolytic Capacitor 450V 4700uF 105degC;Condensateur;0,9910365433233782;acceptée;classement antérieur, règle;2;;0;0,0;aucune : contrôle par sondage
+P-1004;Gate Driver Board;Carte B;1,0;validée;validation humaine;2;0,0;0;0,0;aucune
+P-1005;Control board assembly;Carte B;0,9974554707379127;acceptée;classement antérieur, règle;2;1,1176150901456188;0;0,0;aucune : contrôle par sondage
+P-1006;Bus resistance 33k ohm 10W;Composant standard;0,9958429561200921;acceptée;classement antérieur, règle;2;0,3204864625542595;0;0,0;aucune : contrôle par sondage
+P-1007;Protection fuse 100A high speed;Composant standard;1,0;validée;validation humaine;2;0,0;0;0,0;aucune
+P-2001;Power supply board;Carte B;1,0;validée;validation humaine;2;0,0;0;0,0;aucune
+P-2002;Cooling fan 120mm;Composant standard;0,9958429561200921;acceptée;classement antérieur, règle;2;1,0234021493329295;0;0,0;aucune : contrôle par sondage
+P-3001;Coque boîtier gris;Plastique;1,0;validée;validation humaine;2;0,0;0;0,0;aucune
+P-3002;Tête de joystick;Plastique;0,9958429561200921;acceptée;classement antérieur, règle;2;0,8337883395825274;0;0,0;aucune : contrôle par sondage
+P-3003;Soufflet caoutchouc;Plastique;0,9958429561200921;acceptée;classement antérieur, règle;2;0,4604502770828882;0;0,0;aucune : contrôle par sondage
+P-3004;Cable harness boîtier;Câbles;0,9910365433233782;acceptée;classement antérieur, règle;2;1,6862598270959985;0;0,0;aucune : contrôle par sondage
+P-3005;Keypad controller board;Carte C;1,0;validée;validation humaine;2;0,0;0;0,0;aucune
+P-4001;Grille de protection;Métal;0,9910365433233782;acceptée;classement antérieur, règle;2;1,4918128676876392;0;0,0;aucune : contrôle par sondage
+P-5001;Coil preamp board;Carte C;0,9205807002562013;acceptée;classement antérieur, modèle : extraction, règle;3;8,550997964616224;1;0,07;aucune : contrôle par sondage
+P-5002;Coil cable;Câbles;0,9910365433233782;acceptée;classement antérieur, règle;2;0,4379895654794801;0;0,0;aucune : contrôle par sondage
+P-6001;Mainboard station;Carte B;0,9671052631578878;acceptée;modèle : extraction, règle;3;13,670427247941099;2;0,12000000000000001;aucune : contrôle par sondage
+P-6002;Cooling fan 80mm;Composant standard;0,9958429561200921;acceptée;classement antérieur, règle;2;0,3878155513261627;0;0,0;aucune : contrôle par sondage
+P-9001;Vis M4 inox;Métal;0,6829268292683927;à valider;règle;1;;0;0,0;revue humaine si la pièce compte : enjeu inconnu (poids, volume ou prix d'une classe manquant)
+P-9002;Radiateur aluminium extrudé;Métal;0,6829268292683927;à valider;règle;1;;0;0,0;revue humaine si la pièce compte : enjeu inconnu (poids, volume ou prix d'une classe manquant)

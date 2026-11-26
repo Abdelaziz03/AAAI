@@ -19,6 +19,7 @@ from . import fiabilite as mod_fiab
 from . import flux as mod_flux
 from . import ligne as mod_ligne
 from . import parametres as mod_par
+from . import prevision as mod_prev
 from . import rex as mod_rex
 from .artefacts import Depot, vers_json
 from .config import ETAPES, Config, charger as charger_config
@@ -89,12 +90,13 @@ def etape_sources(ctx: Contexte) -> dict:
     ctx.src = charger_sources(cfg)
     ctx.params = mod_par.lire(cfg)
     mod_par.appliquer_aux_sources(ctx.params, ctx.src)
+    ctx.essayer("sources", "classes matière validées dans le cortex", lambda: _classes_du_cortex(ctx))
     s = ctx.src
     perimetre = {"mode": cfg.mode, "demo": cfg.demo, "periode": s.periode, "jours_extraits": len(s.couverts),
                  "debut": min(s.couverts) if s.couverts else None, "fin": max(s.couverts) if s.couverts else None,
                  "lignes_consommation": len(s.ev), "pieces_consommees": float(s.ev["Qte"].sum()) if len(s.ev) else 0.0,
-                 "fru_rebutees": float(s.fru_rebutees["Unités"].sum()) if len(s.fru_rebutees) else 0.0,
-                 "regle_date_rebut": s.regle_date_rebut, "ateliers_prioritaires": cfg.ateliers_prioritaires,
+                 "fru_scrapees": float(s.fru_scrapees["Unités"].sum()) if len(s.fru_scrapees) else 0.0,
+                 "regle_date_scrap": s.regle_date_scrap, "ateliers_prioritaires": cfg.ateliers_prioritaires,
                  "classeur_parametres": "présent" if ctx.params.existe else "absent : il sera créé à l'étape classement",
                  "genere_le": datetime.now().isoformat(timespec="seconds"),
                  # Noms des dossiers seulement : un chemin complet contient le nom de l'utilisateur du poste.
@@ -108,6 +110,26 @@ def etape_sources(ctx: Contexte) -> dict:
                         "Périmètre": "Mode (réel ou démonstration), période couverte, volumes lus, chemins"})
 
 
+def _classes_du_cortex(ctx: Contexte) -> int:
+    """Une classe matière validée par une personne dans le cortex complète ou corrige le classement matière des sources.
+    Seules les validations comptent : une classe seulement « probable » ne devient jamais une donnée du dossier."""
+    cfg, s = ctx.cfg, ctx.src
+    if not cfg.cortex.is_file():
+        return 0
+    from . import composition, cortex
+    with cortex.Cortex(cfg.cortex) as cx:
+        v = cx.verites(composition.DOMAINE, composition.ATTRIBUT)
+    n = 0
+    for pn, classe in v.items():
+        if pn not in s.classification.index or s.classification.at[pn, "Catégorie proposée"] != classe:
+            s.classification.loc[pn, "Catégorie proposée"] = classe
+            s.classification.loc[pn, "Niveau de preuve"] = "cortex : classe validée par une personne"
+            n += 1
+    if n and hasattr(s, "_constat"):
+        s._constat("Cortex", cfg.cortex.name, "information", f"{n} classe(s) matière reprise(s) des validations du cortex")
+    return n
+
+
 # =========================================================================== 1. classement
 def etape_classement(ctx: Contexte) -> dict:
     cfg, s = ctx.cfg, ctx.src
@@ -116,34 +138,34 @@ def etape_classement(ctx: Contexte) -> dict:
     par_atelier = {a: ctx.essayer(E, f"classement {a}", lambda a=a: mod_cl.classement(s.ev[s.ev["Atelier"].eq(a)], s), tous.iloc[:0])
                    for a in cfg.ateliers_prioritaires}
     cal, par_mois = ctx.essayer(E, "calendrier", lambda: mod_cl.calendrier(s), (_vide("Mois"), pd.DataFrame()))
-    rebut, source_rebut = ctx.essayer(E, "FRU rebutées", lambda: mod_cl.fru_rebutees(s), (_vide("Atelier", "FRU", "Description FRU", "FRU rebutées"), "erreur"))
+    scrap, source_scrap = ctx.essayer(E, "FRU scrapées", lambda: mod_cl.fru_scrapees(s), (_vide("Atelier", "FRU", "Description FRU", "FRU scrapées"), "erreur"))
     couples = ctx.essayer(E, "couples FRU x pièce", lambda: mod_cl.couples_fru_piece(s), _vide("FRU", "Pièce"))
-    contenu = ctx.essayer(E, "composants des FRU rebutées", lambda: mod_cl.composants_fru_rebutees(s, rebut, couples), _vide("Référence"))
+    contenu = ctx.essayer(E, "composants des FRU scrapées", lambda: mod_cl.composants_fru_scrapees(s, scrap, couples), _vide("Référence"))
     # Le classeur de paramètres est créé ici, une fois, avec les FRU et les pièces trouvés dans les données.
-    cree = ctx.essayer(E, "gabarit des paramètres", lambda: _creer_classeur(ctx, rebut, couples, tous), False)
+    cree = ctx.essayer(E, "gabarit des paramètres", lambda: _creer_classeur(ctx, scrap, couples, tous), False)
     if cree:
         ctx.params = mod_par.lire(cfg)
         mod_par.appliquer_aux_sources(ctx.params, s)
     chiffres = ctx.essayer(E, "chiffres à vérifier", lambda: mod_cl.chiffres_a_verifier(s, ctx.params.chiffres, cal), _vide("Chiffre"))
     prio = ctx.essayer(E, "priorisation", lambda: mod_cl.priorisation(tous, contenu), pd.DataFrame())
     tables = {"Classement tous ateliers": tous, **{f"Classement {a}": t for a, t in par_atelier.items()}, "Mois calendrier": cal, "Pièces par mois": par_mois,
-              "Chiffres à vérifier": chiffres, "FRU rebutées": rebut, "Couples FRU x pièce": couples, "Composants des FRU rebutées": contenu,
+              "Chiffres à vérifier": chiffres, "FRU scrapées": scrap, "Couples FRU x pièce": couples, "Composants des FRU scrapées": contenu,
               "Priorisation": prio,
-              "Notes": {"source_fru_rebutees": source_rebut, "classeur_parametres_cree": bool(cree),
+              "Notes": {"source_fru_scrapees": source_scrap, "classeur_parametres_cree": bool(cree),
                         "criteres_actifs": prio.attrs.get("Critères actifs", []), "criteres_inactifs": prio.attrs.get("Critères inactifs faute de données", [])}}
     return ctx.deposer(E, tables, {
         "Classement tous ateliers": "Pièces consommées sur la période : volume, MMICV unitaire et total, type de déchet, poids",
-        "FRU rebutées": "FRU rebutées par type sur la période, avec poids",
+        "FRU scrapées": "FRU scrapées par type sur la période, avec poids",
         "Couples FRU x pièce": "Par couple : pièces consommées, réparations du FRU, maximum observé sur un PO (minimum de pièces par FRU)",
-        "Composants des FRU rebutées": "Pièces présentes dans la nomenclature de consommation des FRU rebutées",
+        "Composants des FRU scrapées": "Pièces présentes dans la nomenclature de consommation des FRU scrapées",
         "Priorisation": "Critères de pré-sélection (valeur, gisement, risque matière, risque supply) et front de Pareto"})
 
 
-def _creer_classeur(ctx: Contexte, rebut, couples, tous) -> bool:
+def _creer_classeur(ctx: Contexte, scrap, couples, tous) -> bool:
     cfg = ctx.cfg
     if cfg.classeur.is_file():
         return False
-    tables = mod_par.tables_gabarit(cfg, ctx.src, rebut, couples, tous)
+    tables = mod_par.tables_gabarit(cfg, ctx.src, scrap, couples, tous)
     if cfg.demo:
         from . import demo
         tables = demo.remplir_parametres(tables)
@@ -162,24 +184,31 @@ def etape_flux(ctx: Contexte) -> dict:
         Références=("Référence", "nunique"), Pièces=("Pièces", "sum"), **{"Références au poids connu": ("Poids connu", "sum"),
             # min_count=1 : un type de déchet dont aucun poids n'est connu a une masse inconnue, pas une masse nulle
             "Kg (poids connus)": ("Kg (poids connus)", lambda x: x.sum(min_count=1))}).reset_index(), _vide("Benne"))
-    flux_fru = ctx.essayer(E, "FRU rebutées par semaine", lambda: mod_flux.flux_fru_hebdo(s.fru_rebutees, s.couverts, s.poids_fru)
-                           if len(s.fru_rebutees) else _vide("Semaine", "FRU", "FRU rebutées", "Jours extraits", "Semaine complète"),
-                           _vide("Semaine", "FRU", "FRU rebutées", "Jours extraits", "Semaine complète"))
-    rebut_an = ctx.essayer(E, "rebut annuel", lambda: mod_flux.rebut_annuel(flux_fru) if len(flux_fru) else _vide("FRU", "rebut_an"), _vide("FRU", "rebut_an"))
+    flux_fru = ctx.essayer(E, "FRU scrapées par semaine", lambda: mod_flux.flux_fru_hebdo(s.fru_scrapees, s.couverts, s.poids_fru)
+                           if len(s.fru_scrapees) else _vide("Semaine", "FRU", "FRU scrapées", "Jours extraits", "Semaine complète"),
+                           _vide("Semaine", "FRU", "FRU scrapées", "Jours extraits", "Semaine complète"))
+    scrap_an = ctx.essayer(E, "scrap annuel", lambda: mod_flux.scrap_annuel(flux_fru) if len(flux_fru) else _vide("FRU", "scrap_an"), _vide("FRU", "scrap_an"))
+    Yp, Ep = ctx.essayer(E, "séries hebdomadaires", lambda: mod_prev.series_hebdo(flux_fru, s.ev), (pd.DataFrame(), None))
+    prev = ctx.essayer(E, "prévision du flux", lambda: mod_prev.prevoir(Yp, Ep, graine=cfg.graine), _vide("FRU", "Méthode", "Moyenne"))
+    eval_prev = ctx.essayer(E, "évaluation des prévisions", lambda: mod_prev.evaluer(Yp, Ep, graine=cfg.graine),
+                            {"resume": _vide("Méthode", "Prévisions"), "detail": pd.DataFrame()})
     est = ctx.essayer(E, "masse estimée par semaine", lambda: mod_flux.estimation_hebdo(s.ev, comp, s.couverts, par=cfg.par_flux), _vide("Semaine", "Flux"))
     rap = ctx.essayer(E, "estimé contre pesé", lambda: mod_flux.rapprocher(est, s.pesees), _vide("Semaine", "Flux", "Dans la marge"))
     verdict = ctx.essayer(E, "verdict par flux", lambda: _verdict(rap), _vide("Flux"))
     tables = {"Composant FRU type de déchet": comp_fru, "Composants type de déchet": comp, "Synthèse par benne": synthese,
-              "FRU rebutées par semaine": flux_fru, "Rebut annuel": rebut_an, "Masse estimée par semaine": est,
+              "FRU scrapées par semaine": flux_fru, "Scrap annuel": scrap_an, "Masse estimée par semaine": est,
               "Estimé contre pesé": rap, "Verdict par flux": verdict,
-              "Notes": {"regle_date_rebut": s.regle_date_rebut, "granularite": cfg.par_flux, "semaines_pesees": int(s.pesees["Semaine"].nunique()) if len(s.pesees) else 0}}
+              "Prévision des FRU scrapées": prev, "Évaluation des prévisions": eval_prev["resume"],
+              "Notes": {"regle_date_scrap": s.regle_date_scrap, "granularite": cfg.par_flux, "semaines_pesees": int(s.pesees["Semaine"].nunique()) if len(s.pesees) else 0}}
     return ctx.deposer(E, tables, {
         "Composant FRU type de déchet": "Une ligne par couple (FRU, composant) : type de déchet, benne, poids",
-        "FRU rebutées par semaine": "Flux d'entrée du modèle : FRU rebutées par semaine et par type (0 les semaines sans rebut)",
-        "Rebut annuel": "FRU rebutées par an (bas, moyen, haut) tirées des semaines complètes",
+        "FRU scrapées par semaine": "Flux d'entrée du modèle : FRU scrapées par semaine et par type (0 les semaines sans scrap)",
+        "Scrap annuel": "FRU scrapées par an (bas, moyen, haut) tirées des semaines complètes",
         "Masse estimée par semaine": "Masse estimée par semaine et par flux, avec marge d'erreur",
         "Estimé contre pesé": "Semaine, valeur estimée et mesurée, marge d'erreur, causes candidates de l'écart, cause constatée à saisir",
-        "Verdict par flux": "Le flux est-il assez bien vérifié pour alimenter le modèle ?"})
+        "Verdict par flux": "Le flux est-il assez bien vérifié pour alimenter le modèle ?",
+        "Prévision des FRU scrapées": "Semaine suivante, par type et par méthode : moyenne et quantiles",
+        "Évaluation des prévisions": "Chaque semaine prévue avec les seules semaines précédentes : écart quadratique relatif à la moyenne, perte de quantile, couverture"})
 
 
 def _composant_fru(s: Sources, tous: pd.DataFrame) -> pd.DataFrame:
@@ -224,7 +253,7 @@ def etape_fiabilite(ctx: Contexte) -> dict:
     ], columns=["Type de pièce", "Mécanisme", "Loi", "Paramètres à lire", "Source"])
     prio = ctx.res["classement"].get("Priorisation", pd.DataFrame())
     if len(prio) and len(fiab):                                # la fiabilité devient un critère de la pré-sélection
-        tous, contenu = ctx.res["classement"]["Classement tous ateliers"], ctx.res["classement"]["Composants des FRU rebutées"]
+        tous, contenu = ctx.res["classement"]["Classement tous ateliers"], ctx.res["classement"]["Composants des FRU scrapées"]
         prio = ctx.essayer(E, "priorisation avec fiabilité", lambda: mod_cl.priorisation(tous, contenu, fiab), prio)
     tables = {"Fiabilité par référence": fiab, "Courbes de Kaplan-Meier": km, "Vie résiduelle (grille illustrative)": grille,
               "A priori physiques": physique, "Priorisation avec fiabilité": prio,
@@ -284,10 +313,10 @@ def etape_ligne(ctx: Contexte) -> dict:
     cfg, s, p = ctx.cfg, ctx.src, ctx.params
     E = "ligne"
     couples = ctx.res["classement"]["Couples FRU x pièce"]
-    rebut = ctx.res["classement"]["FRU rebutées"]
-    flux_fru, rebut_an = ctx.res["flux"]["FRU rebutées par semaine"], ctx.res["flux"]["Rebut annuel"]
+    scrap = ctx.res["classement"]["FRU scrapées"]
+    flux_fru, scrap_an = ctx.res["flux"]["FRU scrapées par semaine"], ctx.res["flux"]["Scrap annuel"]
     post = ctx.res["rex"]["A posteriori"]
-    LIGNE, FRUS, prov = ctx.essayer(E, "résolution des paramètres", lambda: mod_par.resoudre(cfg, p, s, couples, rebut_an, post, rebut),
+    LIGNE, FRUS, prov = ctx.essayer(E, "résolution des paramètres", lambda: mod_par.resoudre(cfg, p, s, couples, scrap_an, post, scrap),
                                     ({}, {}, _vide("FRU", "Pièce", "Paramètre", "Valeur", "Provenance", "État")))
     a_obtenir = ctx.essayer(E, "données à obtenir", lambda: mod_par.a_obtenir(prov, FRUS), _vide("Paramètre"))
     lg, fr = mod_ligne._milieu(LIGNE), mod_ligne._milieu(FRUS)
@@ -436,7 +465,7 @@ def donnees_outil(ctx: Contexte) -> dict:
                     item[k] = _param(e.get(k), pv.get((f, pc, k), ""))
             pieces.append(item)
         item = {"fru": f, "description": d.get("description") or "", "atelier": d.get("atelier") or "", "pieces": pieces}
-        for k in ("rebut_an", "poids_fru_kg", "ouverture_min", "ouverture_tri_min", "taux_horaire_eur"):
+        for k in ("scrap_an", "poids_fru_kg", "ouverture_min", "ouverture_tri_min", "taux_horaire_eur"):
             item[k] = _param(d.get(k), pv.get((f, "", k), ""))
         frus.append(item)
     notes = lg["Notes"]
@@ -445,7 +474,7 @@ def donnees_outil(ctx: Contexte) -> dict:
     rap = ctx.res["flux"]["Estimé contre pesé"]
     prio = ctx.res["fiabilite"].get("Priorisation avec fiabilité", pd.DataFrame())
     cols_prio = ["Référence", "Description", "Ateliers", "Pièces", "MMICV total (USD)", "Type de pièce", "CRM", "Score risque matière (0-1)",
-                 "Risque supply retenu", "Source supply retenue", "FRU rebutées (nomenclature)", "Fiabilité réemploi (1/rapport)", "Sur le front de Pareto"]
+                 "Risque supply retenu", "Source supply retenue", "FRU scrapées (nomenclature)", "Fiabilité réemploi (1/rapport)", "Sur le front de Pareto"]
     return vers_json({
         "meta": {"genere_le": datetime.now().isoformat(timespec="seconds"), "donnees": "démonstration" if cfg.demo else "réelles",
                  "periode": s.periode, "jours_extraits": len(s.couverts), "ateliers": cfg.ateliers_prioritaires, "garantie_jours": cfg.garantie_jours},
@@ -456,10 +485,10 @@ def donnees_outil(ctx: Contexte) -> dict:
                         "tirages": [None if pd.isna(v) else round(float(v), 1) for v in tir["Résultat / an (€)"]] if len(tir) and "Résultat / an (€)" in tir else [],
                         "n": cfg.n_monte_carlo, "frequence_traitement": mc.get("Fréquence de traitement par type de FRU", {})},
         "periodes": {"table": lg["Période par période"], "resume": notes.get("periode_par_periode", {})},
-        "flux": {"fru_hebdo": ctx.res["flux"]["FRU rebutées par semaine"], "rebut_annuel": ctx.res["flux"]["Rebut annuel"].drop(columns="rebut_an", errors="ignore"),
+        "flux": {"fru_hebdo": ctx.res["flux"]["FRU scrapées par semaine"], "scrap_annuel": ctx.res["flux"]["Scrap annuel"].drop(columns="scrap_an", errors="ignore"),
                  "rapprochement": rap[[c for c in ("Semaine", "Flux", "Estimé bas (kg)", "Estimé central (kg)", "Estimé haut (kg)", "Marge d'erreur (± kg)", "Masse mesurée (kg)",
                                                    "Écart (%)", "Dans la marge", "Écart cumulé (%)", "Causes candidates de l'écart") if c in rap]] if len(rap) else [],
-                 "verdict": ctx.res["flux"]["Verdict par flux"], "regle_date_rebut": s.regle_date_rebut},
+                 "verdict": ctx.res["flux"]["Verdict par flux"], "regle_date_scrap": s.regle_date_scrap},
         "priorisation": prio[[c for c in cols_prio if c in prio]].head(60) if len(prio) else [],
         "rex": {"posterieur": ctx.res["rex"]["A posteriori"].drop(columns=["a", "b"], errors="ignore"), "metriques": ctx.res["rex"]["Métriques"],
                 "banc_essai": ctx.res["rex"]["Banc d'essai des politiques"]},

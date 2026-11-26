@@ -41,7 +41,8 @@ class Config:
     n_fru_gabarit: int = 10             # types de FRU proposés dans le classeur de paramètres
     n_pieces_gabarit: int = 7           # pièces proposées par FRU (+ la carcasse)
     par_flux: str = "Benne"             # granularité du suivi hebdomadaire : "Benne" ou "Type de déchet"
-    col_date_rebut: str | None = None   # colonne qui date le rebut ; None = recherche automatique affichée
+    bom: str | None = None              # fichier de nomenclature (PN, Description…) ; None = premier classeur de <projet>/BOM/
+    col_date_scrap: str | None = None   # colonne qui date le scrap ; None = recherche automatique affichée
     fenetre_elf_jours: float | None = None
     garantie_jours: int = 365
     figures: bool = True                # False : les figures ne sont pas tracées (exécutions rapides, tests)
@@ -59,6 +60,22 @@ class Config:
     @property
     def classeur(self) -> Path:
         return self.parametres / NOM_CLASSEUR
+
+    @property
+    def cortex(self) -> Path:
+        """Base de connaissance du dossier (affirmations, validations, journal) : un fichier SQLite, hors du dépôt."""
+        return self.dossier / "cortex" / "cortex.sqlite"
+
+    def chemin_bom(self) -> Path | None:
+        """Fichier de nomenclature : celui de l'option `bom`, sinon le premier classeur ou CSV de <projet>/BOM/."""
+        if self.bom:
+            p = Path(self.bom)
+            return p if p.is_file() else None
+        d = self.projet / "BOM" if self.projet else None
+        if d is not None and d.is_dir():
+            f = sorted([*d.glob("*.xlsx"), *d.glob("*.csv")])
+            return f[0] if f else None
+        return None
 
     @property
     def mode(self) -> str:

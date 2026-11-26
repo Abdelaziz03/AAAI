@@ -4,7 +4,7 @@ Aucune source n'est obligatoire : une source absente ou illisible est notée dan
 qui en dépendent rendent des tables vides ou des valeurs « inconnu », jamais des zéros inventés.
 
 Fichiers attendus (noms et colonnes des extractions existantes) :
-  projet/ERC_R26_extraction_AAAAMMJJ_AAAAMMJJ.xlsx   Composants_jour, FRU_rebutees, FRU_statut_cohorte
+  projet/ERC_R26_extraction_AAAAMMJJ_AAAAMMJJ.xlsx   Composants_jour, FRU_scrapees, FRU_statut_cohorte
   projet/Classification_matieres/ERC_Classification_Cartes_resultats.xlsx (Classification), ERC_Referentiel_Grades.xlsx (Grades)
   projet/Extraction_R26/poids_items_vwAllItems.csv, fiabilite_ELF_references_ERC.csv, poses_2022_2023_par_reference.csv
   projet/Acquisition/pesees_hebdo.csv, audit_demontage.csv
@@ -46,6 +46,8 @@ F_FRU = "FRU_info.xlsx"
 F_FIAB = "Parts_DI_ULS_Data_upd(2022, 23).xlsb"
 COLS_EV = ["Jour", "PO", "FRU ITEM", "Component ITEM", "Component Description", "Qte"]
 BLOQUANT, A_VERIFIER, INFORMATION = "bloquant", "à vérifier", "information"
+# « scrapé » remplace « rebuté » dans tout le dossier ; les extractions existantes gardent leur onglet d'origine.
+ANCIENS_ONGLETS = {"FRU_scrapees": ("FRU_rebutees", "FRU_scrappees", "FRU_scrap")}
 REGLE_EXTRACTIONS = ("sur un jour commun à deux extractions, seule l'extraction dont la période (lue dans le nom du fichier) "
                      "finit le plus tard est lue")
 
@@ -317,6 +319,9 @@ def _onglet(x: pd.ExcelFile, nom: str, colonnes=()) -> tuple:
     for n in x.sheet_names:
         reels.setdefault(_cle(n), n)
     reel = reels.get(_cle(nom))
+    for ancien in ANCIENS_ONGLETS.get(nom, ()):                # extractions produites avant le changement de vocabulaire
+        if reel is None:
+            reel = reels.get(_cle(ancien))
     if reel is not None:
         return x.parse(reel), ("" if reel == nom else f"onglet « {reel} » lu comme « {nom} »")
     if len(x.sheet_names) == 1 and colonnes:
@@ -362,9 +367,9 @@ class Sources:
     controles: list = field(default_factory=list)
     ev: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=COLS_EV + ["Atelier", "Famille"]))
     couverts: set = field(default_factory=set)                 # jours extraits pour les consommations
-    couverts_rebut: set = field(default_factory=set)           # jours extraits pour les FRU rebutées (onglet FRU_rebutees lisible)
-    fru_rebutees: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Date rebut", "FRU", "Unités"]))
-    regle_date_rebut: str = "aucun onglet FRU_rebutees"
+    couverts_scrap: set = field(default_factory=set)           # jours extraits pour les FRU scrapées (onglet FRU_scrapees lisible)
+    fru_scrapees: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Date scrap", "FRU", "Unités"]))
+    regle_date_scrap: str = "aucun onglet FRU_scrapees"
     cohorte: pd.DataFrame = field(default_factory=pd.DataFrame)
     atelier_fru: dict = field(default_factory=dict)
     famille_fru: dict = field(default_factory=dict)
@@ -445,7 +450,7 @@ def _essayer(s: Sources, source: str, fichier: Path | None, sert: str, lecteur):
 
 
 # --------------------------------------------------------------------------- extractions R26
-SERT_EXTRACTION = "consommations, FRU rebutées"
+SERT_EXTRACTION = "consommations, FRU scrapées"
 
 
 def _fenetre(f: Path) -> tuple:
@@ -528,12 +533,12 @@ def _lire_extractions(s: Sources):
             s._constat(S, f.name, BLOQUANT, str(e))
     # La plus récente d'abord : période qui finit le plus tard, puis qui commence le plus tard, puis nom du fichier.
     lisibles.sort(key=lambda t: (t[2], t[1], t[0].name), reverse=True)
-    morceaux, rebuts, couverts, couverts_rebut = [], [], set(), set()
+    morceaux, scraps, couverts, couverts_scrap = [], [], set(), set()
     for f, a, b in lisibles:
         jours = set(pd.date_range(a, b))
         try:
             with pd.ExcelFile(f) as x:
-                feuilles = {nom: _onglet(x, nom) for nom in ("Composants_jour", "FRU_rebutees", "FRU_statut_cohorte")}
+                feuilles = {nom: _onglet(x, nom) for nom in ("Composants_jour", "FRU_scrapees", "FRU_statut_cohorte")}
         except Exception as e:
             s._note(S, f.name, "erreur", detail=expliquer(e)[:400], sert=SERT_EXTRACTION)
             s._constat(S, f.name, BLOQUANT, expliquer(e)[:400])
@@ -553,16 +558,16 @@ def _lire_extractions(s: Sources):
         except Exception as e:
             etat = "erreur"
             s._constat(S, f.name, BLOQUANT, expliquer(e)[:400])
-        d, remarque = feuilles["FRU_rebutees"]
+        d, remarque = feuilles["FRU_scrapees"]
         if d is None:
-            s._constat(S, f.name, A_VERIFIER, remarque + " : les FRU rebutées de cette période ne sont pas datées par ce fichier")
+            s._constat(S, f.name, A_VERIFIER, remarque + " : les FRU scrapées de cette période ne sont pas datées par ce fichier")
         elif not len(d.columns):
-            s._constat(S, f.name, A_VERIFIER, "onglet « FRU_rebutees » vide, sans en-tête : les FRU rebutées de cette période ne sont pas datées par ce fichier")
+            s._constat(S, f.name, A_VERIFIER, "onglet « FRU_scrapees » vide, sans en-tête : les FRU scrapées de cette période ne sont pas datées par ce fichier")
         else:
             if not len(d):
-                s._constat(S, f.name, A_VERIFIER, f"onglet « FRU_rebutees » sans aucune ligne : zéro FRU rebutée du {a:%d/%m/%Y} au {b:%d/%m/%Y} ; à vérifier")
-            rebuts.append((f.name, d, jours - couverts_rebut, (a, b)))
-            couverts_rebut |= jours
+                s._constat(S, f.name, A_VERIFIER, f"onglet « FRU_scrapees » sans aucune ligne : zéro FRU scrapée du {a:%d/%m/%Y} au {b:%d/%m/%Y} ; à vérifier")
+            scraps.append((f.name, d, jours - couverts_scrap, (a, b)))
+            couverts_scrap |= jours
         d, remarque = feuilles["FRU_statut_cohorte"]
         if d is not None and len(d) and not len(s.cohorte):
             d = _colonnes(d, ["FRU ITEM", "Statut", "Unites"], s, S, f.name)
@@ -581,10 +586,10 @@ def _lire_extractions(s: Sources):
         # Ordre fixe, indépendant de l'ordre de lecture des fichiers : deux exécutions donnent les mêmes tables.
         s.ev = ev.sort_values(["Jour", "PO", "FRU ITEM", "Component ITEM"], kind="mergesort", na_position="last").reset_index(drop=True)
     s.couverts = dans_la_fenetre(couverts)
-    s.fru_rebutees, s.regle_date_rebut, s.couverts_rebut = _fru_rebutees(rebuts, cfg.col_date_rebut, s)
-    s.couverts_rebut = dans_la_fenetre(s.couverts_rebut)
-    if len(s.fru_rebutees):
-        s.fru_rebutees = s.fru_rebutees[s.fru_rebutees["Date rebut"].isin(s.couverts_rebut)].reset_index(drop=True)
+    s.fru_scrapees, s.regle_date_scrap, s.couverts_scrap = _fru_scrapees(scraps, cfg.col_date_scrap, s)
+    s.couverts_scrap = dans_la_fenetre(s.couverts_scrap)
+    if len(s.fru_scrapees):
+        s.fru_scrapees = s.fru_scrapees[s.fru_scrapees["Date scrap"].isin(s.couverts_scrap)].reset_index(drop=True)
 
 
 def _colonnes_de_dates(d: pd.DataFrame) -> dict:
@@ -602,23 +607,23 @@ def _colonnes_de_dates(d: pd.DataFrame) -> dict:
     return dates
 
 
-def _fru_rebutees(morceaux: list, col_date: str | None, s: Sources | None = None):
-    """Onglets FRU_rebutees réunis. Renvoie (lignes, règle de date utilisée, jours couverts).
+def _fru_scrapees(morceaux: list, col_date: str | None, s: Sources | None = None):
+    """Onglets FRU_scrapees réunis. Renvoie (lignes, règle de date utilisée, jours couverts).
 
     morceaux : liste de (nom du fichier, onglet, jours propres au fichier, (premier jour, dernier jour) du fichier),
-               le fichier le plus récent d'abord. Un fichier ne fournit que les rebuts datés d'un de ses jours propres :
+               le fichier le plus récent d'abord. Un fichier ne fournit que les scraps datés d'un de ses jours propres :
                sur un jour commun à deux extractions, la plus récente gagne, comme pour les consommations.
-    La colonne qui date le rebut n'est pas imposée : `col_date` si elle est donnée ; sinon la colonne de date dont le
+    La colonne qui date le scrap n'est pas imposée : `col_date` si elle est donnée ; sinon la colonne de date dont le
     nom contient « scrap » ou « rebut » ; sinon la plus tardive des dates de la ligne. La règle est renvoyée pour
     être affichée et confirmée par le responsable du flux.
     Une ligne vaut une FRU, sauf si une colonne de quantité (Unites, Unités, Qte, Quantity) dit autre chose.
     Les doublons ne sont retirés que si une colonne identifie le FRU (PO ou numéro de série).
     """
     S = "Extraction R26"
-    vide = pd.DataFrame(columns=["Date rebut", "FRU", "Unités"])
+    vide = pd.DataFrame(columns=["Date scrap", "FRU", "Unités"])
     dire = (lambda fichier, gravite, texte: s._constat(S, fichier, gravite, texte)) if s is not None else (lambda *a: None)
     if not morceaux:
-        return vide, "aucun onglet FRU_rebutees dans les extractions", set()
+        return vide, "aucun onglet FRU_scrapees dans les extractions", set()
     attendues = ["PO", "FRU ITEM", "Numero de serie", "Unites"] + ([col_date] if col_date else [])
     parties, propres, bornes = [], {}, {}
     for i, (nom, d, jours, (a, b)) in enumerate(morceaux):
@@ -630,20 +635,20 @@ def _fru_rebutees(morceaux: list, col_date: str | None, s: Sources | None = None
     tous_les_jours = set().union(*propres.values())
     col_fru = next((c for c in ("FRU ITEM", "ITEM", "Item") if c in d), None)
     if col_fru is None:
-        regle = "colonne « FRU ITEM » introuvable dans FRU_rebutees : FRU rebutées non datées"
+        regle = "colonne « FRU ITEM » introuvable dans FRU_scrapees : FRU scrapées non datées"
         dire(morceaux[0][0], BLOQUANT, regle + f" ; colonnes présentes : {_liste([c for c in d.columns if c != '_fichier'], 12)}")
         return vide, regle, set()
     dates = _colonnes_de_dates(d)
     if col_date and col_date in d.columns:
         jour, regle = _dates(d[col_date]), f"colonne « {col_date} » (choisie)"
     else:
-        demande = f"colonne « {col_date} » (demandée par col_date_rebut) introuvable ; " if col_date else ""
+        demande = f"colonne « {col_date} » (demandée par col_date_scrap) introuvable ; " if col_date else ""
         if demande:
-            dire(morceaux[0][0], A_VERIFIER, demande + "la date de rebut est cherchée automatiquement")
+            dire(morceaux[0][0], A_VERIFIER, demande + "la date de scrap est cherchée automatiquement")
         if not dates:
-            regle = demande + "aucune colonne de date dans FRU_rebutees : renseigner col_date_rebut"
-            dire(morceaux[0][0], BLOQUANT, "aucune colonne de date lisible dans « FRU_rebutees » : les FRU rebutées ne peuvent pas être datées ni suivies par semaine ; "
-                 "indiquer la colonne par l'option col_date_rebut")
+            regle = demande + "aucune colonne de date dans FRU_scrapees : renseigner col_date_scrap"
+            dire(morceaux[0][0], BLOQUANT, "aucune colonne de date lisible dans « FRU_scrapees » : les FRU scrapées ne peuvent pas être datées ni suivies par semaine ; "
+                 "indiquer la colonne par l'option col_date_scrap")
             return vide, regle, set()
         nommee = next((c for c in dates if re.search(r"scrap|rebut", _cle(c))), None)
         if nommee:
@@ -652,41 +657,41 @@ def _fru_rebutees(morceaux: list, col_date: str | None, s: Sources | None = None
             jour = pd.concat(list(dates.values()), axis=1).max(axis=1)
             regle = demande + "plus tardive des dates de la ligne (" + ", ".join(map(str, dates)) + ") : à confirmer"
     col_q = next((c for c in ("Unites", "Unités", "Qte", "Quantity") if c in d), None)
-    out = pd.DataFrame({"Date rebut": pd.Series(jour, index=d.index).dt.normalize(), "FRU": d[col_fru].map(ref), "Unités": 1.0, "_fichier": d["_fichier"]})
+    out = pd.DataFrame({"Date scrap": pd.Series(jour, index=d.index).dt.normalize(), "FRU": d[col_fru].map(ref), "Unités": 1.0, "_fichier": d["_fichier"]})
     if col_q:
         q = _num(d[col_q])
         if q.isna().any():
-            dire(morceaux[0][0], A_VERIFIER, f"{_pl(q.isna().sum(), 'ligne')} de FRU_rebutees à la quantité « {col_q} » vide ou illisible : comptée{'s' if q.isna().sum() > 1 else ''} pour une FRU")
+            dire(morceaux[0][0], A_VERIFIER, f"{_pl(q.isna().sum(), 'ligne')} de FRU_scrapees à la quantité « {col_q} » vide ou illisible : comptée{'s' if q.isna().sum() > 1 else ''} pour une FRU")
         out["Unités"] = q.fillna(1.0)
     for c in ("PO", "Numero de serie"):
         if c in d:
             out[c] = d[c].map(ref)
     for i, (nom, a, b) in bornes.items():
         m = out["_fichier"].eq(i)
-        sans = m & (out["Date rebut"].isna() | out["FRU"].isna())
+        sans = m & (out["Date scrap"].isna() | out["FRU"].isna())
         if sans.any():
-            dire(nom, A_VERIFIER, f"{_pl(sans.sum(), 'ligne')} de FRU_rebutees sans date de rebut ou sans référence de FRU lisible : écartée{'s' if sans.sum() > 1 else ''}, non comptée{'s' if sans.sum() > 1 else ''}")
-        hors = m & ~sans & ~out["Date rebut"].between(a, b)
+            dire(nom, A_VERIFIER, f"{_pl(sans.sum(), 'ligne')} de FRU_scrapees sans date de scrap ou sans référence de FRU lisible : écartée{'s' if sans.sum() > 1 else ''}, non comptée{'s' if sans.sum() > 1 else ''}")
+        hors = m & ~sans & ~out["Date scrap"].between(a, b)
         if hors.any():
-            dire(nom, A_VERIFIER, f"{_pl(out.loc[hors, 'Unités'].sum(), 'FRU rebutée', 'FRU rebutées')} datée{'s' if hors.sum() > 1 else ''} hors de la période du fichier "
+            dire(nom, A_VERIFIER, f"{_pl(out.loc[hors, 'Unités'].sum(), 'FRU scrapée', 'FRU scrapées')} datée{'s' if hors.sum() > 1 else ''} hors de la période du fichier "
                  f"(du {a:%d/%m/%Y} au {b:%d/%m/%Y}) : non comptée{'s' if hors.sum() > 1 else ''} ; règle de date : {regle}")
         nulles = m & ~sans & ~hors & (out["Unités"] <= 0)
         if nulles.any():
-            dire(nom, A_VERIFIER, f"{_pl(nulles.sum(), 'ligne')} de FRU_rebutees à quantité nulle ou négative : écartée{'s' if nulles.sum() > 1 else ''}")
-    out = out[out["Date rebut"].notna() & out["FRU"].notna() & (out["Unités"] > 0)]
-    out = out[[j in propres[i] for j, i in zip(out["Date rebut"], out["_fichier"])]]
+            dire(nom, A_VERIFIER, f"{_pl(nulles.sum(), 'ligne')} de FRU_scrapees à quantité nulle ou négative : écartée{'s' if nulles.sum() > 1 else ''}")
+    out = out[out["Date scrap"].notna() & out["FRU"].notna() & (out["Unités"] > 0)]
+    out = out[[j in propres[i] for j, i in zip(out["Date scrap"], out["_fichier"])]]
     cles = [c for c in ("PO", "Numero de serie") if c in out and out[c].notna().any()]
     if cles:                                                  # un même FRU (PO, numéro de série) ne compte qu'une fois
         double = out.duplicated(cles + ["FRU"], keep="first") & out[cles].notna().all(axis=1)
         if double.any():
-            dire(morceaux[0][0], INFORMATION, f"{_pl(double.sum(), 'ligne')} de FRU_rebutees en double (même {', '.join(cles)} et même FRU) : comptée{'s' if double.sum() > 1 else ''} une seule fois")
+            dire(morceaux[0][0], INFORMATION, f"{_pl(double.sum(), 'ligne')} de FRU_scrapees en double (même {', '.join(cles)} et même FRU) : comptée{'s' if double.sum() > 1 else ''} une seule fois")
         out = out[~double]
     else:
-        double = out.duplicated(["Date rebut", "FRU", "Unités", "_fichier"], keep="first")
+        double = out.duplicated(["Date scrap", "FRU", "Unités", "_fichier"], keep="first")
         if double.any():
-            dire(morceaux[0][0], A_VERIFIER, f"{_pl(double.sum(), 'ligne')} de FRU_rebutees identique{'s' if double.sum() > 1 else ''} à une autre, sans PO ni numéro de série pour les distinguer : "
+            dire(morceaux[0][0], A_VERIFIER, f"{_pl(double.sum(), 'ligne')} de FRU_scrapees identique{'s' if double.sum() > 1 else ''} à une autre, sans PO ni numéro de série pour les distinguer : "
                  "gardées et comptées ; à vérifier si l'export les a doublées")
-    out = out.drop(columns="_fichier").sort_values(["Date rebut", "FRU"] + cles, kind="mergesort").reset_index(drop=True)
+    out = out.drop(columns="_fichier").sort_values(["Date scrap", "FRU"] + cles, kind="mergesort").reset_index(drop=True)
     return out, regle, tous_les_jours
 
 
@@ -998,7 +1003,7 @@ def _lire_audit(s: Sources):
                 s._constat(S, f.name, A_VERIFIER, f"{_pl(m.sum(), 'lot')} d'audit {quoi} : écarté{'s' if m.sum() > 1 else ''}, non appris par le modèle de Rex")
             vus |= masque
         au = au[~vus].copy()
-        fru_connus = set(s.ev["FRU ITEM"].dropna()) | set(s.fru_rebutees["FRU"].dropna()) | set(s.qc["FRU ITEM"].dropna()) | set(s.poids_fru.index)
+        fru_connus = set(s.ev["FRU ITEM"].dropna()) | set(s.fru_scrapees["FRU"].dropna()) | set(s.qc["FRU ITEM"].dropna()) | set(s.poids_fru.index)
         pieces_connues = set(s.ev["Component ITEM"].dropna()) | set(s.qc["Component ITEM"].dropna()) | set(s.classification.index)
         if fru_connus or pieces_connues:
             etrangers = ~au["Type de FRU"].isin(fru_connus) | ~au["Pièce"].isin(pieces_connues)
@@ -1025,7 +1030,7 @@ def _controles_croises(s: Sources):
     conso = s.ev.groupby("Component ITEM")["Qte"].sum()
     total = float(conso.sum())
     part = lambda refs: f"{float(conso.reindex(list(refs)).sum()) / total:.0%} des pièces consommées" if total > 0 else "part inconnue"
-    frus = sorted(set(s.ev["FRU ITEM"].dropna()) | set(s.fru_rebutees["FRU"].dropna() if len(s.fru_rebutees) else []))
+    frus = sorted(set(s.ev["FRU ITEM"].dropna()) | set(s.fru_scrapees["FRU"].dropna() if len(s.fru_scrapees) else []))
     sans_atelier = [f for f in frus if f not in s.atelier_fru]
     if sans_atelier:
         s._constat(S, F, A_VERIFIER, f"{_pl(len(sans_atelier), 'FRU', 'FRU')} sans atelier dans FRU_info ({_liste(sans_atelier)}) : rangé{'s' if len(sans_atelier) > 1 else ''} dans « (non rattaché) » ; "
@@ -1037,10 +1042,10 @@ def _controles_croises(s: Sources):
         if manquants:
             p = "s" if len(manquants) > 1 else ""
             s._constat(S, F, A_VERIFIER, f"{_pl(len(manquants), 'pièce consommée', 'pièces consommées')} {quoi.format(s=p)} ({part(manquants)} ; {_liste(manquants)}) : {effet}")
-    if len(s.fru_rebutees):
-        sans_poids = sorted(set(s.fru_rebutees["FRU"]) - set(s.poids_fru.index))
+    if len(s.fru_scrapees):
+        sans_poids = sorted(set(s.fru_scrapees["FRU"]) - set(s.poids_fru.index))
         if sans_poids:
-            s._constat(S, F, A_VERIFIER, f"{_pl(len(sans_poids), 'FRU rebuté', 'FRU rebutés')} sans poids ({_liste(sans_poids)}) : masse rebutée inconnue pour ce{'s' if len(sans_poids) > 1 else ''} type{'s' if len(sans_poids) > 1 else ''}")
+            s._constat(S, F, A_VERIFIER, f"{_pl(len(sans_poids), 'FRU scrapé', 'FRU scrapés')} sans poids ({_liste(sans_poids)}) : masse scrapée inconnue pour ce{'s' if len(sans_poids) > 1 else ''} type{'s' if len(sans_poids) > 1 else ''}")
     sans_prix = sorted({str(c) for c in s.classification["Catégorie proposée"].dropna()} - set(s.prix_recycleur.index)) if len(s.classification) else []
     if sans_prix and len(s.prix_recycleur):
         s._constat(S, F, A_VERIFIER, f"{_pl(len(sans_prix), 'catégorie')} du classement matière sans prix dans le référentiel des grades ({_liste(sans_prix)}) : prix du recycleur inconnu pour ces pièces")

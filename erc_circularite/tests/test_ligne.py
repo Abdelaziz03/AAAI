@@ -46,9 +46,9 @@ MARGE, FIXES, RESULTAT = "Marge variable / an (€)", "Coûts fixes annualisés 
 HEURES, CAPACITE, OCCUPATION = "Heures utilisées / an", "Capacité (h/an)", "Taux d'occupation"
 TRAITEES, MOYENNE, SEUIL = "FRU traitées / an", "Marge moyenne par FRU (€)", "Seuil de rentabilité (FRU / an)"
 RETOUR, MU, INCOMPLETS = "Retour sur investissement (ans)", "Valeur d'une heure opérateur en plus (€ net)", "Types de FRU incomplets"
-MASSE, DETOURNEE, ACTUEL = "Masse des FRU rebutées (kg/an)", "Masse détournée de la benne (kg/an)", "Coût actuel de traitement (€/an)"
+MASSE, DETOURNEE, ACTUEL = "Masse des FRU scrapées (kg/an)", "Masse détournée de la benne (kg/an)", "Coût actuel de traitement (€/an)"
 CLES_RESUME = [MARGE, FIXES, RESULTAT, HEURES, CAPACITE, OCCUPATION, TRAITEES, MOYENNE, SEUIL, RETOUR, MU, INCOMPLETS, MASSE, DETOURNEE, ACTUEL]
-COLONNES_DETAIL = ["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU rebutées / an", "Heures par FRU",
+COLONNES_DETAIL = ["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU scrapées / an", "Heures par FRU",
                    "Marge par FRU (€)", "Marge par heure (€)", "Heures / an", "Marge variable / an (€)", "Kg détournés / an",
                    "Entrées manquantes", "Pièces non examinées"]
 RE, RC = "1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)"
@@ -141,7 +141,7 @@ def plans_de_la_ligne(ligne: dict, frus: dict) -> dict:
     out = {}
     for f, d in (frus or {}).items():
         d = d or {}
-        if inconnu(d.get("rebut_an")) or d["rebut_an"] < 0:
+        if inconnu(d.get("scrap_an")) or d["scrap_an"] < 0:
             continue
         plans = plans_document(ligne, d)
         if len(plans) > 1:
@@ -154,7 +154,7 @@ def besoin_sans_limite(ligne: dict, frus: dict) -> float:
     total = 0.0
     for f, plans in plans_de_la_ligne(ligne, frus).items():
         g_max = max(g for _, g, _ in plans.values())
-        total += frus[f]["rebut_an"] * max(h for h, g, _ in plans.values() if g >= g_max - 1e-12)
+        total += frus[f]["scrap_an"] * max(h for h, g, _ in plans.values() if g >= g_max - 1e-12)
     return total
 
 
@@ -162,10 +162,10 @@ def controler(ligne: dict, frus: dict, res: dict | None = None, tol: float = REL
     """Passe un résultat de `optimiser_ligne` au crible du document.
 
     1. Chaque ligne du plan est un plan calculable, avec les heures, la marge et les kg du document.
-    2. FRU traitées ≤ FRU rebutées pour chaque type ; heures ≤ capacité.
+    2. FRU traitées ≤ FRU scrapées pour chaque type ; heures ≤ capacité.
     3. Le résumé est la somme du plan.
     4. Optimalité : pour tout prix de l'heure mu ≥ 0, aucun plan ne rapporte plus que
-       mu × capacité + somme sur les types de (FRU rebutées × meilleur plan à ce prix). La marge trouvée doit valoir
+       mu × capacité + somme sur les types de (FRU scrapées × meilleur plan à ce prix). La marge trouvée doit valoir
        cette borne au mu annoncé : le plan est donc optimal, et mu est bien la valeur d'une heure de plus.
     Renvoie la marge, les heures et les kg recalculés.
     """
@@ -191,7 +191,7 @@ def controler(ligne: dict, frus: dict, res: dict | None = None, tol: float = REL
         h, g, k = plans[f][cle]
         x = r["FRU traitées / an"]
         assert x >= 0, f"{f} : nombre de FRU traitées négatif"
-        assert r["FRU rebutées / an"] == frus[f]["rebut_an"]
+        assert r["FRU scrapées / an"] == frus[f]["scrap_an"]
         assert r["Décision"] == ("traiter" if (cle[0] or cle[1]) and x > 0 else "jeter telle quelle")
         assert r["Heures par FRU"] == vaut(h) and r["Marge par FRU (€)"] == vaut(g), f"{f} : heures ou marge par FRU"
         assert pareil(r["Marge par heure (€)"], g / h if h else math.nan)
@@ -201,7 +201,7 @@ def controler(ligne: dict, frus: dict, res: dict | None = None, tol: float = REL
         traites[f] += x
     assert vus == set(frus or {}), "chaque type de FRU a sa ligne dans le plan"
     for f, x in traites.items():
-        assert x <= frus[f]["rebut_an"] * (1 + 1e-9) + 1e-9, f"{f} : plus de FRU traitées que de FRU rebutées"
+        assert x <= frus[f]["scrap_an"] * (1 + 1e-9) + 1e-9, f"{f} : plus de FRU traitées que de FRU scrapées"
     assert heures <= cap * (1 + 1e-9) + 1e-9, f"heures utilisées {heures} au-delà de la capacité {cap}"
     assert resume[INCOMPLETS] == len(frus or {}) - len(plans)
     assert resume[CAPACITE] == cap
@@ -212,7 +212,7 @@ def controler(ligne: dict, frus: dict, res: dict | None = None, tol: float = REL
         assert resume[HEURES] == vaut(heures) and resume[DETOURNEE] == vaut(kg) and resume[TRAITEES] == vaut(sum(traites.values()))
         mu = resume[MU]
         assert mu >= 0 and (mu == 0 or math.isfinite(cap)), "prix de l'heure négatif, ou positif sans limite d'heures"
-        borne = (mu * cap if mu > 0 else 0.0) + sum(frus[f]["rebut_an"] * max(g - mu * h for h, g, _ in p.values()) for f, p in plans.items())
+        borne = (mu * cap if mu > 0 else 0.0) + sum(frus[f]["scrap_an"] * max(g - mu * h for h, g, _ in p.values()) for f, p in plans.items())
         assert abs(marge - borne) <= tol * max(1.0, abs(borne)), f"marge {marge} différente de la borne {borne} (mu = {mu})"
     else:
         assert all(inconnu(resume[c]) for c in (MARGE, HEURES, TRAITEES, DETOURNEE, MU, RESULTAT)), "aucun type calculable : rien de chiffré"
@@ -221,15 +221,15 @@ def controler(ligne: dict, frus: dict, res: dict | None = None, tol: float = REL
 
 # --------------------------------------------------------------------------- optimum exact, deux façons
 def _blocs(ligne: dict, frus: dict) -> list:
-    """[(FRU rebutées, heures des plans, marges des plans)] par type calculable."""
-    return [(float(frus[f]["rebut_an"]), np.array([v[0] for v in p.values()]), np.array([v[1] for v in p.values()]))
+    """[(FRU scrapées, heures des plans, marges des plans)] par type calculable."""
+    return [(float(frus[f]["scrap_an"]), np.array([v[0] for v in p.values()]), np.array([v[1] for v in p.values()]))
             for f, p in plans_de_la_ligne(ligne, frus).items()]
 
 
 def optimum_solveur_exact(linprog, ligne: dict, frus: dict) -> float:
     """Optimum du programme linéaire du document (§7), par le solveur HiGHS de scipy.
 
-    Variables x[f, s] ≥ 0 ; somme sur s de x[f, s] = FRU rebutées de f ; somme de heures × x ≤ capacité.
+    Variables x[f, s] ≥ 0 ; somme sur s de x[f, s] = FRU scrapées de f ; somme de heures × x ≤ capacité.
     """
     blocs = _blocs(ligne, frus)
     if not blocs:
@@ -311,7 +311,7 @@ def ligne_aleatoire(rng, types=(2, 6), pieces=(1, 5)) -> tuple:
     grille = bool(rng.random() < 0.5)
     frus = {}
     for i in range(int(rng.integers(types[0], types[1] + 1))):
-        d = {"rebut_an": float(rng.choice([0, 10, 20, 50])) if grille else float(rng.integers(0, 200)), "poids_fru_kg": float(rng.uniform(1, 30)),
+        d = {"scrap_an": float(rng.choice([0, 10, 20, 50])) if grille else float(rng.integers(0, 200)), "poids_fru_kg": float(rng.uniform(1, 30)),
              "ouverture_min": float(rng.choice([0, 6, 12])) if grille else float(rng.uniform(0, 40)),
              "pieces": {f"P{i}{j}": piece_aleatoire(rng, grille) for j in range(int(rng.integers(pieces[0], pieces[1] + 1)))}}
         if rng.random() < 0.6:
@@ -320,7 +320,7 @@ def ligne_aleatoire(rng, types=(2, 6), pieces=(1, 5)) -> tuple:
             d["taux_horaire_eur"] = float(rng.choice([30, 60])) if grille else float(rng.uniform(25, 90))
         u = rng.random()
         if u < 0.03:
-            d["rebut_an"] = None                    # type incomplet : nombre de FRU rebutées inconnu
+            d["scrap_an"] = None                    # type incomplet : nombre de FRU scrapées inconnu
         elif u < 0.05:
             d["taux_horaire_eur"] = None            # type incomplet : taux propre au FRU présent mais inconnu
         elif u < 0.08:
@@ -328,7 +328,7 @@ def ligne_aleatoire(rng, types=(2, 6), pieces=(1, 5)) -> tuple:
         frus[f"F{i}"] = d
     if len(frus) < types[1] and rng.random() < 0.4:                      # un type jumeau : mêmes plans, même prix de bascule
         f = list(frus)[int(rng.integers(0, len(frus)))]
-        frus[f + "-BIS"] = dict(copy.deepcopy(frus[f]), rebut_an=float(rng.integers(1, 100)))
+        frus[f + "-BIS"] = dict(copy.deepcopy(frus[f]), scrap_an=float(rng.integers(1, 100)))
     ligne = {"heures_operateur_an": None, "taux_horaire_eur": 60.0 if grille else 45.0,
              "cout_traitement_eur_kg": float(rng.choice([0.0, 1.0])) if grille else float(rng.choice([0.0, 0.25, -0.1])),
              "cout_installation_eur": 10000.0, "amortissement_ans": 5.0, "couts_fixes_annuels_eur": 2000.0}
@@ -350,7 +350,7 @@ def capacite_aleatoire(rng, ligne: dict, frus: dict):
     if u < 0.45:                                                        # exactement les heures d'un plan pur par type
         total = 0.0
         for f, plans in plans_de_la_ligne(ligne, frus).items():
-            total += frus[f]["rebut_an"] * list(plans.values())[int(rng.integers(0, len(plans)))][0]
+            total += frus[f]["scrap_an"] * list(plans.values())[int(rng.integers(0, len(plans)))][0]
         return total
     if u < 0.55:
         return float(round(besoin * rng.random()))
@@ -395,7 +395,7 @@ def piece_main(**remplace) -> dict:
 
 
 def fru_main(pieces: dict | None = None, **remplace) -> dict:
-    d = {"rebut_an": 100.0, "poids_fru_kg": 10.0, "ouverture_min": 12.0, "ouverture_tri_min": 6.0,
+    d = {"scrap_an": 100.0, "poids_fru_kg": 10.0, "ouverture_min": 12.0, "ouverture_tri_min": 6.0,
          "pieces": {"P-1": piece_main()} if pieces is None else pieces}
     d.update(remplace)
     return d
@@ -413,7 +413,7 @@ def modele_matrice() -> tuple:
     p3 = {"n_par_fru": 1.0, "extraction_min": 6.0, "test_min": 6.0, "tri_min": 2.0, "p_reutilisable": 0.8, "valeur_eur": 30.0,
           "delai_semaines": 1.25, "valeur_semaine_eur": 1.0, "transport_eur": 1.0, "poids_kg": 0.2, "prix_recycleur_eur_kg": 1.0}
     frus = {"FRU-T1": fru_main({"P-1": piece_main(), "P-2": p2}),
-            "FRU-T2": {"rebut_an": 50.0, "poids_fru_kg": 4.0, "ouverture_min": 9.0, "ouverture_tri_min": 4.0, "pieces": {"P-3": p3}}}
+            "FRU-T2": {"scrap_an": 50.0, "poids_fru_kg": 4.0, "ouverture_min": 9.0, "ouverture_tri_min": 4.0, "pieces": {"P-3": p3}}}
     return ligne_main(heures_operateur_an=60.0), frus
 
 
@@ -462,8 +462,8 @@ def modele_deux_types() -> tuple:
     plus pour 0,5 h de plus (12 €/h) ; B seule perd 6 €."""
     def p(ext, test, valeur):
         return {"n_par_fru": 1.0, "extraction_min": ext, "test_min": test, "p_reutilisable": 1.0, "valeur_eur": valeur}
-    frus = {"FRU-X": {"rebut_an": 10.0, "poids_fru_kg": 5.0, "ouverture_min": 30.0, "pieces": {"X1": p(20.0, 10.0, 90.0)}},
-            "FRU-Y": {"rebut_an": 10.0, "poids_fru_kg": 5.0, "ouverture_min": 12.0, "pieces": {"A": p(12.0, 6.0, 50.0), "B": p(20.0, 10.0, 36.0)}}}
+    frus = {"FRU-X": {"scrap_an": 10.0, "poids_fru_kg": 5.0, "ouverture_min": 30.0, "pieces": {"X1": p(20.0, 10.0, 90.0)}},
+            "FRU-Y": {"scrap_an": 10.0, "poids_fru_kg": 5.0, "ouverture_min": 12.0, "pieces": {"A": p(12.0, 6.0, 50.0), "B": p(20.0, 10.0, 36.0)}}}
     return ligne_main(cout_traitement_eur_kg=0.0), frus
 
 
@@ -595,7 +595,7 @@ def test_optimum_egal_au_solveur_exact(k):
         assert inconnu(r[HEURES]) or r[HEURES] <= cap * (1 + 1e-9) + 1e-9, "heures au-delà de la capacité"
         traitees = d.groupby("Type de FRU")["FRU traitées / an"].sum(min_count=1).dropna()
         for f, x in traitees.items():
-            assert x <= frus[f]["rebut_an"] * (1 + 1e-9) + 1e-9, f"{f} : plus de FRU traitées que rebutées"
+            assert x <= frus[f]["scrap_an"] * (1 + 1e-9) + 1e-9, f"{f} : plus de FRU traitées que scrapées"
     chaque(k, verifier)
 
 
@@ -620,7 +620,7 @@ def test_les_lignes_tirees_couvrent_les_cas_difficiles():
                 mu, indifferents = r[MU], 0
                 for f, plans in plans_de_la_ligne(ligne, frus).items():
                     nets = sorted((g - mu * h for h, g, _ in plans.values()), reverse=True)
-                    indifferents += frus[f]["rebut_an"] > 0 and nets[0] - nets[1] <= 1e-7 * max(1.0, abs(nets[0]))
+                    indifferents += frus[f]["scrap_an"] > 0 and nets[0] - nets[1] <= 1e-7 * max(1.0, abs(nets[0]))
                 vus["plusieurs types changent de plan au même prix"] += indifferents >= 2
     assert sum(len(bloc(k)) for k in range(N_BLOCS)) >= 500
     for cas, n in vus.items():
@@ -646,7 +646,7 @@ def test_types_jumeaux_qui_changent_de_plan_au_meme_prix():
     """Trois types identiques (mêmes plans, 39 €/h) et un quatrième moins rentable : à chaque capacité, la marge est
     celle du calcul à la main, quel que soit le type servi en premier."""
     ligne = ligne_main()
-    frus = {f"FRU-J{i}": fru_main(rebut_an=n) for i, n in enumerate((40.0, 25.0, 35.0))}               # 0,5 h et 19,5 € par FRU
+    frus = {f"FRU-J{i}": fru_main(scrap_an=n) for i, n in enumerate((40.0, 25.0, 35.0))}               # 0,5 h et 19,5 € par FRU
     frus["FRU-K"] = fru_main({"P-1": piece_main(valeur_eur=30.0)})                                     # 0,5 h et 9,5 € par FRU, 100 FRU
     for heures in (0.0, 5.0, 20.0, 32.5, 49.99, 50.0, 50.01, 70.0, 100.0, 120.0):
         ligne["heures_operateur_an"] = heures
@@ -664,8 +664,8 @@ def test_plans_alignes_et_ex_aequo_a_marge_nulle():
     ligne = ligne_main(cout_traitement_eur_kg=0.0)
     p = {"n_par_fru": 1.0, "extraction_min": 6.0, "test_min": 0.0, "p_reutilisable": 1.0, "valeur_eur": 10.0}       # 4 € en 0,1 h
     nulle = {"n_par_fru": 1.0, "extraction_min": 0.0, "test_min": 0.0, "p_reutilisable": 1.0, "valeur_eur": 0.0}    # 0 € en 0 h
-    frus = {"F1": {"rebut_an": 30.0, "poids_fru_kg": 1.0, "ouverture_min": 0.0, "pieces": {"a": dict(p), "b": dict(p), "z": nulle}},
-            "F2": {"rebut_an": 20.0, "poids_fru_kg": 1.0, "ouverture_min": 0.0, "pieces": {"a": dict(p), "b": dict(p)}}}
+    frus = {"F1": {"scrap_an": 30.0, "poids_fru_kg": 1.0, "ouverture_min": 0.0, "pieces": {"a": dict(p), "b": dict(p), "z": nulle}},
+            "F2": {"scrap_an": 20.0, "poids_fru_kg": 1.0, "ouverture_min": 0.0, "pieces": {"a": dict(p), "b": dict(p)}}}
     for heures in (0.0, 1.0, 3.0, 4.5, 6.0, 9.999, 10.0, 12.0, None):
         ligne["heures_operateur_an"] = heures
         res = L.optimiser_ligne(ligne, frus)
@@ -805,7 +805,7 @@ def modele_plages() -> tuple:
     """Le modèle de `modele_matrice` avec des plages dont le centre est la valeur d'origine."""
     ligne, frus = modele_matrice()
     ligne.update(taux_horaire_eur=(50.0, 60.0, 75.0), cout_traitement_eur_kg=(0.3, 0.7), cout_installation_eur=(4000.0, 5000.0, 8000.0))
-    frus["FRU-T1"].update(rebut_an=(80.0, 100.0, 130.0), ouverture_min=(8.0, 16.0))
+    frus["FRU-T1"].update(scrap_an=(80.0, 100.0, 130.0), ouverture_min=(8.0, 16.0))
     frus["FRU-T1"]["pieces"]["P-1"].update(p_reutilisable=(0.3, 0.5, 0.7), valeur_eur=(30.0, 40.0, 55.0), extraction_min=(4.0, 6.0, 9.0))
     frus["FRU-T1"]["pieces"]["P-2"].update(prix_recycleur_eur_kg=(2.0, 4.0))
     frus["FRU-T2"]["pieces"]["P-3"].update(p_reutilisable=(0.7, 0.8, 0.95))
@@ -911,7 +911,7 @@ def test_taux_propre_a_un_type_de_fru():
 
 
 @pytest.mark.parametrize("vide", INCONNUS, ids=["None", "nan", "numpy nan", "pd.NA"])
-@pytest.mark.parametrize("champ, manque", [("rebut_an", "rebut_an"), ("taux_horaire_eur", "taux_horaire_eur")])
+@pytest.mark.parametrize("champ, manque", [("scrap_an", "scrap_an"), ("taux_horaire_eur", "taux_horaire_eur")])
 def test_type_de_fru_incomplet_les_autres_sont_optimises(champ, manque, vide):
     """Le type incomplet est écarté et compté ; le reste du résultat est celui de la ligne sans ce type."""
     ligne, frus = modele_matrice()
@@ -926,7 +926,7 @@ def test_type_de_fru_incomplet_les_autres_sont_optimises(champ, manque, vide):
     r = res["resume"]
     assert r[INCOMPLETS] == 1 and r[MARGE] == vaut(157.0) and r[HEURES] == vaut(17.5)
     assert all(pareil(r[c], seul[c]) for c in CLES_RESUME if c not in (INCOMPLETS, MASSE, ACTUEL))
-    if champ == "rebut_an":                 # la masse rebutée et le coût actuel ne se calculent plus
+    if champ == "scrap_an":                 # la masse scrapée et le coût actuel ne se calculent plus
         assert inconnu(r[MASSE]) and inconnu(r[ACTUEL])
     else:
         assert r[MASSE] == vaut(1200.0) and r[ACTUEL] == vaut(600.0)
@@ -942,7 +942,7 @@ def test_poids_d_un_fru_inconnu(vide):
         assert inconnu(res["resume"][c]) if c in (MASSE, ACTUEL) else pareil(res["resume"][c], base["resume"][c]), c
     pd.testing.assert_frame_equal(res["detail"], base["detail"])
     t = L.comparer_scenarios(ligne, frus)
-    assert inconnu(t.attrs["Masse rebutée (kg/an)"]) and inconnu(t.attrs["Part détournée"])
+    assert inconnu(t.attrs["Masse scrapée (kg/an)"]) and inconnu(t.attrs["Part détournée"])
     t = t.set_index("Poste (€/an)")
     assert inconnu(t.at["TOTAL", "Actuel"]) and inconnu(t.at["TOTAL", "Avec la ligne"])
     assert t.at["TOTAL", "Écart"] == vaut(base["resume"][RESULTAT])           # le gain ne dépend pas du poids des FRU
@@ -1046,7 +1046,7 @@ def test_piece_sans_aucune_donnee_et_type_sans_piece():
     t = options(ligne, frus["FRU-T1"])
     assert inconnu(t.at["P-9", RE]) and inconnu(t.at["P-10", RC]) and t.at["P-9", "Meilleure option seule"] == "Jeté"
     for vide in ({}, None):
-        frus["FRU-T3"] = {"rebut_an": 5.0, "poids_fru_kg": 2.0, "ouverture_min": 5.0, "pieces": vide}
+        frus["FRU-T3"] = {"scrap_an": 5.0, "poids_fru_kg": 2.0, "ouverture_min": 5.0, "pieces": vide}
         res = L.optimiser_ligne(ligne, frus)
         d = res["detail"].set_index("Type de FRU")
         assert d.at["FRU-T3", "Décision"] == "incomplet" and d.at["FRU-T3", "Entrées manquantes"].startswith("aucune option calculable")
@@ -1079,17 +1079,17 @@ def test_bilan_cas_limites():
         assert inconnu(r[MOYENNE]) and inconnu(r[SEUIL]) and inconnu(r[RETOUR]) and r[RESULTAT] == vaut(-1400.0)
         assert r[MU] == vaut(32.0 / 0.525, rel=1e-9)                       # la première heure irait à FRU-T1
         assert set(res["detail"]["Décision"]) == {"jeter telle quelle"}
-    # aucun FRU rebuté : type calculé, rien à traiter
+    # aucun FRU scrapé : type calculé, rien à traiter
     frus0 = copy.deepcopy(frus)
-    frus0["FRU-T1"]["rebut_an"] = 0.0
+    frus0["FRU-T1"]["scrap_an"] = 0.0
     res = L.optimiser_ligne(ligne, frus0)
     controler(ligne, frus0, res)
     assert res["detail"].set_index("Type de FRU").at["FRU-T1", "Décision"] == "jeter telle quelle" and res["resume"][MASSE] == vaut(200.0)
     # nombre de FRU négatif : erreur de saisie, type écarté, masse inconnue
-    frus0["FRU-T1"]["rebut_an"] = -3.0
+    frus0["FRU-T1"]["scrap_an"] = -3.0
     res = L.optimiser_ligne(ligne, frus0)
     controler(ligne, frus0, res)
-    assert res["detail"].set_index("Type de FRU").at["FRU-T1", "Entrées manquantes"] == "rebut_an négatif" and inconnu(res["resume"][MASSE])
+    assert res["detail"].set_index("Type de FRU").at["FRU-T1", "Entrées manquantes"] == "scrap_an négatif" and inconnu(res["resume"][MASSE])
     # rien n'est rentable : marge nulle et connue, pas de seuil ni de retour sur investissement
     cher = L.optimiser_ligne(dict(ligne, taux_horaire_eur=1000.0), frus)["resume"]
     assert cher[MARGE] == 0.0 and cher[TRAITEES] == 0.0 and cher[RESULTAT] == vaut(-1400.0) and inconnu(cher[SEUIL]) and inconnu(cher[RETOUR])
@@ -1114,7 +1114,7 @@ def test_fonctions_d_inventaire_des_manques():
     assert L.options_disponibles(fru) == {"P-1": {"réemploi": ["test_min", "valeur_eur"], "recyclage": []},
                                           "P-2": {"réemploi": [], "recyclage": ["poids_kg"]}}
     assert L.manques(fru, 60.0) == [] and L.manques(fru, None) == ["taux_horaire_eur"]
-    assert L.manques(dict(fru, rebut_an=None, _c_trait=None), 60.0) == ["rebut_an", "cout_traitement_eur_kg"]
+    assert L.manques(dict(fru, scrap_an=None, _c_trait=None), 60.0) == ["scrap_an", "cout_traitement_eur_kg"]
     assert L.manques(dict(fru, _c_trait=0.0), 60.0) == []
     rien = fru_main({"P-1": piece_main(valeur_eur=None, tri_min=None)})
     assert L.manques(rien, 60.0) == ["aucune option calculable : P-1 réemploi[valeur_eur] recyclage[tri_min]"]
@@ -1225,7 +1225,7 @@ def test_monte_carlo_quand_tout_est_inconnu():
 
 # --------------------------------------------------------------------------- période par période
 def flux(lignes) -> pd.DataFrame:
-    return pd.DataFrame(lignes, columns=["Semaine", "FRU", "FRU rebutées"])
+    return pd.DataFrame(lignes, columns=["Semaine", "FRU", "FRU scrapées"])
 
 
 def modele_periodes() -> tuple:
@@ -1321,8 +1321,8 @@ def test_periode_par_periode_heures_et_couts_inconnus():
     assert t["Coût fixe (€)"].isna().all() and t["Résultat (€)"].isna().all() and t["Résultat cumulé (€)"].isna().all()
     assert all(inconnu(t.attrs[c]) for c in ("Résultat annualisé, période par période (€)", "Résultat du modèle annuel au flux moyen (€)",
                                               "Coût de la variabilité du flux (€/an)")) and t.attrs["Périodes en perte"] == 0
-    # un type de FRU incomplet (sans temps) arrive mais n'est pas traité ; rebut annuel inconnu : le flux de la semaine le remplace
-    frus2 = {"FRU-T1": fru_main(rebut_an=None), "FRU-T9": fru_main({"P-1": piece_main(extraction_min=None, tri_min=None)})}
+    # un type de FRU incomplet (sans temps) arrive mais n'est pas traité ; scrap annuel inconnu : le flux de la semaine le remplace
+    frus2 = {"FRU-T1": fru_main(scrap_an=None), "FRU-T9": fru_main({"P-1": piece_main(extraction_min=None, tri_min=None)})}
     t = L.resultat_par_periode(ligne, frus2, flux([("S1", "FRU-T1", 10), ("S1", "FRU-T9", 5)]))
     assert t.at[0, "FRU arrivées"] == 15.0 and t.at[0, "FRU traitées"] == vaut(10.0) and t.at[0, "Marge variable (€)"] == vaut(195.0)
 
@@ -1374,7 +1374,7 @@ def verifier_comparaison(ligne: dict, frus: dict):
     for colonne in ("Actuel", "Avec la ligne", "Écart"):
         somme = sum(l[colonne] for l in (traitement, marge, fixes))
         assert pareil(total[colonne], somme, abs_=1e-6)
-    assert pareil(t.attrs["Masse rebutée (kg/an)"], r[MASSE]) and pareil(t.attrs["Masse détournée (kg/an)"], r[DETOURNEE])
+    assert pareil(t.attrs["Masse scrapée (kg/an)"], r[MASSE]) and pareil(t.attrs["Masse détournée (kg/an)"], r[DETOURNEE])
     assert pareil(t.attrs["Part détournée"], r[DETOURNEE] / r[MASSE] if r[MASSE] else math.nan)
     return t
 
@@ -1383,7 +1383,7 @@ def test_actuel_contre_ligne_calcule_a_la_main():
     """Cas à une pièce : coût actuel 1 000 kg × 0,5 = 500 € ; 100 kg détournés, soit 50 € évités ; marge 1 950 € dont ces
     50 € ; coûts fixes 1 400 €. Actuel −500 € ; avec la ligne −450 + 1 900 − 1 400 = 50 € ; écart 550 € = résultat."""
     t = verifier_comparaison(ligne_main(), {"FRU-T1": fru_main()})
-    assert t.attrs["Part détournée"] == vaut(0.1) and t.attrs["Masse rebutée (kg/an)"] == vaut(1000.0) and t.attrs["Masse détournée (kg/an)"] == vaut(100.0)
+    assert t.attrs["Part détournée"] == vaut(0.1) and t.attrs["Masse scrapée (kg/an)"] == vaut(1000.0) and t.attrs["Masse détournée (kg/an)"] == vaut(100.0)
     assert list(t["Actuel"]) == [vaut(-500.0), 0.0, 0.0, vaut(-500.0)]
     assert list(t["Avec la ligne"]) == [vaut(-450.0), vaut(1900.0), vaut(-1400.0), vaut(50.0)]
     assert list(t["Écart"]) == [vaut(50.0), vaut(1900.0), vaut(-1400.0), vaut(550.0)]
@@ -1438,7 +1438,7 @@ def test_p_reutilisable():
         d, f, casse, rendement = rng.uniform(-0.2, 1.2), rng.uniform(0, 4), rng.uniform(-0.2, 1.2), rng.uniform(-0.2, 1.2)
         v = q(d, f, casse, rendement)
         assert isinstance(v, float) and 0.0 <= v <= 1.0
-        assert q(d + 0.1, f, casse, rendement) <= v and q(max(d, 0.0), f + 0.5, casse, rendement) <= q(max(d, 0.0), f, casse, rendement)    # décroît avec le défaut et le facteur rebut
+        assert q(d + 0.1, f, casse, rendement) <= v and q(max(d, 0.0), f + 0.5, casse, rendement) <= q(max(d, 0.0), f, casse, rendement)    # décroît avec le défaut et le facteur scrap
         assert q(d, f, casse + 0.1, rendement) <= v and q(d, f, casse, rendement + 0.1) >= v              # décroît avec la casse, croît avec le rendement
 
 
@@ -1446,7 +1446,7 @@ def test_p_reutilisable():
 def fru_nombreuses_pieces(valeurs: dict) -> dict:
     """Un type de FRU sans temps d'ouverture dont chaque pièce, réemployée, rapporte net la valeur donnée (en 0,1 h)."""
     pieces = {p: {"n_par_fru": 1.0, "extraction_min": 6.0, "test_min": 0.0, "p_reutilisable": 1.0, "valeur_eur": v + 6.0} for p, v in valeurs.items()}
-    return {"rebut_an": 10.0, "poids_fru_kg": 3.0, "ouverture_min": 0.0, "pieces": pieces}
+    return {"scrap_an": 10.0, "poids_fru_kg": 3.0, "ouverture_min": 0.0, "pieces": pieces}
 
 
 def test_au_dela_de_huit_pieces_les_moins_rentables_restent_dans_le_fru_et_le_plan_le_dit():

@@ -57,7 +57,7 @@ N00 = ("00_Demarrage", [
     md("""
 # ERC circularité · 00 · Démarrage
 
-Ce dossier aide à décider quoi faire des FRU rebutées d'un centre de réparation et des pièces qu'elles contiennent. Pour chaque pièce d'un FRU rebuté, trois options sont comparées :
+Ce dossier aide à décider quoi faire des FRU scrapées d'un centre de réparation et des pièces qu'elles contiennent. Pour chaque pièce d'un FRU scrapé, trois options sont comparées :
 
 1. **Réemploi** : le FRU est ouvert avec soin, la pièce est extraite, testée, puis réutilisée en réparation.
 2. **Recyclage trié** : la pièce est triée dans le bon flux et vendue au kilo à un recycleur.
@@ -82,9 +82,9 @@ Ce premier notebook exécute tout le calcul et vérifie que le dossier est en é
 |---|---|
 | **00 Démarrage** | Le dossier fonctionne-t-il, sur quelles données, que manque-t-il ? |
 | **01 Classement et priorisation** | Quelles pièces consomme-t-on, lesquelles étudier en premier ? |
-| **02 Flux d'entrée** | Combien de FRU rebutées par semaine, quelle masse par benne, l'estimation est-elle confirmée par les pesées ? |
+| **02 Flux d'entrée** | Combien de FRU scrapées par semaine, quelle masse par benne, l'estimation est-elle confirmée par les pesées ? |
 | **03 Fiabilité** | Une pièce réparée ou récupérée tient-elle aussi bien qu'une pièce neuve ? |
-| **04 Modèle de Rex** | Quelle est la probabilité qu'une pièce extraite d'un FRU rebuté soit réutilisable ? |
+| **04 Modèle de Rex** | Quelle est la probabilité qu'une pièce extraite d'un FRU scrapé soit réutilisable ? |
 | **05 Ligne de démontage et de tri** | Une ligne est-elle rentable, avec quelles pièces et combien d'heures opérateur ? |
 | **06 Synthèse décideurs** | Que retenir, que reste-t-il à obtenir, où est l'outil de décision ? |
 
@@ -114,7 +114,7 @@ puis relancer le notebook en entier. `projet` est le dossier qui contient les ex
     md("""
 ## Périmètre de cette exécution
 
-Mode, période couverte par les extractions, volumes lus, règle qui date un rebut, emplacement des fichiers. **À vérifier en premier** : la période et le nombre de jours extraits, parce que tous les volumes annuels du dossier en découlent.
+Mode, période couverte par les extractions, volumes lus, règle qui date un scrap, emplacement des fichiers. **À vérifier en premier** : la période et le nombre de jours extraits, parce que tous les volumes annuels du dossier en découlent.
 
 La ligne « Classeur de paramètres » dit s'il existait au début de cette exécution : « absent » à la toute première, où il vient d'être créé (section suivante). Les emplacements sont abrégés : seul le dernier élément d'un chemin extérieur au dossier est affiché.
 """),
@@ -132,7 +132,7 @@ Une ligne par fichier attendu : chargé, absent ou en erreur, et ce à quoi il s
 
 Les extractions ne contiennent ni les temps de démontage, ni les coûts, ni les prix des recycleurs, ni les délais d'approvisionnement. Ces paramètres se saisissent dans **`parametres/ERC_Parametres.xlsx`** (en démonstration : `demo/parametres/ERC_Parametres.xlsx`).
 
-- **Création** : le classeur est créé à la première exécution, pré-rempli avec les FRU rebutées des ateliers prioritaires et, pour chacune, ses pièces de plus forte valeur et une ligne `CARCASSE` (le châssis et le reste du FRU). **Il n'est jamais réécrit ensuite** : ce qui y est saisi reste. Pour repartir d'un gabarit neuf, renommer l'ancien classeur et relancer.
+- **Création** : le classeur est créé à la première exécution, pré-rempli avec les FRU scrapées des ateliers prioritaires et, pour chacune, ses pièces de plus forte valeur et une ligne `CARCASSE` (le châssis et le reste du FRU). **Il n'est jamais réécrit ensuite** : ce qui y est saisi reste. Pour repartir d'un gabarit neuf, renommer l'ancien classeur et relancer.
 - **Ce qu'on écrit dans une cellule** :
     - `45` : une valeur ;
     - `30|70` : une plage, du plus bas au plus haut (toutes les valeurs également plausibles) ;
@@ -186,7 +186,7 @@ N01 = ("01_Classement_et_priorisation", [
     md("""
 # ERC circularité · 01 · Classement et priorisation
 
-**Question** : quelles pièces les ateliers consomment-ils, pour quelle valeur, et lesquelles se retrouvent dans les FRU rebutées ?
+**Question** : quelles pièces les ateliers consomment-ils, pour quelle valeur, et lesquelles se retrouvent dans les FRU scrapées ?
 
 **Décision éclairée** : la liste courte des pièces et des types de FRU à étudier en premier, celle qui entre dans le classeur de paramètres et dans le modèle de ligne (notebook 05).
 
@@ -223,13 +223,13 @@ Avant de discuter de valeur, se mettre d'accord sur les volumes. La première ta
     code('aff.table(ctx, "classement", "Mois calendrier")'),
     code('aff.table(ctx, "classement", "Chiffres à vérifier")'),
     md("""
-## 3. Les FRU rebutées : le gisement
+## 3. Les FRU scrapées : le gisement
 
-FRU rebutées sur la période, par type, avec leur poids. C'est le gisement que la ligne de démontage et de tri aurait à traiter.
+FRU scrapées sur la période, par type, avec leur poids. C'est le gisement que la ligne de démontage et de tri aurait à traiter.
 
-**Lecture** : masse rebutée = nombre de FRU × poids de la fiche du FRU ; elle reste vide si le poids est inconnu. **Limite** : la date qui fait entrer un FRU dans la période dépend d'une règle à confirmer ; elle est rappelée dans les notes en fin de notebook.
+**Lecture** : masse scrapée = nombre de FRU × poids de la fiche du FRU ; elle reste vide si le poids est inconnu. **Limite** : la date qui fait entrer un FRU dans la période dépend d'une règle à confirmer ; elle est rappelée dans les notes en fin de notebook.
 """),
-    code('aff.table(ctx, "classement", "FRU rebutées")'),
+    code('aff.table(ctx, "classement", "FRU scrapées")'),
     md("""
 ## 4. Quelles pièces dans quels FRU ?
 
@@ -243,15 +243,15 @@ Par couple (type de FRU, pièce), ce que montrent les consommations en réparati
 **Limite essentielle** : le nombre de pièces par FRU est **inconnu avant un audit de démontage**. « Max par PO » n'est qu'un minimum : un FRU peut contenir quatre exemplaires d'une pièce dont on n'a jamais changé plus de deux à la fois.
 """),
     code('aff.table(ctx, "classement", "Couples FRU x pièce")'),
-    md("La table suivante retourne la question : pour chaque pièce, combien de FRU rebutées l'ont dans leur nomenclature de consommation."),
-    code('aff.table(ctx, "classement", "Composants des FRU rebutées")'),
+    md("La table suivante retourne la question : pour chaque pièce, combien de FRU scrapées l'ont dans leur nomenclature de consommation."),
+    code('aff.table(ctx, "classement", "Composants des FRU scrapées")'),
     md("""
 ## 5. Pré-sélection des pièces
 
 Chaque pièce est décrite par plusieurs critères, sans pondération imposée :
 
 - **valeur** : MMICV total consommé ;
-- **gisement** : FRU rebutées dont la nomenclature contient la pièce ;
+- **gisement** : FRU scrapées dont la nomenclature contient la pièce ;
 - **risque matière** (0 à 1) : présence de matières premières critiques ou stratégiques selon le type de pièce reconnu dans sa description ;
 - **risque d'approvisionnement** (0 à 1) : tiré du délai fourni par les achats (onglet `Supply`), sinon d'une valeur par défaut selon le type de pièce ;
 - **fiabilité du réemploi** : ajoutée au notebook 03, quand le fichier de fiabilité le permet.
@@ -262,10 +262,10 @@ Une pièce est **sur le front de Pareto** quand aucune autre ne fait au moins au
 """),
     code('aff.figures(ctx, "classement", "Pré-sélection")'),
     code('''
-aff.table(ctx, "classement", "Priorisation", colonnes=["Référence", "Description", "Sur le front de Pareto", "MMICV total (USD)", "FRU rebutées (nomenclature)",
+aff.table(ctx, "classement", "Priorisation", colonnes=["Référence", "Description", "Sur le front de Pareto", "MMICV total (USD)", "FRU scrapées (nomenclature)",
           "Score risque matière (0-1)", "Risque supply retenu", "Source supply retenue", "Note (poids égaux, indicatif)", "Type de pièce", "CRM", "Ateliers"])
 '''),
-    md("## Notes de l'étape\n\nSource des FRU rebutées, critères actifs et inactifs, création du classeur de paramètres."),
+    md("## Notes de l'étape\n\nSource des FRU scrapées, critères actifs et inactifs, création du classeur de paramètres."),
     code('aff.notes(ctx, "classement")'),
     md(SUITE.format(suivant="02_Flux_entree", rep="01_classement")),
 ])
@@ -275,11 +275,11 @@ N02 = ("02_Flux_entree", [
     md("""
 # ERC circularité · 02 · Flux d'entrée
 
-**Question** : que contient le flux de déchets des ateliers, combien de FRU sont rebutées chaque semaine, et la masse estimée à partir des consommations est-elle confirmée par les pesées ?
+**Question** : que contient le flux de déchets des ateliers, combien de FRU sont scrapées chaque semaine, et la masse estimée à partir des consommations est-elle confirmée par les pesées ?
 
 **Décision éclairée** : à quelle granularité (quelle benne, quel type de déchet) le modèle de ligne peut être utilisé. Un flux dont l'estimation n'est pas confirmée par les pesées n'alimente pas le modèle.
 
-Ce notebook présente, dans l'ordre, les deux tableaux demandés par le responsable du projet, puis le flux des FRU rebutées.
+Ce notebook présente, dans l'ordre, les deux tableaux demandés par le responsable du projet, puis le flux des FRU scrapées.
 """),
     depart("flux"),
     code("aff.etat(ctx)"),
@@ -327,27 +327,50 @@ Un flux est jugé **utilisable par le modèle** quand il compte au moins trois s
 """),
     code('aff.table(ctx, "flux", "Verdict par flux")'),
     md("""
-## FRU rebutées par semaine
+## FRU scrapées par semaine
 
-C'est le flux d'entrée du modèle de ligne : nombre de FRU rebutées chaque semaine, par type. Une semaine extraite sans rebut compte pour zéro ; une semaine incomplète (moins de sept jours extraits) est signalée et ne sert pas au calcul du rebut annuel.
+C'est le flux d'entrée du modèle de ligne : nombre de FRU scrapées chaque semaine, par type. Une semaine extraite sans scrap compte pour zéro ; une semaine incomplète (moins de sept jours extraits) est signalée et ne sert pas au calcul du scrap annuel.
 
 **Lecture** : l'irrégularité d'une semaine à l'autre compte autant que la moyenne. Une ligne dimensionnée sur la moyenne perd des heures les semaines creuses et laisse des FRU les semaines chargées (chiffré au notebook 05).
 """),
-    code('aff.figures(ctx, "flux", "FRU rebutées par semaine")'),
-    code('aff.table(ctx, "flux", "FRU rebutées par semaine", n=12)'),
+    code('aff.figures(ctx, "flux", "FRU scrapées par semaine")'),
+    code('aff.table(ctx, "flux", "FRU scrapées par semaine", n=12)'),
     md("""
-## Rebut annuel par type de FRU
+## Scrap annuel par type de FRU
 
-Moyenne hebdomadaire des semaines complètes × 52, avec un intervalle à 90 % obtenu en ré-échantillonnant les semaines observées. Ces trois valeurs (bas, moyen, haut) sont reprises par le modèle de ligne quand le rebut annuel n'est pas saisi dans le classeur de paramètres.
+Moyenne hebdomadaire des semaines complètes × 52, avec un intervalle à 90 % obtenu en ré-échantillonnant les semaines observées. Ces trois valeurs (bas, moyen, haut) sont reprises par le modèle de ligne quand le scrap annuel n'est pas saisi dans le classeur de paramètres.
 
-**Limite** : l'intervalle ne reflète que l'irrégularité des semaines observées. Une période courte, une saisonnalité ou un changement de politique de rebut n'y sont pas.
+**Limite** : l'intervalle ne reflète que l'irrégularité des semaines observées. Une période courte, une saisonnalité ou un changement de politique de scrap n'y sont pas.
 """),
-    code('aff.figures(ctx, "flux", "Rebut annuel par type de FRU")'),
+    code('aff.figures(ctx, "flux", "Scrap annuel par type de FRU")'),
     code('''
-aff.table(ctx, "flux", "Rebut annuel", colonnes=["FRU", "Semaines complètes", "Moyenne hebdo", "Écart-type hebdo", "Rebut annuel bas (5 %)",
-          "Rebut annuel moyen", "Rebut annuel haut (95 %)", "Note"])
+aff.table(ctx, "flux", "Scrap annuel", colonnes=["FRU", "Semaines complètes", "Moyenne hebdo", "Écart-type hebdo", "Scrap annuel bas (5 %)",
+          "Scrap annuel moyen", "Scrap annuel haut (95 %)", "Note"])
 '''),
-    md("## Notes de l'étape\n\nRègle qui date un rebut, granularité du suivi (par benne ou par type de déchet), nombre de semaines pesées."),
+    md("""
+## Prévision du flux de la semaine suivante
+
+Pour chaque type de FRU et chaque méthode : la moyenne attendue et des quantiles (q10 à q90) du nombre de FRU scrapées la semaine suivante. Les méthodes sont celles des séries à faibles effectifs et à nombreux zéros : moyenne de l'historique, Croston et ses variantes, un taux propre à chaque type tiré vers celui des autres (gamma-Poisson), et un modèle structurel (FRU arrivées à une décision × taux de scrap).
+
+**Lecture** : comparer les méthodes entre elles avant d'en retenir une ; voir la table suivante.
+"""),
+    code('aff.table(ctx, "flux", "Prévision des FRU scrapées", n=12)'),
+    md("""
+## Que valent ces prévisions ?
+
+Chaque semaine est prévue avec les seules semaines précédentes, puis comparée à ce qui s'est passé.
+
+| Colonne | Lecture |
+|---|---|
+| Écart quadratique relatif | erreur rapportée à celle de la simple moyenne ; sous 1, la méthode fait mieux |
+| Perte de quantile | note la loi entière, pas seulement la moyenne ; plus bas est mieux |
+| Couverture 80 % | part des semaines tombées entre q10 et q90 ; doit être proche de 80 %, un peu au-dessus pour des comptages |
+| Biais | prévision moins réalité, en moyenne ; proche de 0 |
+
+**Limite** : sur un flux régulier, aucune méthode ne bat la moyenne, et c'est normal. Les méthodes plus riches ne servent que si le flux change de niveau ou suit le volume des réparations. Les modèles de fondation de séries temporelles (Chronos, TimesFM, Moirai, Toto, Timestral) se comparent avec la même table en les enregistrant par `erc.prevision.enregistrer_modele` sur un poste qui dispose de leurs poids.
+"""),
+    code('aff.table(ctx, "flux", "Évaluation des prévisions")'),
+    md("## Notes de l'étape\n\nRègle qui date un scrap, granularité du suivi (par benne ou par type de déchet), nombre de semaines pesées."),
     code('aff.notes(ctx, "flux")'),
     md(SUITE.format(suivant="03_Fiabilite", rep="02_flux")),
 ])
@@ -424,7 +447,7 @@ La pré-sélection du notebook 01, complétée du critère « fiabilité du rée
 """),
     code('aff.figures(ctx, "fiabilite", "Pré-sélection avec fiabilité")'),
     code('''
-aff.table(ctx, "fiabilite", "Priorisation avec fiabilité", colonnes=["Référence", "Description", "Sur le front de Pareto", "MMICV total (USD)", "FRU rebutées (nomenclature)",
+aff.table(ctx, "fiabilite", "Priorisation avec fiabilité", colonnes=["Référence", "Description", "Sur le front de Pareto", "MMICV total (USD)", "FRU scrapées (nomenclature)",
           "Score risque matière (0-1)", "Risque supply retenu", "Fiabilité réemploi (1/rapport)", "Note (poids égaux, indicatif)"])
 '''),
     md("## Notes de l'étape\n\nNombre de défaillances lues, présence du dénominateur (pièces posées), fenêtre d'observation, durée de garantie utilisée."),
@@ -437,7 +460,7 @@ N04 = ("04_Modele_de_Rex", [
     md("""
 # ERC circularité · 04 · Modèle de Rex
 
-**Question** : quand on extrait une pièce d'un FRU rebuté, quelle est la probabilité *q* qu'elle soit réutilisable ?
+**Question** : quand on extrait une pièce d'un FRU scrapé, quelle est la probabilité *q* qu'elle soit réutilisable ?
 
 Tout le reste du choix entre réemploi et recyclage se mesure (valeur de la pièce, temps d'extraction et de test, prix au kilo). *q* est la seule grandeur qu'il faut estimer : le « modèle de Rex » est le modèle qui l'estime, par couple (type de FRU, pièce).
 
@@ -453,7 +476,7 @@ Tout le reste du choix entre réemploi et recyclage se mesure (valeur de la piè
 Avant tout audit, la seule information est la consommation en réparation : une pièce souvent changée est souvent défectueuse.
 
 - **p_défaut** = pièces consommées ÷ (réparations du FRU × pièces par FRU), corrigé de la part des remplacements faits par précaution ;
-- **q0** = (1 − p_défaut), corrigé d'un facteur « FRU rebuté plus abîmé qu'un FRU réparé », de la casse au démontage et du rendement du test.
+- **q0** = (1 − p_défaut), corrigé d'un facteur « FRU scrapé plus abîmé qu'un FRU réparé », de la casse au démontage et du rendement du test.
 
 **Limites** : le nombre de pièces par FRU (`n_par_fru`) est inconnu avant un audit de démontage ; s'il n'est pas saisi, le calcul prend le maximum observé sur une réparation, qui n'est qu'un minimum, et le signale. Les correctifs non saisis prennent une valeur neutre, signalée dans la colonne « Correctifs ». L'a priori est donc une hypothèse de départ, pas une mesure.
 """),
@@ -473,7 +496,7 @@ Pour chaque couple (type de FRU, pièce) : la valeur de *q* retenue, son interva
 
 **Lecture** : quand l'audit a porté sur la pièce, le point bleu s'écarte du losange (l'a priori) et l'intervalle se resserre. Quand aucune pièce n'a été testée, la valeur n'est que l'a priori et son intervalle est large : ce sont les pièces à tester en priorité si leur valeur est élevée.
 
-**Limite** : *q* est une moyenne par type de FRU et par pièce. Il ne tient pas compte de l'âge du FRU ni du motif de rebut.
+**Limite** : *q* est une moyenne par type de FRU et par pièce. Il ne tient pas compte de l'âge du FRU ni du motif de scrap.
 """),
     code('aff.figures(ctx, "rex", "Probabilité de réemploi")'),
     code('''
@@ -525,11 +548,11 @@ N05 = ("05_Ligne_demontage_tri", [
     md("""
 # ERC circularité · 05 · Ligne de démontage et de tri
 
-**Question** : faut-il installer une ligne de démontage et de tri des FRU rebutées ? Avec quelles pièces en réemploi, lesquelles en recyclage trié, et combien d'heures opérateur ?
+**Question** : faut-il installer une ligne de démontage et de tri des FRU scrapées ? Avec quelles pièces en réemploi, lesquelles en recyclage trié, et combien d'heures opérateur ?
 
 **Décision éclairée** : installer ou non la ligne, la dimensionner en heures, choisir les types de FRU à traiter et les pièces à extraire.
 
-**Principe du modèle** : chaque FRU rebuté reçoit un plan (une option par pièce : réemploi, recyclage trié, ou laissée dans le FRU). La ligne a un coût fixe (installation amortie, frais annuels) et une capacité en heures opérateur. Le modèle choisit les plans qui maximisent le gain par rapport à la situation actuelle, où tout part chez le recycleur actuel. La formulation (ensembles, paramètres, variables, objectif, contraintes, hypothèses) est dans [docs/Modele_mathematique.md](../docs/Modele_mathematique.md).
+**Principe du modèle** : chaque FRU scrapé reçoit un plan (une option par pièce : réemploi, recyclage trié, ou laissée dans le FRU). La ligne a un coût fixe (installation amortie, frais annuels) et une capacité en heures opérateur. Le modèle choisit les plans qui maximisent le gain par rapport à la situation actuelle, où tout part chez le recycleur actuel. La formulation (ensembles, paramètres, variables, objectif, contraintes, hypothèses) est dans [docs/Modele_mathematique.md](../docs/Modele_mathematique.md).
 
 **Règle tenue partout** : un paramètre inconnu n'est jamais remplacé par zéro. L'option concernée reste « inconnue », et un type de FRU qu'on ne peut pas calculer est déclaré « incomplet » et sorti du calcul.
 """),
@@ -538,7 +561,7 @@ N05 = ("05_Ligne_demontage_tri", [
     md("""
 ## 1. Paramètres et provenance
 
-Chaque paramètre du modèle arrive avec sa provenance : **saisi** dans le classeur de paramètres, **tiré des données** (poids du classement matière, prix du référentiel des grades, MMICV, rebut annuel du suivi hebdomadaire, probabilité *q* du modèle de Rex), ou **manquant**.
+Chaque paramètre du modèle arrive avec sa provenance : **saisi** dans le classeur de paramètres, **tiré des données** (poids du classement matière, prix du référentiel des grades, MMICV, scrap annuel du suivi hebdomadaire, probabilité *q* du modèle de Rex), ou **manquant**.
 
 **Lecture de la figure** : seuls les paramètres manquants *qui bloquent un calcul* (en orange) demandent une action ; les manquants facultatifs (transport, délai d'approvisionnement, valeur d'une semaine de délai) laissent simplement de côté le terme correspondant, et une ouverture sommaire non saisie est remplacée par l'ouverture soignée.
 
@@ -586,7 +609,7 @@ Pour chaque type de FRU : traiter ou laisser, quelles pièces réemployer, lesqu
 **Limites** : calcul au centre des plages de paramètres (l'incertitude est traitée en section 7) ; les types de FRU incomplets sont exclus, ce qui sous-estime le gisement.
 """),
     code('''
-aff.table(ctx, "ligne", "Plan optimal", colonnes=["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU rebutées / an", "Heures par FRU",
+aff.table(ctx, "ligne", "Plan optimal", colonnes=["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU scrapées / an", "Heures par FRU",
           "Marge par FRU (€)", "Marge par heure (€)", "Heures / an", "Marge variable / an (€)", "Kg détournés / an"])
 '''),
     md("Les types de FRU **incomplets**, avec ce qui manque pour les calculer (nom des paramètres du classeur) :"),
@@ -596,7 +619,7 @@ aff.table(ctx, "ligne", "Plan optimal", colonnes=["Type de FRU", "Décision", "1
     md("""
 ## 5. Situation actuelle contre ligne
 
-Flux annuels en euros, coût en négatif. La situation actuelle se résume au traitement de tous les FRU rebutés par le recycleur actuel. Avec la ligne s'ajoutent la marge de la ligne et ses coûts fixes, et le traitement résiduel diminue.
+Flux annuels en euros, coût en négatif. La situation actuelle se résume au traitement de tous les FRU scrapés par le recycleur actuel. Avec la ligne s'ajoutent la marge de la ligne et ses coûts fixes, et le traitement résiduel diminue.
 
 **Lecture** : la ligne « TOTAL », colonne « Écart », est le gain annuel attendu de la ligne.
 
@@ -688,7 +711,98 @@ Table vide = tous les calculs ont abouti. Sinon, traiter l'anomalie avant de pr�
     md("---\nFin du parcours. Pour mettre à jour les résultats : compléter le classeur de paramètres ou ajouter des extractions, puis relancer les notebooks dans l'ordre (ou seulement **00_Demarrage**, qui exécute tout)."),
 ])
 
-TOUS = [N00, N01, N02, N03, N04, N05, N06]
+# =========================================================================== 07
+N07 = ("07_Composition_des_pieces", [
+    md("""
+# ERC circularité · 07 · Composition des pièces d'une nomenclature
+
+À partir d'une liste de pièces (code article et description), ce notebook propose pour chacune sa **classe matière**, celle qui fixe le prix du recycleur et la filière. C'est une entrée du reste du dossier : une classe validée ici devient le type de déchet de la pièce dans les autres notebooks.
+
+**Comment ça marche.** Chaque source (une règle sur la description, une pièce validée qui lui ressemble, le classement antérieur, un document du fabricant, un modèle de langage) *affirme* une classe. Aucune n'est crue sur parole : le **cortex** garde ces affirmations, les compare aux validations faites par une personne, et en déduit ce que vaut chaque type de source. La probabilité d'une classe combine les affirmations selon cette fiabilité.
+
+**Le moins d'appels possible.** La chaîne commence par ce qui est gratuit. Une recherche de documents ou un appel à un modèle n'est lancé que si l'**enjeu** de la pièce (ce que rapporterait au plus de connaître sa classe : masse annuelle × écart entre les prix possibles) dépasse le coût de l'action.
+
+**Confidentialité.** Aucun code article interne ni aucune description ne sort du poste : une recherche ne contient que le fabricant, sa référence et un type générique. Une pièce de conception interne n'est jamais recherchée à l'extérieur.
+
+Vocabulaire : « collecte » désigne ici la recherche de documents sur le web ; « scrapé » reste réservé aux pièces mises au scrap.
+"""),
+    depart("ligne"),
+    code("""
+from erc import composition
+compo = composition.executer(ctx)      # nomenclature du dossier ; à défaut, les pièces consommées dans les extractions
+aff.etat(ctx)
+"""),
+    md("""
+## 1. Composition proposée
+
+Une ligne par pièce : la classe la plus probable, sa probabilité, les sources qui l'affirment, et un statut.
+
+| Statut | Sens |
+|---|---|
+| validée | une personne a fixé la classe : c'est la vérité du dossier |
+| acceptée | la probabilité dépasse le seuil d'acceptation ; à contrôler par sondage |
+| à valider | des preuves existent mais ne suffisent pas |
+| inconnue | aucune source ne s'est prononcée |
+
+**Lecture** : « Enjeu » borne ce que la connaissance de la classe peut rapporter par an. « Prochaine action » dit quoi faire, y compris « aucune » quand apprendre la classe coûterait plus que cela ne rapporte.
+
+**Limite** : en démonstration, la nomenclature, les documents et le modèle sont fictifs.
+"""),
+    code('aff.table(ctx, "composition", "Composition proposée", colonnes=["PN", "Description", "Classe retenue", "Probabilité", "Statut", "Sources", "Enjeu (€/an, borne)", "Appels au modèle", "Prochaine action"])'),
+    md("""
+## 2. File de revue
+
+Les pièces à faire valider par une personne, par enjeu décroissant. Remplir « Classe validée » et « Validateur », puis déposer le fichier sous `Acquisition/validations_composition.csv` (colonnes `PN;Classe validée;Validateur;Commentaire`) dans le dossier des extractions : à l'exécution suivante, ces validations entrent dans le cortex et améliorent la fiabilité estimée des sources.
+"""),
+    code('aff.table(ctx, "composition", "File de revue", colonnes=["PN", "Description", "Classe retenue", "Probabilité", "Enjeu (€/an, borne)", "Vaut une revue", "Prochaine action"])'),
+    md("""
+## 3. Ce que valent les sources
+
+Pour chaque type de source : l'a priori de départ, qui est une hypothèse de travail, puis ce qui est observé sur les pièces validées. Plus il y a de validations, plus la fiabilité repose sur les faits et moins sur l'hypothèse (« Poids des observations »).
+
+**Lecture** : une source souvent contredite par les validations voit sa fiabilité baisser, et pèse moins dans toutes les probabilités. Un modèle de langage est une source comme une autre.
+
+**Limite** : le calcul suppose que les types de source se trompent indépendamment. Si les règles saisies ici reprennent celles qui ont produit le classement antérieur, les deux comptent en double : ne garder que l'une des deux.
+"""),
+    code('aff.table(ctx, "composition", "Fiabilité des sources")'),
+    md("""
+## 4. Journal des acquisitions
+
+Chaque recherche de documents et chaque appel au modèle, avec son coût supposé. Une table courte est le signe que la chaîne s'arrête tôt.
+"""),
+    code('aff.table(ctx, "composition", "Journal des acquisitions")'),
+    md("""
+## 5. Valeur de l'information dans le modèle de ligne
+
+Pour les pièces encore incertaines qui figurent dans le modèle de ligne : ce que rapporterait de connaître leur classe, calculé en résolvant le modèle sous chaque classe possible. « La décision change » dit si la réponse modifierait le plan. Table vide = aucune pièce du modèle n'est incertaine.
+
+La justification est dans `docs/Formal_framework.md`, section 8 (proposition 6).
+"""),
+    code('aff.table(ctx, "composition", "Valeur de l\'information")'),
+    md("""
+## 6. Brancher une collecte de documents et un modèle local
+
+Sans collecteur ni modèle, la chaîne s'arrête aux sources gratuites et dit ce qui manque. Les deux se branchent sans modifier le dossier :
+
+```python
+from erc import composition
+
+def ma_collecte(requete):
+    # requete = {"fabricant": ..., "reference_fabricant": ..., "type": ...} : rien d'interne
+    # rendre une liste de documents : {"origine": "site ou URL", "texte": "...", "nature": "document" ou "déclaration fabricant"}
+    return []
+
+qwen = composition.ModeleLocal("http://localhost:11434/v1", "nom-du-modele")   # tout serveur compatible « chat completions »
+compo = composition.executer(ctx, collecteur=ma_collecte, modele=qwen)
+```
+
+Le modèle répond sous contrainte : la classe doit être dans la liste proposée, et la citation qui la justifie doit se trouver mot pour mot dans le document, sinon la réponse est rejetée.
+"""),
+    code('aff.notes(ctx, "composition")'),
+    md("---\\nCe notebook est une entrée du dossier : relancer **00_Demarrage** après avoir validé des pièces pour que leurs classes soient reprises partout."),
+])
+
+TOUS = [N00, N01, N02, N03, N04, N05, N06, N07]
 
 
 # =========================================================================== construction et exécution

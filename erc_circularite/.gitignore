@@ -1,6 +1,8 @@
 # Données et résultats réels : jamais dans le dépôt
 /artefacts/
 /parametres/*
+/cortex/
+/demo/cortex/
 !/parametres/.gitkeep
 # Démonstration : sources et paramètres se régénèrent (python -m erc --demo)
 /demo/sources/

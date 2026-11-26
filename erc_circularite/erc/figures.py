@@ -259,7 +259,7 @@ def _descriptions(ctx) -> dict:
 
 
 def _descriptions_fru(ctx) -> dict:
-    t = _table(ctx, "classement", "FRU rebutées", ["FRU", "Description FRU"])
+    t = _table(ctx, "classement", "FRU scrapées", ["FRU", "Description FRU"])
     d = {} if t is None else dict(zip(t["FRU"].astype(str), t["Description FRU"]))
     for f, v in _dico(_objet(ctx, "ligne", "Modèle").get("frus")).items():
         if isinstance(v, dict) and v.get("description"):
@@ -501,11 +501,11 @@ def _top_mmicv(ctx):
             "pèse dans le coût standard consommé ; ce n'est pas ce que rapporterait son réemploi.", fig)
 
 
-def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection des pièces : valeur consommée et gisement de FRU rebutées"):
-    t = _table(ctx, etape, nom_table, ["Référence", "MMICV total (USD)", "FRU rebutées (nomenclature)", "Sur le front de Pareto"])
+def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection des pièces : valeur consommée et gisement de FRU scrapées"):
+    t = _table(ctx, etape, nom_table, ["Référence", "MMICV total (USD)", "FRU scrapées (nomenclature)", "Sur le front de Pareto"])
     if t is None:
         return None
-    d = t.assign(_x=_num(t, "FRU rebutées (nomenclature)"), _y=_num(t, "MMICV total (USD)"), _p=_vrai(t["Sur le front de Pareto"]))
+    d = t.assign(_x=_num(t, "FRU scrapées (nomenclature)"), _y=_num(t, "MMICV total (USD)"), _p=_vrai(t["Sur le front de Pareto"]))
     d.loc[(d["_x"] < 0) | (d["_y"] < 0), ["_x", "_y"]] = np.nan      # un nombre de FRU ou une valeur négatifs : donnée invalide, traitée comme inconnue
     hors = int(d[["_x", "_y"]].isna().any(axis=1).sum())
     d = d.dropna(subset=["_x", "_y"])
@@ -513,12 +513,12 @@ def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection
         return None
     actifs = t.attrs.get("Critères actifs") or _objet(ctx, etape, "Notes").get("criteres_actifs") or []
     actifs = [str(c) for c in actifs] if isinstance(actifs, (list, tuple)) else []
-    court = {"MMICV total (USD)": "valeur", "FRU rebutées (nomenclature)": "gisement", "Score risque matière (0-1)": "risque matière",
+    court = {"MMICV total (USD)": "valeur", "FRU scrapées (nomenclature)": "gisement", "Score risque matière (0-1)": "risque matière",
              "Risque supply retenu": "risque d'approvisionnement", "Fiabilité réemploi (1/rapport)": "fiabilité du réemploi"}
     sous = "En bleu : pièces qu'aucune autre ne dépasse sur tous les critères à la fois (front de Pareto)."
     if actifs:
         sous += f" Le front est calculé sur {len(actifs)} critères ({', '.join(court.get(c, c) for c in actifs)}), pas seulement sur les deux axes."
-    note = ("Gisement = FRU rebutées dont la nomenclature de consommation contient la pièce ; le nombre de pièces par FRU reste inconnu "
+    note = ("Gisement = FRU scrapées dont la nomenclature de consommation contient la pièce ; le nombre de pièces par FRU reste inconnu "
             "avant un audit de démontage. Le MMICV est un coût standard, pas une valeur de revente.")
     if hors:
         note += f" {_pluriel(hors, 'pièce')} sans valeur connue sur un des deux axes : non tracée{'s' if hors > 1 else ''}."
@@ -540,10 +540,10 @@ def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection
     ax.set_ylim(*ylim)
     ax.xaxis.set_major_formatter(_fmt())
     ax.yaxis.set_major_formatter(_fmt())
-    _axe(ax, "xy", xlabel="FRU rebutées sur la période dont la nomenclature contient la pièce", ylabel="MMICV total consommé (USD)")
+    _axe(ax, "xy", xlabel="FRU scrapées sur la période dont la nomenclature contient la pièce", ylabel="MMICV total consommé (USD)")
     for x, y, texte, decalage, ha, va in etiquettes:
         _etiquette(ax, texte, (x, y), decalage=decalage, ha=ha, va=va, couleur=ENCRE)
-    description = ("Chaque point est une pièce : en abscisse le nombre de FRU rebutées qui la contiennent (gisement), en ordonnée son MMICV total "
+    description = ("Chaque point est une pièce : en abscisse le nombre de FRU scrapées qui la contiennent (gisement), en ordonnée son MMICV total "
                    "consommé (valeur). Les points bleus forment le front de Pareto : ce sont les candidates à examiner en premier.")
     if etape == "fiabilite":
         description += " La fiabilité du réemploi est ajoutée aux critères quand elle a pu être calculée : le front peut différer de celui de l'étape classement."
@@ -552,10 +552,10 @@ def _preselection(ctx, etape: str, nom_table: str, titre: str = "Pré-sélection
 
 # =========================================================================== 2. flux
 def _fru_par_semaine(ctx):
-    t = _table(ctx, "flux", "FRU rebutées par semaine", ["Semaine", "FRU", "FRU rebutées"])
+    t = _table(ctx, "flux", "FRU scrapées par semaine", ["Semaine", "FRU", "FRU scrapées"])
     if t is None:
         return None
-    d = t.assign(_s=_dates(t["Semaine"]), _n=_num(t, "FRU rebutées")).dropna(subset=["_s"])
+    d = t.assign(_s=_dates(t["Semaine"]), _n=_num(t, "FRU scrapées")).dropna(subset=["_s"])
     if not len(d) or not d["_n"].notna().any():
         return None
     rangs, libelle, debut = _semaines(d["_s"])
@@ -582,10 +582,10 @@ def _fru_par_semaine(ctx):
         legende.append(_trait(ENCRE_2, f"Moyenne des semaines complètes : {_fr(moyenne, 1)} FRU par semaine", epaisseur=1.0))
     fin = debut + pd.Timedelta(days=7 * (n_sem - 1))
     absentes = [r for r in range(n_sem) if r not in set(int(i) for i in piv.index)]
-    sous = (f"Une barre par semaine, du lundi au dimanche ({_annee(debut, fin)}). Une semaine extraite sans rebut compte pour zéro (« 0 »)"
+    sous = (f"Une barre par semaine, du lundi au dimanche ({_annee(debut, fin)}). Une semaine extraite sans scrap compte pour zéro (« 0 »)"
             + (" ; une semaine non extraite est marquée comme telle et ne compte pas." if absentes else "."))
-    note = "Date de rebut : " + (_court(_objet(ctx, "flux", "Notes").get("regle_date_rebut"), 150) or "règle non précisée") + "."
-    fig, corps = _cadre(ctx, 3.3, "FRU rebutées par semaine et par type de FRU", sous, note, legende, colonnes=3)
+    note = "Date de scrap : " + (_court(_objet(ctx, "flux", "Notes").get("regle_date_scrap"), 150) or "règle non précisée") + "."
+    fig, corps = _cadre(ctx, 3.3, "FRU scrapées par semaine et par type de FRU", sous, note, legende, colonnes=3)
     ax = fig.add_subplot(corps)
     x, bas = piv.index.to_numpy(float), np.zeros(len(piv))
     for _, v, c, _lab in series:
@@ -607,9 +607,9 @@ def _fru_par_semaine(ctx):
     ax.set_ylim(0, float(total.max()) * 1.12 + 0.5)
     ax.yaxis.set_major_locator(MaxNLocator(integer=True, nbins=6))
     ax.yaxis.set_major_formatter(_fmt())
-    _axe(ax, "y", xlabel="Semaine (date du lundi)", ylabel="FRU rebutées")
-    return ("Le flux d'entrée du modèle de ligne : nombre de FRU rebutées chaque semaine, empilé par type de FRU (les cinq types les plus "
-            "fréquents, puis les autres). Les semaines incomplètes sont hachurées et ne servent pas à calculer le rebut annuel.", fig)
+    _axe(ax, "y", xlabel="Semaine (date du lundi)", ylabel="FRU scrapées")
+    return ("Le flux d'entrée du modèle de ligne : nombre de FRU scrapées chaque semaine, empilé par type de FRU (les cinq types les plus "
+            "fréquents, puis les autres). Les semaines incomplètes sont hachurées et ne servent pas à calculer le scrap annuel.", fig)
 
 
 def _estime_contre_pese(ctx):
@@ -740,13 +740,13 @@ def _cumul(ctx):
             "valident l'estimation ; deux courbes qui s'écartent régulièrement désignent une cause permanente (périmètre de la benne, poids manquants).", fig)
 
 
-def _rebut_annuel(ctx):
-    t = _table(ctx, "flux", "Rebut annuel", ["FRU", "Rebut annuel moyen"])
+def _scrap_annuel(ctx):
+    t = _table(ctx, "flux", "Scrap annuel", ["FRU", "Scrap annuel moyen"])
     if t is None:
         return None
-    d = t.assign(_m=_num(t, "Rebut annuel moyen"))
-    d["_b"] = _num(d, "Rebut annuel bas (5 %)") if "Rebut annuel bas (5 %)" in d else np.nan
-    d["_h"] = _num(d, "Rebut annuel haut (95 %)") if "Rebut annuel haut (95 %)" in d else np.nan
+    d = t.assign(_m=_num(t, "Scrap annuel moyen"))
+    d["_b"] = _num(d, "Scrap annuel bas (5 %)") if "Scrap annuel bas (5 %)" in d else np.nan
+    d["_h"] = _num(d, "Scrap annuel haut (95 %)") if "Scrap annuel haut (95 %)" in d else np.nan
     inconnus = [str(f) for f in d.loc[d["_m"].isna(), "FRU"]]
     d = d.dropna(subset=["_m"]).sort_values("_m", ascending=False)
     en_trop, d = len(d) - 20, d.head(20)
@@ -757,12 +757,12 @@ def _rebut_annuel(ctx):
     sous = "Moyenne hebdomadaire des semaines complètes × 52. Trait : intervalle à 90 % obtenu en ré-échantillonnant les semaines."
     if len(sem) and sem.notna().any():
         sous += f" Base : {_fr(sem.min())} à {_fr(sem.max())} semaines complètes." if sem.min() != sem.max() else f" Base : {_fr(sem.max())} semaines complètes."
-    note = "Ces valeurs (bas, moyen, haut) alimentent le modèle de ligne quand le rebut annuel n'est pas saisi dans le classeur de paramètres."
+    note = "Ces valeurs (bas, moyen, haut) alimentent le modèle de ligne quand le scrap annuel n'est pas saisi dans le classeur de paramètres."
     if inconnus:
-        note += " Rebut annuel inconnu (non tracé) : " + _liste(inconnus) + "."
+        note += " Scrap annuel inconnu (non tracé) : " + _liste(inconnus) + "."
     if en_trop > 0:
         note += f" {_pluriel(en_trop, 'autre type', 'autres types')} dans la table."
-    fig, corps = _cadre(ctx, 0.6 + 0.34 * n, "Rebut annuel estimé par type de FRU", sous, note)
+    fig, corps = _cadre(ctx, 0.6 + 0.34 * n, "Scrap annuel estimé par type de FRU", sous, note)
     ax = fig.add_subplot(corps)
     y = np.arange(n)
     descf = _descriptions_fru(ctx)
@@ -780,8 +780,8 @@ def _rebut_annuel(ctx):
     ax.set_ylim(n - 0.4, -0.6)
     ax.set_xlim(0, _etendue(np.nanmax(d[["_m", "_h"]].to_numpy(float))) * 1.38)
     ax.xaxis.set_major_formatter(_fmt())
-    _axe(ax, "x", xlabel="FRU rebutées par an")
-    return ("Le rebut annuel de chaque type de FRU, tiré du suivi hebdomadaire : point = estimation moyenne, trait = intervalle à 90 %. "
+    _axe(ax, "x", xlabel="FRU scrapées par an")
+    return ("Le scrap annuel de chaque type de FRU, tiré du suivi hebdomadaire : point = estimation moyenne, trait = intervalle à 90 %. "
             "Un intervalle large dit que la période observée est trop courte ou le flux trop irrégulier pour dimensionner la ligne à l'unité près.", fig)
 
 
@@ -1088,7 +1088,7 @@ def _q_par_piece(ctx):
     sans_audit.set_markeredgecolor(BLEU)                          # même losange que sur le tracé : contour bleu, trait bleu clair
     legende = [_trait(BLEU, "Après audit : moyenne et intervalle à 90 %", "o"), sans_audit,
                _trait(ENCRE_2, "A priori q0 tiré de la consommation, avant l'audit", "D", epaisseur=0, plein=False, taille=6)]
-    sous = ("q = probabilité qu'une pièce extraite d'un FRU rebuté soit réutilisable. L'audit de démontage déplace l'a priori et resserre l'intervalle ; "
+    sous = ("q = probabilité qu'une pièce extraite d'un FRU scrapé soit réutilisable. L'audit de démontage déplace l'a priori et resserre l'intervalle ; "
             "sans pièce testée, la valeur n'est qu'une hypothèse tirée de la consommation.")
     note = ("L'a priori q0 dépend du nombre de pièces par FRU, inconnu avant un audit de démontage (le maximum observé sur un PO n'est qu'un minimum). "
             "À droite : pièces testées lors de l'audit.")
@@ -1417,9 +1417,9 @@ def _actuel_contre_ligne(ctx):
     elif len(total):
         sous += " Un poste est inconnu : le total n'est pas calculé."
     note = ""
-    m, md, part = (_reel(attrs.get(k)) for k in ("Masse rebutée (kg/an)", "Masse détournée (kg/an)", "Part détournée"))
+    m, md, part = (_reel(attrs.get(k)) for k in ("Masse scrapée (kg/an)", "Masse détournée (kg/an)", "Part détournée"))
     if np.isfinite(m) and np.isfinite(md):
-        note = f"Masse détournée de la benne actuelle : {_fr(md)} kg par an sur {_fr(m)} kg rebutés" + (f" ({_pct(part)})." if np.isfinite(part) else ".")
+        note = f"Masse détournée de la benne actuelle : {_fr(md)} kg par an sur {_fr(m)} kg scrapés" + (f" ({_pct(part)})." if np.isfinite(part) else ".")
     note += " Estimation, pas un résultat constaté." + _phrase_incomplets(ctx)
     legende = [_pave(GRIS_FONCE, "Situation actuelle : tout part chez le recycleur actuel"), _pave(BLEU, "Avec la ligne de démontage et de tri")]
     fig, corps = _cadre(ctx, 0.65 + 0.78 * n, "Situation actuelle contre ligne de démontage et de tri, poste par poste", sous, note.strip(), legende, colonnes=2)
@@ -1452,7 +1452,7 @@ def _actuel_contre_ligne(ctx):
         if p.upper() == "TOTAL":
             etiq.set_fontweight("bold")
             etiq.set_color(ENCRE)
-    return ("Le coût annuel de la situation actuelle (tous les FRU rebutés partent chez le recycleur actuel) comparé au bilan avec la ligne, poste par "
+    return ("Le coût annuel de la situation actuelle (tous les FRU scrapés partent chez le recycleur actuel) comparé au bilan avec la ligne, poste par "
             "poste puis au total. Lecture : l'écart entre les deux barres du total est le gain annuel attendu de la ligne.", fig)
 
 
@@ -1688,8 +1688,8 @@ CATALOGUE = [
     # (étape, nom de la figure, fonction qui la trace)
     ("classement", "Top MMICV", _top_mmicv),
     ("classement", "Pré-sélection", lambda ctx: _preselection(ctx, "classement", "Priorisation")),
-    ("flux", "FRU rebutées par semaine", _fru_par_semaine),
-    ("flux", "Rebut annuel par type de FRU", _rebut_annuel),
+    ("flux", "FRU scrapées par semaine", _fru_par_semaine),
+    ("flux", "Scrap annuel par type de FRU", _scrap_annuel),
     ("flux", "Pièces et masse par type de déchet", _par_type_de_dechet),
     ("flux", "Estimé contre pesé", _estime_contre_pese),
     ("flux", "Cumul estimé contre pesé", _cumul),

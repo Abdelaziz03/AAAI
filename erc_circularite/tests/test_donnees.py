@@ -102,8 +102,8 @@ def test_classeur_rempli_donne_un_resultat(reel):
     assert manquants["Valeur"].fillna("").eq("").all()                              # « manquant » ne porte jamais de nombre
     r = ctx.res["ligne"]["Notes"]["resume"]
     assert r["Heures utilisées / an"] <= r["Capacité (h/an)"] + 1e-6
-    assert r["FRU traitées / an"] <= plan.drop_duplicates("Type de FRU")["FRU rebutées / an"].sum() + 1e-6
-    assert r["Masse détournée de la benne (kg/an)"] <= r["Masse des FRU rebutées (kg/an)"] + 1e-6
+    assert r["FRU traitées / an"] <= plan.drop_duplicates("Type de FRU")["FRU scrapées / an"].sum() + 1e-6
+    assert r["Masse détournée de la benne (kg/an)"] <= r["Masse des FRU scrapées (kg/an)"] + 1e-6
     # données de l'outil : JSON strict, sans NaN
     d = json.loads(json.dumps(ctx.res["synthese"]["Données de l'outil"], allow_nan=False))
     assert d["meta"]["donnees"] == "réelles" and len(d["frus"]) == plan["Type de FRU"].nunique()
@@ -208,8 +208,8 @@ def test_manifeste_fidele_et_execution_repetable(reel):
             if pd.api.types.is_numeric_dtype(t1[c]):
                 assert np.allclose(t1[c].astype(float), t2[c].astype(float), equal_nan=True, rtol=1e-9, atol=1e-9), (e, n, c)
     # une table relue du disque redonne ce qui a été écrit, y compris des références qui ressemblent à des nombres
-    t = ctx2.depot.lire_table("classement", "FRU rebutées")
-    assert len(t) == len(ctx2.res["classement"]["FRU rebutées"])
+    t = ctx2.depot.lire_table("classement", "FRU scrapées")
+    assert len(t) == len(ctx2.res["classement"]["FRU scrapées"])
 
 
 def test_mode_demonstration_isole(tmp_path):
@@ -225,3 +225,27 @@ def test_memoriser_chemins(reel, monkeypatch):
     erc.memoriser_chemins(projet=projet, racine=racine, dossier=dossier, n_top=12)
     cfg = erc.charger_config(dossier=dossier)
     assert not cfg.demo and cfg.projet == projet and cfg.racine == racine and cfg.n_top == 12
+
+
+# ------------------------------------------------------------------ vocabulaire : « scrapé » remplace « rebuté »
+def test_ancien_onglet_et_anciennes_colonnes_toujours_lus(reel):
+    """Les extractions produites avant le changement de vocabulaire gardent l'onglet FRU_rebutees ; un classeur déjà
+    rempli garde la colonne rebut_an. Les deux sont encore lus."""
+    dossier, projet, racine = reel
+    attendu = None
+    for f in projet.glob("ERC_R26_extraction_*.xlsx"):
+        x = pd.read_excel(f, sheet_name=None)
+        assert "FRU_scrapees" in x
+        x["FRU_rebutees"] = x.pop("FRU_scrapees")
+        with pd.ExcelWriter(f, engine="openpyxl") as w:
+            for nom, d in x.items():
+                d.to_excel(w, sheet_name=nom, index=False)
+    ctx = lancer(dossier, projet, racine, jusqua="classement")
+    assert len(ctx.src.fru_scrapees) > 0
+    x = pd.read_excel(ctx.cfg.classeur, sheet_name=None, dtype=object)
+    premier = x["FRU"]["FRU"].iloc[0]
+    x["FRU"] = x["FRU"].rename(columns={"scrap_an": "rebut_an"})
+    x["FRU"].loc[x["FRU"].index[0], "rebut_an"] = 123
+    P.ecrire_classeur(ctx.cfg.classeur, x)
+    p = P.lire(ctx.cfg)
+    assert p.fru.set_index("FRU").at[premier, "scrap_an"] == 123.0

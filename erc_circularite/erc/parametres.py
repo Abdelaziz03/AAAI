@@ -1,6 +1,6 @@
 """Classeur des paramètres saisis (parametres/ERC_Parametres.xlsx) : gabarit, lecture, résolution.
 
-Le pipeline crée le gabarit au premier lancement, pré-rempli avec les FRU rebutées et leurs pièces trouvées dans
+Le pipeline crée le gabarit au premier lancement, pré-rempli avec les FRU scrapées et leurs pièces trouvées dans
 les données. Il ne le réécrit jamais ensuite : ce que l'utilisateur saisit est à lui.
 
 Une cellule de paramètre accepte :
@@ -25,6 +25,8 @@ from .risques import type_piece
 from .sources import Sources, ref
 
 CARCASSE = "CARCASSE"
+# Colonnes d'un classeur rempli avant le changement de vocabulaire (« rebuté » → « scrapé ») : toujours lues.
+ANCIENNES_COLONNES = {"rebut_an": "scrap_an", "facteur_rebut": "facteur_scrap", "FRU rebutées (période)": "FRU scrapées (période)"}
 
 # paramètre : (libellé, unité, à demander à)
 P_LIGNE = {
@@ -39,12 +41,12 @@ P_LIGNE = {
     "taux_change_mmicv": ("Conversion du MMICV vers l'euro (1 si le MMICV est déjà en euros)", "€ par unité de MMICV", "Finance"),
 }
 P_FRU = {
-    "rebut_an": ("FRU rebutées par an (vide = tiré du suivi hebdomadaire)", "Suivi hebdomadaire du flux"),
+    "scrap_an": ("FRU scrapées par an (vide = tiré du suivi hebdomadaire)", "Suivi hebdomadaire du flux"),
     "poids_fru_kg": ("Poids du FRU (vide = fiche du FRU)", "Pesée"),
     "ouverture_min": ("Ouverture soignée du FRU, pour extraire des pièces à réemployer (minutes)", "Audit de démontage chronométré"),
     "ouverture_tri_min": ("Ouverture sommaire du FRU, pour trier seulement (minutes)", "Audit de démontage chronométré"),
     "taux_horaire_eur": ("Coût horaire propre à ce FRU (vide = défaut de la ligne)", "Responsables d'atelier"),
-    "facteur_rebut": ("Facteur ≥ 1 : pièces plus souvent défectueuses dans un FRU rebuté que dans un FRU réparé", "Audit de démontage"),
+    "facteur_scrap": ("Facteur ≥ 1 : pièces plus souvent défectueuses dans un FRU scrapé que dans un FRU réparé", "Audit de démontage"),
 }
 P_PIECE = {
     "n_par_fru": ("Exemplaires de la pièce dans un FRU (vide = maximum observé sur un même PO)", "Audit de démontage, nomenclature"),
@@ -62,7 +64,7 @@ P_PIECE = {
     "rendement_test": ("Part des pièces saines qui passent le test (0 à 1)", "Audit de démontage, qualité"),
     "p_reutilisable": ("Probabilité qu'un exemplaire extrait soit réutilisable (vide = modèle de Rex)", "Audit de démontage"),
 }
-INFO_FRU = ["FRU", "Description", "Atelier", "FRU rebutées (période)", "Réparations (période)"]
+INFO_FRU = ["FRU", "Description", "Atelier", "FRU scrapées (période)", "Réparations (période)"]
 INFO_PIECE = ["FRU", "Pièce", "Description", "Type de pièce", "Pièces consommées (période)", "Max par PO"]
 
 
@@ -148,18 +150,19 @@ class Parametres:
     supply: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Référence", "Délai (semaines)", "Source"]))
     ateliers: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["FRU", "Atelier"]))
     chiffres: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Libellé", "Motif", "Atelier", "Valeur par mois"]))
+    regles: pd.DataFrame = field(default_factory=lambda: pd.DataFrame(columns=["Motif", "Classe", "Source"]))   # description → classe matière
 
 
 # --------------------------------------------------------------------------- gabarit
-def tables_gabarit(cfg: Config, src: Sources, rebut: pd.DataFrame, couples: pd.DataFrame, cl_tous: pd.DataFrame) -> dict:
-    """Contenu du gabarit : les FRU rebutées des ateliers prioritaires et, pour chacun, ses pièces de plus forte valeur."""
-    r = rebut[rebut["Atelier"].isin(cfg.ateliers_prioritaires)] if len(rebut) else rebut
+def tables_gabarit(cfg: Config, src: Sources, scrap: pd.DataFrame, couples: pd.DataFrame, cl_tous: pd.DataFrame) -> dict:
+    """Contenu du gabarit : les FRU scrapées des ateliers prioritaires et, pour chacun, ses pièces de plus forte valeur."""
+    r = scrap[scrap["Atelier"].isin(cfg.ateliers_prioritaires)] if len(scrap) else scrap
     if not len(r):
-        r = rebut
-    r = r.sort_values("FRU rebutées", ascending=False).head(cfg.n_fru_gabarit)
+        r = scrap
+    r = r.sort_values("FRU scrapées", ascending=False).head(cfg.n_fru_gabarit)
     n_po = couples.drop_duplicates("FRU").set_index("FRU")["Réparations du FRU"] if len(couples) else pd.Series(dtype=float)
     fru = pd.DataFrame({"FRU": r["FRU"].values, "Description": r["Description FRU"].values, "Atelier": r["Atelier"].values,
-                        "FRU rebutées (période)": r["FRU rebutées"].values, "Réparations (période)": r["FRU"].map(n_po).values})
+                        "FRU scrapées (période)": r["FRU scrapées"].values, "Réparations (période)": r["FRU"].map(n_po).values})
     for c in list(P_FRU) + ["Source"]:
         fru[c] = None
     lignes = []
@@ -185,22 +188,25 @@ def tables_gabarit(cfg: Config, src: Sources, rebut: pd.DataFrame, couples: pd.D
         ("Colonnes jaunes", "À saisir. Une cellule vide est cherchée dans les données (poids, prix du référentiel, MMICV) puis laissée inconnue."),
         ("Source", "Notez d'où vient chaque valeur (devis, audit du JJ/MM, personne). Elle suit la valeur jusqu'à l'outil des décideurs."),
         ("Ligne", "Paramètres de la ligne de démontage et de tri, et valeurs par défaut."),
-        ("FRU", "Un FRU rebuté par ligne. Retirer une ligne l'exclut du modèle ; en ajouter une l'y fait entrer."),
+        ("FRU", "Un FRU scrapé par ligne. Retirer une ligne l'exclut du modèle ; en ajouter une l'y fait entrer."),
         ("Pieces", f"Les pièces de chaque FRU. La ligne {CARCASSE} représente le châssis : poids, prix au kilo et temps de tri seulement."),
         ("Supply", "Délai d'approvisionnement par référence (achats)."),
         ("Ateliers", "Rattachement manuel d'un FRU à un atelier quand FRU_info ne le donne pas."),
         ("Chiffres_a_verifier", "Chiffres annoncés à comparer aux extractions : libellé, motif cherché dans la description, atelier, valeur par mois."),
+        ("Regles_composition", "Règles qui donnent la classe matière d'une pièce d'après sa description : un motif (mot ou expression régulière), la classe (une catégorie du référentiel des grades), la source de la règle. La première règle qui correspond est retenue."),
     ], columns=["Élément", "Mode d'emploi"])
     return {"Lisez_moi": lisez, "Ligne": ligne, "FRU": fru, "Pieces": pieces, "Supply": supply,
             "Ateliers": pd.DataFrame({"FRU": non_ratt, "Atelier": [None] * len(non_ratt)}),
-            "Chiffres_a_verifier": pd.DataFrame(columns=["Libellé", "Motif", "Atelier", "Valeur par mois"])}
+            "Chiffres_a_verifier": pd.DataFrame(columns=["Libellé", "Motif", "Atelier", "Valeur par mois"]),
+            "Regles_composition": pd.DataFrame(columns=["Motif", "Classe", "Source"])}
 
 
 def ecrire_classeur(chemin, tables: dict) -> None:
     from openpyxl.styles import Alignment, Font, PatternFill
     chemin.parent.mkdir(parents=True, exist_ok=True)
     saisie = {"Ligne": ["Valeur", "Source"], "FRU": list(P_FRU) + ["Source"], "Pieces": list(P_PIECE) + ["Source"],
-              "Supply": ["Délai (semaines)", "Source"], "Ateliers": ["Atelier"], "Chiffres_a_verifier": ["Libellé", "Motif", "Atelier", "Valeur par mois"]}
+              "Supply": ["Délai (semaines)", "Source"], "Ateliers": ["Atelier"], "Chiffres_a_verifier": ["Libellé", "Motif", "Atelier", "Valeur par mois"],
+              "Regles_composition": ["Motif", "Classe", "Source"]}
     aide = {**{k: v[0] for k, v in P_FRU.items()}, **{k: v[0] for k, v in P_PIECE.items()}}
     with pd.ExcelWriter(chemin, engine="openpyxl") as w:
         for nom, d in tables.items():
@@ -223,11 +229,11 @@ def ecrire_classeur(chemin, tables: dict) -> None:
                     cel.comment = Comment(aide[c], "ERC")
 
 
-def creer_gabarit(cfg: Config, src: Sources, rebut, couples, cl_tous) -> bool:
+def creer_gabarit(cfg: Config, src: Sources, scrap, couples, cl_tous) -> bool:
     """Crée le classeur s'il n'existe pas. Renvoie True s'il vient d'être créé."""
     if cfg.classeur.is_file():
         return False
-    ecrire_classeur(cfg.classeur, tables_gabarit(cfg, src, rebut, couples, cl_tous))
+    ecrire_classeur(cfg.classeur, tables_gabarit(cfg, src, scrap, couples, cl_tous))
     return True
 
 
@@ -249,6 +255,7 @@ def lire(cfg: Config) -> Parametres:
     for nom, attr, cles, params in (("FRU", "fru", ["FRU"], P_FRU), ("Pieces", "pieces", ["FRU", "Pièce"], P_PIECE)):
         if nom in x and set(cles) <= set(x[nom].columns):
             d = x[nom].copy()
+            d = d.rename(columns={a: n for a, n in ANCIENNES_COLONNES.items() if a in d.columns and n not in d.columns})
             for c in cles:
                 d[c] = d[c].map(ref)
             d = d.dropna(subset=cles).drop_duplicates(cles)
@@ -269,6 +276,8 @@ def lire(cfg: Config) -> Parametres:
         p.ateliers = d.dropna(subset=["FRU", "Atelier"])
     if "Chiffres_a_verifier" in x:
         p.chiffres = x["Chiffres_a_verifier"].dropna(how="all")
+    if "Regles_composition" in x and {"Motif", "Classe"} <= set(x["Regles_composition"].columns):
+        p.regles = x["Regles_composition"].dropna(subset=["Motif", "Classe"]).reset_index(drop=True)
     return p
 
 
@@ -290,11 +299,11 @@ def appliquer_aux_sources(p: Parametres, src: Sources) -> None:
 def a_priori_rex(p: Parametres, couples: pd.DataFrame) -> pd.DataFrame:
     """q0 par (FRU, pièce) tiré de la consommation :
         p_défaut = pièces consommées × (1 − part préventive) / (réparations du FRU × pièces par FRU)
-        q0 = (1 − facteur_rebut × p_défaut) × (1 − casse) × rendement du test
+        q0 = (1 − facteur_scrap × p_défaut) × (1 − casse) × rendement du test
     Valeurs neutres quand un correctif n'est pas saisi (part préventive 0, facteur 1, casse 0, rendement 1) : signalées."""
     cols = ["Type de FRU", "Pièce", "Pièces consommées", "Réparations du FRU", "n_par_fru", "Source n_par_fru", "p_défaut", "Correctifs", "q0"]
     c = couples.set_index(["FRU", "Pièce"]) if len(couples) else pd.DataFrame()
-    fac = p.fru.set_index("FRU")["facteur_rebut"].map(milieu) if len(p.fru) else pd.Series(dtype=float)
+    fac = p.fru.set_index("FRU")["facteur_scrap"].map(milieu) if len(p.fru) else pd.Series(dtype=float)
     lignes = []
     for _, r in p.pieces.iterrows():
         if r["Pièce"] == CARCASSE:
@@ -311,15 +320,15 @@ def a_priori_rex(p: Parametres, couples: pd.DataFrame) -> pd.DataFrame:
         fr = None if fr is None or pd.isna(fr) else fr
         d = mod_ligne.p_defaut_depuis_conso(conso if pd.notna(conso) else None, rep if pd.notna(rep) else None, n, pp or 0.0)
         q0 = mod_ligne.p_reutilisable(d, fr or 1.0, ca or 0.0, 1.0 if rt is None else rt)
-        neutres = [nom for nom, v in (("part préventive", pp), ("facteur rebut", fr), ("casse", ca), ("rendement du test", rt)) if v is None]
+        neutres = [nom for nom, v in (("part préventive", pp), ("facteur scrap", fr), ("casse", ca), ("rendement du test", rt)) if v is None]
         lignes.append({"Type de FRU": r["FRU"], "Pièce": r["Pièce"], "Pièces consommées": conso, "Réparations du FRU": rep, "n_par_fru": n,
                        "Source n_par_fru": src_n, "p_défaut": d, "Correctifs": "neutres : " + ", ".join(neutres) if neutres else "tous saisis", "q0": q0})
     return pd.DataFrame(lignes, columns=cols)
 
 
 # --------------------------------------------------------------------------- résolution
-def resoudre(cfg: Config, p: Parametres, src: Sources, couples: pd.DataFrame, rebut_annuel: pd.DataFrame, rex_post: pd.DataFrame,
-             rebut: pd.DataFrame | None = None) -> tuple[dict, dict, pd.DataFrame]:
+def resoudre(cfg: Config, p: Parametres, src: Sources, couples: pd.DataFrame, scrap_annuel: pd.DataFrame, rex_post: pd.DataFrame,
+             scrap: pd.DataFrame | None = None) -> tuple[dict, dict, pd.DataFrame]:
     """Paramètres effectifs du modèle : (LIGNE, FRU_TYPES, provenance). Voir l'en-tête du module."""
     prov = []
 
@@ -335,7 +344,7 @@ def resoudre(cfg: Config, p: Parametres, src: Sources, couples: pd.DataFrame, re
         ligne[k] = note("(ligne)", "", k, v, "saisi" + (f" : {p.ligne_source.get(k)}" if p.ligne_source.get(k) else ""))
     change = ligne.get("taux_change_mmicv")
     frac = ligne.get("valeur_reemploi_frac")
-    ra = rebut_annuel.set_index("FRU") if rebut_annuel is not None and len(rebut_annuel) else pd.DataFrame()
+    ra = scrap_annuel.set_index("FRU") if scrap_annuel is not None and len(scrap_annuel) else pd.DataFrame()
     post = rex_post.set_index(["Type de FRU", "Pièce"]) if rex_post is not None and len(rex_post) else pd.DataFrame()
     c = couples.set_index(["FRU", "Pièce"]) if len(couples) else pd.DataFrame()
     delais = p.supply.set_index("Référence")["Délai (semaines)"] if len(p.supply) else pd.Series(dtype=float)
@@ -347,14 +356,14 @@ def resoudre(cfg: Config, p: Parametres, src: Sources, couples: pd.DataFrame, re
         saisi_f = "saisi" + (f" : {src_f}" if src_f else "")
         d = {"description": f.get("Description") if isinstance(f.get("Description"), str) else src.desc_fru.get(nom, ""),
              "atelier": src.atelier_fru.get(nom, f.get("Atelier") if isinstance(f.get("Atelier"), str) else "")}
-        # FRU rebutées par an
-        v, o = milieu_ou_plage(f["rebut_an"]), saisi_f
-        if v is None and len(ra) and nom in ra.index and not nul(ra.at[nom, "rebut_an"]):
-            v, o = ra.at[nom, "rebut_an"], f"auto : suivi hebdomadaire ({int(ra.at[nom, 'Semaines complètes'])} semaines complètes)"
-        if v is None and rebut is not None and len(rebut) and jours and nom in set(rebut["FRU"]):
-            n = float(rebut.loc[rebut["FRU"].eq(nom), "FRU rebutées"].sum())
-            v, o = n * 365.0 / jours, f"auto : {n:g} FRU rebutées sur {jours} jours, annualisé"
-        d["rebut_an"] = note(nom, "", "rebut_an", v, o)
+        # FRU scrapées par an
+        v, o = milieu_ou_plage(f["scrap_an"]), saisi_f
+        if v is None and len(ra) and nom in ra.index and not nul(ra.at[nom, "scrap_an"]):
+            v, o = ra.at[nom, "scrap_an"], f"auto : suivi hebdomadaire ({int(ra.at[nom, 'Semaines complètes'])} semaines complètes)"
+        if v is None and scrap is not None and len(scrap) and jours and nom in set(scrap["FRU"]):
+            n = float(scrap.loc[scrap["FRU"].eq(nom), "FRU scrapées"].sum())
+            v, o = n * 365.0 / jours, f"auto : {n:g} FRU scrapées sur {jours} jours, annualisé"
+        d["scrap_an"] = note(nom, "", "scrap_an", v, o)
         v, o = milieu_ou_plage(f["poids_fru_kg"]), saisi_f
         if v is None and nom in src.poids_fru.index:
             v, o = float(src.poids_fru[nom]), "auto : fiche du FRU (Net weight)"

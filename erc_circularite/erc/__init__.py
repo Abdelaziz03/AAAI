@@ -1,4 +1,4 @@
-"""ERC circularité : du flux des FRU rebutées à la décision (ligne de démontage et de tri, réemploi, recyclage).
+"""ERC circularité : du flux des FRU scrapées à la décision (ligne de démontage et de tri, réemploi, recyclage).
 
     import erc
     ctx = erc.executer()                 # tout le pipeline ; ctx.res[étape][nom], ctx.depot, ctx.src

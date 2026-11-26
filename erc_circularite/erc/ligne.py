@@ -1,11 +1,11 @@
-"""Économie d'une ligne de tri / démontage des FRU rebutées (et non plus pièce par pièce).
+"""Économie d'une ligne de tri / démontage des FRU scrapées (et non plus pièce par pièce).
 
 Idées du modèle
 ---------------
 1. La probabilité qu'une pièce soit défectueuse dans une FRU se lit dans la consommation :
        p_défaut ≈ pièces consommées / (FRU réparées × nombre de cette pièce par FRU).
-   Une pièce saine extraite d'une FRU rebutée a donc une probabilité (1 − p_défaut) d'être réutilisable,
-   corrigée par un facteur « rebut » (une FRU rebutée est souvent plus abîmée qu'une FRU réparée) et
+   Une pièce saine extraite d'une FRU scrapée a donc une probabilité (1 − p_défaut) d'être réutilisable,
+   corrigée par un facteur « scrap » (une FRU scrapée est souvent plus abîmée qu'une FRU réparée) et
    par la casse au démontage. Ces corrections se calibrent avec l'audit de démontage.
 2. Le coût se raisonne au niveau d'une LIGNE :
      - coûts fixes : installation (postes, outillage ESD, banc de test) amortie + coûts fixes annuels ;
@@ -24,7 +24,7 @@ Ce que devient une entrée inconnue (None ou NaN) : jamais un zéro caché
 ------------------------------------------------------------------------
 - Entrée d'une option (temps, nombre par FRU, probabilité, valeur, poids, prix, ouverture) : l'option n'est pas
   calculable et n'est jamais choisie ; la colonne « Manque ... » dit ce qu'il faut obtenir.
-- FRU rebutées par an, taux horaire, coût de traitement du recycleur actuel, ou aucune option calculable :
+- FRU scrapées par an, taux horaire, coût de traitement du recycleur actuel, ou aucune option calculable :
   le type de FRU est « incomplet », exclu du calcul et compté dans « Types de FRU incomplets ». Les autres
   types sont optimisés normalement.
 - Investissement, durée d'amortissement, coûts fixes annuels, poids d'un FRU : l'indicateur qui en dépend
@@ -80,15 +80,15 @@ def p_defaut_depuis_conso(conso_piece, fru_reparees, n_par_fru=1, part_preventiv
     return float(np.clip(conso_piece * (1 - part) / (fru_reparees * n_par_fru), 0, 1))
 
 
-def p_reutilisable(p_defaut, facteur_rebut=1.0, casse_demontage=0.0, rendement_test=1.0):
-    """P(un exemplaire extrait d'une FRU REBUTÉE est réutilisable), entre 0 et 1.
+def p_reutilisable(p_defaut, facteur_scrap=1.0, casse_demontage=0.0, rendement_test=1.0):
+    """P(un exemplaire extrait d'une FRU SCRAPÉE est réutilisable), entre 0 et 1.
 
-    = (1 − p_défaut × facteur_rebut) × (1 − casse au démontage) × rendement du test, chaque facteur borné à [0, 1].
+    = (1 − p_défaut × facteur_scrap) × (1 − casse au démontage) × rendement du test, chaque facteur borné à [0, 1].
     Une entrée inconnue donne NaN : la valeur neutre d'un correctif (1, 0, 1) se passe explicitement.
     """
-    if any(_inconnu(v) for v in (p_defaut, facteur_rebut, casse_demontage, rendement_test)) or not np.isfinite(p_defaut):
+    if any(_inconnu(v) for v in (p_defaut, facteur_scrap, casse_demontage, rendement_test)) or not np.isfinite(p_defaut):
         return np.nan
-    sain = np.clip(1 - p_defaut * facteur_rebut, 0, 1)
+    sain = np.clip(1 - p_defaut * facteur_scrap, 0, 1)
     return float(sain * (1 - np.clip(casse_demontage, 0, 1)) * np.clip(rendement_test, 0, 1))
 
 
@@ -141,7 +141,7 @@ def _milieu(x):
 # ---------------------------------------------------------------------------
 # 3. Options par type de FRU
 # ---------------------------------------------------------------------------
-# Trois options pour chaque pièce de chaque FRU rebutée, valeurs nettes PAR FRU, comparées à l'option 3 :
+# Trois options pour chaque pièce de chaque FRU scrapée, valeurs nettes PAR FRU, comparées à l'option 3 :
 #   1 « réemploi »  : démontage soigné + test → pièce réutilisée ; un exemplaire qui échoue au test est vendu au kilo
 #                     si son poids et le prix du recycleur acheteur sont connus (le temps de tri n'intervient pas :
 #                     l'exemplaire est déjà sorti du FRU), sinon il retourne à la benne du recycleur actuel.
@@ -170,7 +170,7 @@ CHAMPS_RECYCLAGE = ["n_par_fru", "poids_kg", "prix_recycleur_eur_kg", "tri_min"]
 # « Pièces non examinées » celles qui avaient une option calculable : pour ce type de FRU, le plan est alors un
 # minimum garanti et non plus l'optimum (une pièce écartée dont aucune option ne vaut plus que zéro ne change rien).
 MAX_PIECES_ENUM = 8
-COLONNES_DETAIL = ["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU rebutées / an", "Heures par FRU",
+COLONNES_DETAIL = ["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU scrapées / an", "Heures par FRU",
                    "Marge par FRU (€)", "Marge par heure (€)", "Heures / an", "Marge variable / an (€)", "Kg détournés / an",
                    "Entrées manquantes", "Pièces non examinées"]
 COLONNES_PERIODE = ["Semaine", "FRU arrivées", "FRU traitées", "Heures utilisées", "Capacité (h)", "Marge variable (€)", "Coût fixe (€)",
@@ -199,9 +199,9 @@ def manques(fru: dict, taux_defaut) -> list[str]:
     Le coût de traitement du recycleur actuel est lu dans fru["_c_trait"], que `optimiser_ligne` renseigne :
     présent et inconnu, il bloque le type de FRU ; absent, il n'est pas vérifié.
     """
-    m = [c for c in ("rebut_an",) if _inconnu(fru.get(c))]
-    if not m and fru["rebut_an"] < 0:
-        m.append("rebut_an négatif")
+    m = [c for c in ("scrap_an",) if _inconnu(fru.get(c))]
+    if not m and fru["scrap_an"] < 0:
+        m.append("scrap_an négatif")
     if _inconnu(fru.get("taux_horaire_eur", taux_defaut)):
         m.append("taux_horaire_eur")
     if "_c_trait" in fru and _inconnu(fru["_c_trait"]):
@@ -372,7 +372,7 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
         return {f: o.meilleur(mu) for f, o in opts.items()}
 
     def heures(c):
-        return sum(ok[f]["rebut_an"] * x[1] for f, x in c.items())
+        return sum(ok[f]["scrap_an"] * x[1] for f, x in c.items())
 
     mu_lo, mu_hi = 0.0, 0.0
     c_hi = choix(0.0)
@@ -394,13 +394,13 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
         for f, _ in sorted(candidats, key=lambda x: -x[1]):
             if reste <= 1e-12:
                 break
-            x = min(float(ok[f]["rebut_an"]), reste / (c_lo[f][1] - c_hi[f][1]))
+            x = min(float(ok[f]["scrap_an"]), reste / (c_lo[f][1] - c_hi[f][1]))
             reste -= x * (c_lo[f][1] - c_hi[f][1])
             bascule[f] = x
     lignes = []
     for f in ok:
         S, h, m, k = c_hi[f]
-        n = float(ok[f]["rebut_an"])
+        n = float(ok[f]["scrap_an"])
         x = bascule.get(f, 0.0)
         debut = len(lignes)
         if x > 0:                                 # x FRU au plan plus gourmand, le reste au plan sobre
@@ -422,7 +422,7 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
 def _ligne_res(f, S, n, h, m, d, k=0.0):
     return {"Type de FRU": f, "Décision": "traiter" if S and n > 0 else "jeter telle quelle",
             "1 Réemploi": ", ".join(p for p, o in S if o == "réemploi"),
-            "2 Recyclage": ", ".join(p for p, o in S if o == "recyclage"), "FRU traitées / an": n, "FRU rebutées / an": d["rebut_an"],
+            "2 Recyclage": ", ".join(p for p, o in S if o == "recyclage"), "FRU traitées / an": n, "FRU scrapées / an": d["scrap_an"],
             "Heures par FRU": h, "Marge par FRU (€)": m, "Marge par heure (€)": m / h if h else np.nan,
             "Heures / an": n * h, "Marge variable / an (€)": n * m, "Kg détournés / an": n * k, "Entrées manquantes": ""}
 
@@ -447,8 +447,8 @@ def _bilan(ligne, detail, mu, cap, frus=None):
     """Résultat de la ligne. Coût fixe ou marge inconnus → NaN (jamais 0)."""
     frus = frus or {}
     c = ligne.get("cout_traitement_eur_kg")
-    masses = [d["rebut_an"] * d["poids_fru_kg"] for d in frus.values()
-              if d and not _inconnu(d.get("rebut_an")) and not _inconnu(d.get("poids_fru_kg")) and d["rebut_an"] >= 0]
+    masses = [d["scrap_an"] * d["poids_fru_kg"] for d in frus.values()
+              if d and not _inconnu(d.get("scrap_an")) and not _inconnu(d.get("poids_fru_kg")) and d["scrap_an"] >= 0]
     masse = float(sum(masses)) if masses and len(masses) == len(frus) else np.nan
     cout_actuel = masse * c if not _inconnu(c) else np.nan
     inv, fix = ligne.get("cout_installation_eur"), ligne.get("couts_fixes_annuels_eur")
@@ -467,7 +467,7 @@ def _bilan(ligne, detail, mu, cap, frus=None):
         "Retour sur investissement (ans)": inv / excedent if not _inconnu(inv) and excedent > 0 else np.nan,
         "Valeur d'une heure opérateur en plus (€ net)": mu if len(calc) else np.nan,
         "Types de FRU incomplets": int(detail["Décision"].eq("incomplet").sum()) if len(detail) else 0,
-        "Masse des FRU rebutées (kg/an)": masse, "Masse détournée de la benne (kg/an)": float(calc["Kg détournés / an"].sum()) if len(calc) else np.nan,
+        "Masse des FRU scrapées (kg/an)": masse, "Masse détournée de la benne (kg/an)": float(calc["Kg détournés / an"].sum()) if len(calc) else np.nan,
         "Coût actuel de traitement (€/an)": cout_actuel}}
 
 
@@ -492,8 +492,8 @@ def comparer_scenarios(ligne: dict, frus: dict) -> pd.DataFrame:
     t = pd.DataFrame(lignes, columns=["Poste (€/an)", "Actuel", "Avec la ligne", "Écart"])
     tot = pd.DataFrame([("TOTAL", t["Actuel"].sum(skipna=False), t["Avec la ligne"].sum(skipna=False), t["Écart"].sum(skipna=False))], columns=t.columns)
     t = pd.concat([t, tot], ignore_index=True)
-    t.attrs.update({"Masse rebutée (kg/an)": r["Masse des FRU rebutées (kg/an)"], "Masse détournée (kg/an)": r["Masse détournée de la benne (kg/an)"],
-                    "Part détournée": r["Masse détournée de la benne (kg/an)"] / r["Masse des FRU rebutées (kg/an)"] if r["Masse des FRU rebutées (kg/an)"] else np.nan})
+    t.attrs.update({"Masse scrapée (kg/an)": r["Masse des FRU scrapées (kg/an)"], "Masse détournée (kg/an)": r["Masse détournée de la benne (kg/an)"],
+                    "Part détournée": r["Masse détournée de la benne (kg/an)"] / r["Masse des FRU scrapées (kg/an)"] if r["Masse des FRU scrapées (kg/an)"] else np.nan})
     return t
 
 
@@ -534,13 +534,13 @@ def _semaine_incomplete(v) -> bool:
 
 
 def resultat_par_periode(ligne: dict, frus: dict, flux: pd.DataFrame, periodes_par_an=52) -> pd.DataFrame:
-    """Le modèle rejoué période par période sur le flux RÉEL des FRU rebutées (colonnes Semaine, FRU, FRU rebutées).
+    """Le modèle rejoué période par période sur le flux RÉEL des FRU scrapées (colonnes Semaine, FRU, FRU scrapées).
 
     Chaque période : capacité = heures annuelles / périodes ; coût fixe = (installation amortie + fixes annuels) / périodes,
     payé même si peu de FRU arrivent ; pas de stock d'une période à l'autre (hypothèse 10 du modèle).
     Une période présente dans le flux sans FRU du modèle compte pour zéro FRU. Si le flux a une colonne
     « Semaine complète », les semaines marquées incomplètes sont écartées : une semaine extraite à moitié n'est pas
-    une semaine creuse. De même, une semaine où le nombre de FRU rebutées d'un type du modèle est inconnu (vide ou
+    une semaine creuse. De même, une semaine où le nombre de FRU scrapées d'un type du modèle est inconnu (vide ou
     illisible) est écartée : un comptage manquant n'est pas un zéro. Les FRU du flux absents du modèle sont ignorés.
     Les attributs du tableau comparent avec le modèle annuel au flux moyen des mêmes périodes : l'écart est le
     COÛT DE LA VARIABILITÉ du flux (heures perdues les semaines creuses, FRU non traitées les semaines chargées).
@@ -557,7 +557,7 @@ def resultat_par_periode(ligne: dict, frus: dict, flux: pd.DataFrame, periodes_p
     if "Semaine complète" in flux.columns:
         flux = flux[~flux["Semaine complète"].map(_semaine_incomplete).astype(bool)]
     total, sans_comptage = {}, set()
-    for sem, f, v in zip(flux["Semaine"], flux["FRU"], pd.to_numeric(flux["FRU rebutées"], errors="coerce")):
+    for sem, f, v in zip(flux["Semaine"], flux["FRU"], pd.to_numeric(flux["FRU scrapées"], errors="coerce")):
         if f not in fr:
             continue
         if np.isnan(v):
@@ -568,17 +568,17 @@ def resultat_par_periode(ligne: dict, frus: dict, flux: pd.DataFrame, periodes_p
     semaines = sorted({sem for sem in flux["Semaine"] if not _inconnu(sem)} - sans_comptage)
     lignes, cumul = [], 0.0
     for sem in semaines:
-        fr_t = {f: dict(d or {}, rebut_an=total.get((sem, f), 0.0)) for f, d in fr.items()}
+        fr_t = {f: dict(d or {}, scrap_an=total.get((sem, f), 0.0)) for f, d in fr.items()}
         r = optimiser_ligne(dict(lg, heures_operateur_an=cap_p), fr_t)["resume"]
         resultat = r["Marge variable / an (€)"] - fixe_p
         cumul += resultat
-        lignes.append({"Semaine": sem, "FRU arrivées": float(sum(d["rebut_an"] for d in fr_t.values())), "FRU traitées": r["FRU traitées / an"],
+        lignes.append({"Semaine": sem, "FRU arrivées": float(sum(d["scrap_an"] for d in fr_t.values())), "FRU traitées": r["FRU traitées / an"],
                        "Heures utilisées": r["Heures utilisées / an"], "Capacité (h)": np.nan if cap_p is None else cap_p,
                        "Marge variable (€)": r["Marge variable / an (€)"], "Coût fixe (€)": fixe_p, "Résultat (€)": resultat,
                        "Valeur d'une heure en plus (€)": r["Valeur d'une heure opérateur en plus (€ net)"], "Résultat cumulé (€)": cumul})
     t = pd.DataFrame(lignes, columns=COLONNES_PERIODE)
     if len(t):
-        moyen = {f: dict(d or {}, rebut_an=sum(total.get((sem, f), 0.0) for sem in semaines) / len(semaines) * periodes_par_an) for f, d in fr.items()}
+        moyen = {f: dict(d or {}, scrap_an=sum(total.get((sem, f), 0.0) for sem in semaines) / len(semaines) * periodes_par_an) for f, d in fr.items()}
         annuel = optimiser_ligne(lg, moyen)["resume"]["Résultat / an (€)"]
         par_periode = t["Résultat (€)"].mean() * periodes_par_an
         t.attrs.update({"Périodes": len(t), "Résultat annualisé, période par période (€)": par_periode,

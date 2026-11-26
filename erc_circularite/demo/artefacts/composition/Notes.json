@@ -1,0 +1,41 @@
+{
+ "pieces": 21,
+ "statuts": {
+  "acceptée": 13,
+  "validée": 6,
+  "à valider": 2
+ },
+ "appels_au_modele": 3,
+ "cout_des_acquisitions_eur": 0.19,
+ "pieces_sans_appel_payant": 19,
+ "classes": [
+  "Carte B",
+  "Carte C",
+  "Composant de puissance",
+  "Condensateur",
+  "Câbles",
+  "Composant standard",
+  "Plastique",
+  "Métal"
+ ],
+ "seuil_acceptation": 0.9,
+ "couts_hypotheses_de_travail": {
+  "collecte": 0.02,
+  "lecture par le modèle": 0.05,
+  "contrôle par le modèle": 0.03,
+  "revue humaine": 5.0
+ },
+ "collecteur": "branché",
+ "modele": "branché",
+ "cortex": {
+  "sujets": 21,
+  "affirmations": 43,
+  "sujets validés": 6,
+  "coût cumulé des acquisitions": 0.19
+ },
+ "nomenclature": "BOM_demo.xlsx",
+ "validations_importees": 6,
+ "regles": 7,
+ "regles_invalides": [],
+ "fournisseurs_fictifs": true
+}

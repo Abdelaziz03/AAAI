@@ -1,6 +1,6 @@
 ﻿Source;Fichier;État;Lignes;Détail;Sert à
-Extraction R26;ERC_R26_extraction_20260831_20261101.xlsx;chargé;737;20260831 → 20261101;consommations, FRU rebutées
-Extraction R26;ERC_R26_extraction_20260601_20260913.xlsx;chargé;1030;20260601 → 20260913;consommations, FRU rebutées
+Extraction R26;ERC_R26_extraction_20260831_20261101.xlsx;chargé;737;20260831 → 20261101;consommations, FRU scrapées
+Extraction R26;ERC_R26_extraction_20260601_20260913.xlsx;chargé;1030;20260601 → 20260913;consommations, FRU scrapées
 FRU_info;FRU_info.xlsx;chargé;5;;atelier et famille de chaque FRU
 Classification matières;ERC_Classification_Cartes_resultats.xlsx;chargé;18;;type de déchet, benne, poids unitaire
 Référentiel des grades;ERC_Referentiel_Grades.xlsx;chargé;8;;prix recycleur par catégorie

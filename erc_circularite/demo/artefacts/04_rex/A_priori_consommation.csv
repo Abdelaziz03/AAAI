@@ -15,6 +15,6 @@ FRU-B300-R;P-3002;209,0;341;2,0;saisi;0,3064516129032258;neutres : part prévent
 FRU-B300-R;P-3004;77,0;341;1,0;saisi;0,22580645161290322;neutres : part préventive;0,604016129032258
 FRU-B300-R;P-3005;54,0;341;1,0;saisi;0,15835777126099707;neutres : part préventive;0,6789853372434017
 FRU-B300-R;P-3003;370,0;341;2,0;saisi;0,5425219941348973;neutres : part préventive;0,2519868035190616
-FRU-B400-R;P-3002;59,0;73;2,0;minimum observé sur un PO, à confirmer;0,4041095890410959;neutres : part préventive, facteur rebut, casse, rendement du test;0,595890410958904
-FRU-B400-R;P-3005;13,0;73;1,0;minimum observé sur un PO, à confirmer;0,1780821917808219;neutres : part préventive, facteur rebut, casse, rendement du test;0,821917808219178
-FRU-B400-R;P-4001;43,0;73;1,0;minimum observé sur un PO, à confirmer;0,589041095890411;neutres : part préventive, facteur rebut, casse, rendement du test;0,410958904109589
+FRU-B400-R;P-3002;59,0;73;2,0;minimum observé sur un PO, à confirmer;0,4041095890410959;neutres : part préventive, facteur scrap, casse, rendement du test;0,595890410958904
+FRU-B400-R;P-3005;13,0;73;1,0;minimum observé sur un PO, à confirmer;0,1780821917808219;neutres : part préventive, facteur scrap, casse, rendement du test;0,821917808219178
+FRU-B400-R;P-4001;43,0;73;1,0;minimum observé sur un PO, à confirmer;0,589041095890411;neutres : part préventive, facteur scrap, casse, rendement du test;0,410958904109589

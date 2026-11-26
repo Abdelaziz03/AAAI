@@ -115,7 +115,7 @@ def _causes(r) -> str:
         c.append(f"poids unitaires manquants ({1 - r['Couverture poids']:.0%} des pièces)")
     if r["Dans la marge"] == "non":
         if r["Écart (kg)"] > 0:
-            c.append("mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières rebutées, emballages, vidage de bacs remplis les semaines précédentes")
+            c.append("mesuré > estimé : benne partagée avec d'autres ateliers, FRU entières scrapées, emballages, vidage de bacs remplis les semaines précédentes")
         else:
             c.append("mesuré < estimé : pièces encore dans les bacs individuels, pièces renvoyées en réparation ou réemployées, pièce consommée ≠ pièce jetée (kit)")
         if pd.notna(r.get("Écart cumulé (%)")) and abs(r["Écart cumulé (%)"]) < abs(r["Écart (%)"]) / 2:
@@ -124,38 +124,38 @@ def _causes(r) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Flux d'entrée du modèle de ligne : FRU rebutées par semaine et par type
+# Flux d'entrée du modèle de ligne : FRU scrapées par semaine et par type
 # ---------------------------------------------------------------------------
 def flux_fru_hebdo(fr: pd.DataFrame, couverts: set, poids_fru: pd.Series | None = None) -> pd.DataFrame:
-    """Semaine x FRU : FRU rebutées et masse estimée. Les semaines extraites sans rebut comptent pour 0 (et non absentes)."""
+    """Semaine x FRU : FRU scrapées et masse estimée. Les semaines extraites sans scrap comptent pour 0 (et non absentes)."""
     js = pd.Series(sorted(couverts))
     n_j = semaine(js).value_counts().sort_index() if len(js) else pd.Series(dtype=int)
-    d = fr[fr["Date rebut"].isin(couverts)] if len(couverts) else fr
-    g = d.assign(Semaine=semaine(d["Date rebut"])).groupby(["Semaine", "FRU"])["Unités"].sum()
+    d = fr[fr["Date scrap"].isin(couverts)] if len(couverts) else fr
+    g = d.assign(Semaine=semaine(d["Date scrap"])).groupby(["Semaine", "FRU"])["Unités"].sum()
     grille = pd.MultiIndex.from_product([n_j.index, sorted(d["FRU"].unique())], names=["Semaine", "FRU"])
-    t = g.reindex(grille, fill_value=0).rename("FRU rebutées").reset_index()
+    t = g.reindex(grille, fill_value=0).rename("FRU scrapées").reset_index()
     t["Jours extraits"] = t["Semaine"].map(n_j).astype(int)
     t["Semaine complète"] = t["Jours extraits"].eq(7)
     if poids_fru is not None:
         t["Poids FRU (kg)"] = t["FRU"].map(poids_fru)
-        t["Masse estimée (kg)"] = t["FRU rebutées"] * t["Poids FRU (kg)"]
+        t["Masse estimée (kg)"] = t["FRU scrapées"] * t["Poids FRU (kg)"]
     return t
 
 
-def rebut_annuel(flux: pd.DataFrame, n_boot=2000, rng=None) -> pd.DataFrame:
+def scrap_annuel(flux: pd.DataFrame, n_boot=2000, rng=None) -> pd.DataFrame:
     """N_f du modèle : moyenne hebdomadaire x 52 sur les semaines COMPLÈTES, avec intervalle par ré-échantillonnage
-    des semaines. `rebut_an` est le triangle (bas, moyen, haut) à passer à la ligne de tri."""
+    des semaines. `scrap_an` est le triangle (bas, moyen, haut) à passer à la ligne de tri."""
     rng = np.random.default_rng(2026) if rng is None else rng      # un générateur par appel : deux exécutions donnent le même intervalle
     lignes = []
     for f, g in flux[flux["Semaine complète"]].groupby("FRU"):
-        x = g["FRU rebutées"].to_numpy(float)
+        x = g["FRU scrapées"].to_numpy(float)
         if len(x) < 2:
-            lignes.append({"FRU": f, "Semaines complètes": len(x), "Moyenne hebdo": x.mean() if len(x) else np.nan, "rebut_an": None,
+            lignes.append({"FRU": f, "Semaines complètes": len(x), "Moyenne hebdo": x.mean() if len(x) else np.nan, "scrap_an": None,
                            "Note": "moins de 2 semaines complètes : pas d'intervalle"})
             continue
         b = rng.choice(x, (n_boot, len(x))).mean(axis=1) * 52
         bas, moy, haut = float(np.quantile(b, 0.05)), float(x.mean() * 52), float(np.quantile(b, 0.95))
         lignes.append({"FRU": f, "Semaines complètes": len(x), "Moyenne hebdo": x.mean(), "Écart-type hebdo": x.std(ddof=1),
-                       "Rebut annuel bas (5 %)": bas, "Rebut annuel moyen": moy, "Rebut annuel haut (95 %)": haut,
-                       "rebut_an": (bas, moy, haut) if haut > bas else moy, "Note": ""})
+                       "Scrap annuel bas (5 %)": bas, "Scrap annuel moyen": moy, "Scrap annuel haut (95 %)": haut,
+                       "scrap_an": (bas, moy, haut) if haut > bas else moy, "Note": ""})
     return pd.DataFrame(lignes)
