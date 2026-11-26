@@ -1,3 +1,2 @@
-﻿PN;Description;Classe retenue;Probabilité;Statut;Sources;Preuves;Enjeu (€/an, borne);Appels au modèle;Coût des acquisitions (€);Prochaine action;Vaut une revue;Classe validée;Validateur
-P-9001;Vis M4 inox;Métal;0,6829268292683927;à valider;règle;1;;0;0,0;revue humaine si la pièce compte : enjeu inconnu (poids, volume ou prix d'une classe manquant);enjeu inconnu;;
-P-9002;Radiateur aluminium extrudé;Métal;0,6829268292683927;à valider;règle;1;;0;0,0;revue humaine si la pièce compte : enjeu inconnu (poids, volume ou prix d'une classe manquant);enjeu inconnu;;
+﻿PN;Description;Classe retenue;Probabilité;Statut;Sources;Preuves;Enjeu (€/an, borne);Appels au modèle;Coût des acquisitions (€);Prochaine action;Vaut une revue;Classe validée;Validateur;Motif
+P-5001;Coil preamp board;Carte B;0,5772051536174426;à valider;classement antérieur, modèle : extraction, règle;4;78,41481420462587;0;0,0;revue humaine;oui;;;file

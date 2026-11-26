@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Composition des pièces ERC</title>
+<style>
+/* Mise en page : une file de travail. Bilan en tête, barre de tri collante, une ligne par pièce
+   (qui est la pièce | ce que croit la chaîne | ce que décide la personne), preuves dépliables, export en bas. */
+/*__ERC_JETONS__*/
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--fond); color: var(--encre);
+  font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px; line-height: 1.5;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--fond); }
+.page {
+  max-width: 1180px; margin: 0 auto; padding-block: 0 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3, p, ul, ol, dl, dd, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+h1 { font-size: clamp(24px, 3.4vw, 32px); line-height: 1.2; font-weight: 650; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 21px; line-height: 1.25; font-weight: 650; text-wrap: balance; }
+h3 { font-size: 15px; line-height: 1.3; font-weight: 650; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+[hidden] { display: none !important; }
+.chiffres, td.n, th.n { font-variant-numeric: tabular-nums; }
+.second { color: var(--encre-2); }
+.discret { color: var(--encre-3); }
+.petit { font-size: 13px; }
+.inconnu { color: var(--encre-3); font-style: italic; }
+
+.bandeau {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin-top: 12px; padding: 10px 14px;
+  border: 1px solid var(--trait); border-radius: 8px; background: var(--surface); font-size: 13px; color: var(--encre-2);
+}
+.bandeau > * { min-width: 0; }
+.bandeau.demo { background: var(--alerte-fond); border-color: var(--alerte-trait); color: var(--alerte); }
+.bandeau .mode { font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; }
+.bandeau .mode::before { content: ""; width: 10px; height: 10px; flex: none; background: currentColor; border-radius: 50%; }
+.bandeau.demo .mode::before { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); width: 12px; height: 11px; }
+
+.entete { padding-block: 28px 20px; }
+.sur-titre { font-size: 13px; font-weight: 650; color: var(--encre-3); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+.chapeau { margin-top: 10px; max-width: 74ch; color: var(--encre-2); }
+
+/* Bilan : des chiffres alignés, pas des tuiles */
+.bilan { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border: 1px solid var(--trait); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.bilan > div { padding: 14px 18px; min-width: 0; border-left: 1px solid var(--trait); border-top: 1px solid var(--trait); margin: -1px 0 0 -1px; }
+.bilan dt { font-size: 13px; color: var(--encre-2); font-weight: 600; }
+.bilan dd.valeur { font-size: 24px; line-height: 1.2; font-weight: 650; margin-top: 2px; }
+.bilan dd.lecture { font-size: 12px; color: var(--encre-3); margin-top: 2px; }
+.repartition { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--neutre-fond); margin-top: 14px; }
+.repartition > span { display: block; height: 100%; min-width: 2px; }
+.rep-validee { background: var(--bon); }
+.rep-acceptee { background: var(--serie-1); }
+.rep-a-valider { background: var(--alerte-trait); }
+.rep-inconnue { background: var(--marque-neutre); }
+.legende { display: flex; flex-wrap: wrap; gap: 4px 18px; margin-top: 8px; font-size: 12px; color: var(--encre-2); }
+.legende span { display: inline-flex; align-items: center; gap: 6px; }
+.legende i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+section { padding-block: 34px 6px; scroll-margin-top: 72px; }
+section + section { border-top: 1px solid var(--trait); margin-top: 28px; }
+.intro { max-width: 80ch; color: var(--encre-2); margin-block: 6px 16px; }
+.note { font-size: 13px; color: var(--encre-2); max-width: 86ch; margin-top: 10px; }
+.vide { padding: 18px; border: 1px dashed var(--trait-fort); border-radius: 8px; color: var(--encre-2); background: var(--surface); font-size: 14px; }
+
+.puce {
+  display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; padding: 1px 9px; border-radius: 999px;
+  border: 1px solid var(--trait-fort); background: var(--neutre-fond); color: var(--neutre);
+  font-size: 12px; font-weight: 650; line-height: 18px; white-space: nowrap;
+}
+.puce::before { content: ""; width: 7px; height: 7px; flex: none; border-radius: 50%; background: currentColor; }
+.puce.bon { background: var(--bon-fond); color: var(--bon); border-color: var(--bon-trait); }
+.puce.alerte { background: var(--alerte-fond); color: var(--alerte); border-color: var(--alerte-trait); }
+.puce.alerte::before { border-radius: 0; clip-path: polygon(50% 0, 100% 100%, 0 100%); width: 9px; height: 8px; }
+.puce.accent { background: var(--accent-fond); color: var(--accent); border-color: var(--accent-trait); }
+.puce.sans::before { display: none; }
+
+input.texte, select, textarea { background: var(--surface); border: 1px solid var(--trait-fort); border-radius: 6px; padding: 5px 8px; min-height: 32px; max-width: 100%; }
+.bouton {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 32px; padding: 5px 12px; border: 1px solid var(--trait-fort);
+  border-radius: 6px; background: var(--surface); color: var(--encre); font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: none;
+}
+.bouton:hover { background: var(--surface-2); }
+.bouton.principal { background: var(--accent); border-color: var(--accent); color: var(--sur-accent); }
+.bouton.principal:hover { filter: brightness(1.08); }
+.bouton.lien { border-color: transparent; background: transparent; color: var(--accent); padding-inline: 4px; }
+.bouton:disabled { opacity: 0.55; cursor: default; }
+
+/* Barre de tri collante */
+.barre {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--fond); border-bottom: 1px solid var(--trait);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-block: 8px;
+}
+.barre > * { min-width: 0; }
+.files { display: flex; flex-wrap: wrap; gap: 4px; }
+.files button { border: 1px solid transparent; background: transparent; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 600; color: var(--encre-2); cursor: pointer; }
+.files button:hover { background: var(--surface-2); color: var(--encre); }
+.files button[aria-pressed="true"] { background: var(--accent-fond); color: var(--accent); border-color: var(--accent-trait); }
+.files .compte { font-variant-numeric: tabular-nums; font-weight: 500; margin-left: 4px; }
+.barre .pousse { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+#recherche { width: 280px; }
+
+/* Une pièce */
+.pieces { border-bottom: 1px solid var(--trait); }
+.piece { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 4fr); gap: 10px 28px; padding-block: 16px; border-top: 1px solid var(--trait); }
+.piece > * { min-width: 0; }
+.pn { font-family: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace; font-size: 13.5px; font-weight: 650; overflow-wrap: anywhere; }
+.description { margin-top: 2px; overflow-wrap: anywhere; }
+.origine-piece { font-size: 12.5px; color: var(--encre-3); margin-top: 4px; overflow-wrap: anywhere; }
+.ligne-puces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.proposee { font-weight: 650; font-size: 16px; }
+.proposee small { font-size: 13px; font-weight: 600; color: var(--encre-2); margin-left: 6px; }
+.croyance { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--neutre-fond); margin-top: 8px; }
+.croyance > span { display: block; height: 100%; }
+.c1 { background: var(--serie-1); }
+.c2 { background: var(--serie-2); }
+.c3 { background: var(--marque-neutre); }
+.partage { font-size: 12.5px; color: var(--encre-2); margin-top: 6px; overflow-wrap: anywhere; }
+.partage b { font-weight: 650; color: var(--encre); }
+.enjeu { font-size: 13px; color: var(--encre-2); }
+.enjeu b { color: var(--encre); font-weight: 650; }
+.suite { font-size: 12.5px; color: var(--encre-3); margin-top: 2px; }
+.choix { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.choix select { min-width: 150px; }
+.deplier { display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; padding: 2px 4px; margin: 6px -4px -2px; cursor: pointer; font-weight: 650; font-size: 13px; color: var(--accent); border-radius: 4px; }
+.deplier::before { content: ""; width: 0; height: 0; border-left: 6px solid currentColor; border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; transition: transform 0.12s; }
+.deplier[aria-expanded="true"]::before { transform: rotate(90deg); }
+.preuves { grid-column: 1 / -1; background: var(--surface); border: 1px solid var(--trait); border-radius: 8px; padding: 12px 14px; }
+.preuves li { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 4px 14px; padding-block: 8px; font-size: 13.5px; }
+.preuves li + li { border-top: 1px solid var(--trait); }
+.preuves .dit b { font-weight: 650; }
+.preuves .ecarte b { color: var(--critique); }
+.preuves .citation { color: var(--encre-2); font-size: 13px; margin-top: 2px; overflow-wrap: anywhere; }
+.preuves .commentaire { margin-top: 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; }
+.preuves .commentaire input { flex: 1 1 260px; }
+.plus { display: flex; justify-content: center; padding-block: 16px; }
+
+/* Export */
+.export { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px 32px; }
+.export > * { min-width: 0; }
+.export ol { list-style: decimal; padding-left: 20px; color: var(--encre-2); }
+.export ol li + li { margin-top: 6px; }
+.export code, .note code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.92em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.export .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block: 10px; }
+#csv { width: 100%; min-height: 150px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12.5px; white-space: pre; resize: vertical; }
+.champ-nom { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+.tableau-zone { overflow-x: auto; border: 1px solid var(--trait); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 8px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--trait); }
+thead th { font-size: 12px; font-weight: 650; color: var(--encre-2); background: var(--surface-2); border-bottom: 1px solid var(--trait-fort); vertical-align: bottom; }
+tbody tr:last-child > td, tbody tr:last-child > th { border-bottom: 0; }
+tbody th { font-weight: 650; }
+td.n, th.n { text-align: right; white-space: nowrap; }
+.barre-mini { display: inline-block; vertical-align: middle; width: 72px; height: 6px; border-radius: 3px; background: var(--neutre-fond); overflow: hidden; margin-right: 8px; position: relative; }
+.barre-mini > span { display: block; height: 100%; background: var(--serie-1); border-radius: 3px; }
+.deux { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px 32px; }
+.deux > * { min-width: 0; }
+
+@media (max-width: 860px) {
+  .bilan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bilan > div:last-child { grid-column: 1 / -1; }
+  .piece, .export, .deux { grid-template-columns: minmax(0, 1fr); }
+  .preuves li { grid-template-columns: minmax(0, 1fr); }
+  .barre .pousse { margin-left: 0; width: 100%; }
+  #recherche { flex: 1 1 160px; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .deplier::before { transition: none; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div id="etat"></div>
+  <header class="entete">
+    <p class="sur-titre">Centre de réparation · connaissance des pièces</p>
+    <h1>De quoi est faite chaque pièce</h1>
+    <p class="chapeau">La chaîne propose une classe matière pour chaque pièce de la nomenclature, avec ce qu'elle en sait. Vous tranchez les cas qu'elle n'a pas su résoudre et vous contrôlez par sondage ceux qu'elle a acceptés seule. Vos décisions deviennent la référence : elles corrigent les pièces, servent d'exemples aux pièces voisines et mesurent ce que vaut chaque source.</p>
+  </header>
+
+  <dl class="bilan" id="bilan"></dl>
+  <div class="repartition" id="repartition" role="img"></div>
+  <div class="legende" id="legende"></div>
+
+  <section id="file" aria-labelledby="t-file">
+    <h2 id="t-file">Pièces</h2>
+    <p class="intro" id="intro-file"></p>
+    <div class="barre">
+      <div class="files" id="files" role="group" aria-label="File affichée"></div>
+      <div class="pousse">
+        <input class="texte" id="recherche" type="search" placeholder="Référence, description, fabricant" aria-label="Chercher une pièce">
+        <a class="bouton principal" href="#export" id="vers-export">Décisions à exporter : <span class="chiffres" id="n-decisions">0</span></a>
+      </div>
+    </div>
+    <ul class="pieces" id="pieces"></ul>
+    <div class="plus"><button class="bouton" id="plus" type="button">Afficher la suite</button></div>
+  </section>
+
+  <section id="export" aria-labelledby="t-export">
+    <h2 id="t-export">Enregistrer vos décisions</h2>
+    <p class="intro">Cette page ne modifie rien toute seule. Elle prépare un fichier que la chaîne relit au passage suivant.</p>
+    <div class="export">
+      <div>
+        <ol>
+          <li>Indiquez votre nom : il est gardé avec chaque validation.</li>
+          <li>Téléchargez le fichier et déposez-le dans le dossier <code>Acquisition</code> du projet, sous le nom <code id="nom-fichier"></code>.</li>
+          <li>Relancez la chaîne (<code>python -m erc.composition</code>, ou le carnet 07). Les validations déjà relues restent dans la base : le fichier peut ne contenir que les nouvelles.</li>
+        </ol>
+        <p class="note">Si le téléchargement ne démarre pas (page ouverte dans un lecteur qui le bloque), copiez le contenu et collez-le dans un fichier de ce nom.</p>
+      </div>
+      <div>
+        <div class="champ-nom">
+          <label for="validateur">Votre nom</label>
+          <input class="texte" id="validateur" type="text" autocomplete="name" placeholder="Prénom Nom">
+        </div>
+        <div class="actions">
+          <button class="bouton principal" id="telecharger" type="button">Télécharger le fichier</button>
+          <button class="bouton" id="copier" type="button">Copier le contenu</button>
+          <button class="bouton lien" id="effacer" type="button">Effacer toutes mes décisions</button>
+          <span class="petit second" id="retour" role="status"></span>
+        </div>
+        <label class="petit second" for="csv">Contenu du fichier</label>
+        <textarea id="csv" readonly spellcheck="false"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section id="sources" aria-labelledby="t-sources">
+    <h2 id="t-sources">Ce que valent les sources</h2>
+    <p class="intro">Chaque type de source a une fiabilité de départ, posée par bon sens et de faible poids. Elle est remplacée par ce qui est observé sur les pièces validées : combien de fois la source a eu raison.</p>
+    <div class="deux">
+      <div class="tableau-zone"><table id="t-fiab"></table></div>
+      <div>
+        <h3>Ce qu'a coûté la recherche</h3>
+        <div class="tableau-zone" style="margin-top:10px"><table id="t-actions"></table></div>
+        <p class="note" id="note-couts"></p>
+      </div>
+    </div>
+    <p class="note">Une mesure faite seulement sur les pièces douteuses sous-estime les sources, puisque ce sont justement les cas où elles se contredisent. Le contrôle par sondage des pièces acceptées corrige ce biais : c'est la raison d'être de la file « Sondage ».</p>
+  </section>
+</div>
+
+<script type="application/json" id="donnees">__ERC_COMPOSITION__</script>
+<script>
+/*__LOGIQUE_DEBUT__*/
+// Fonctions sans affichage : testées hors navigateur (tests/test_composition_outil.py).
+var EN_TETE_CSV = ["PN", "Classe validée", "Validateur", "Commentaire", "Motif"];
+
+function champCsv(v) {
+  var t = v === null || v === undefined ? "" : String(v);
+  return /[";\r\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+}
+
+// decisions : {PN: {classe, commentaire, motif}} ; une ligne par décision, triées par référence. Séparateur « ; ».
+// Le motif dit d'où vient la décision : « file » (pièce que la chaîne n'avait pas tranchée), « sondage » (pièce acceptée
+// tirée au hasard) ou « choix » (toute autre pièce). Il sert à mesurer la fiabilité des sources sans biais.
+function csvValidations(decisions, validateur) {
+  var lignes = [EN_TETE_CSV.join(";")];
+  Object.keys(decisions).sort().forEach(function (pn) {
+    var d = decisions[pn];
+    if (d && d.classe) lignes.push([pn, d.classe, validateur || "non précisé", d.commentaire || "", d.motif || "choix"].map(champCsv).join(";"));
+  });
+  return lignes.join("\r\n") + "\r\n";
+}
+
+function sansAccent(t) {
+  return String(t || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+}
+
+function motifDe(p, sondage) {
+  if (p.statut === "à valider" || p.statut === "inconnue") return "file";
+  return p.statut === "acceptée" && sondage.has(p.pn) ? "sondage" : "choix";
+}
+
+function dansFile(p, file, sondage, decisions) {
+  if (file === "a-valider") return p.statut === "à valider" || p.statut === "inconnue";
+  if (file === "sondage") return sondage.has(p.pn);
+  if (file === "acceptees") return p.statut === "acceptée";
+  if (file === "validees") return p.statut === "validée";
+  if (file === "decisions") return !!decisions[p.pn];
+  return true;
+}
+
+// La file « à valider » est triée par enjeu décroissant (enjeu inconnu en dernier) ; les autres par référence.
+function filtrer(pieces, file, texte, sondage, decisions) {
+  var q = sansAccent(texte).trim();
+  var out = pieces.filter(function (p) {
+    if (!dansFile(p, file, sondage, decisions)) return false;
+    if (!q) return true;
+    return sansAccent([p.pn, p.description, p.fabricant, p.reference_fabricant, p.classe, p.fru].join(" ")).indexOf(q) >= 0;
+  });
+  if (file === "a-valider") {
+    out.sort(function (a, b) {
+      var x = a.enjeu === null || a.enjeu === undefined ? -Infinity : a.enjeu, y = b.enjeu === null || b.enjeu === undefined ? -Infinity : b.enjeu;
+      return y - x || (a.pn < b.pn ? -1 : a.pn > b.pn ? 1 : 0);
+    });
+  } else {
+    out.sort(function (a, b) { return a.pn < b.pn ? -1 : a.pn > b.pn ? 1 : 0; });
+  }
+  return out;
+}
+
+function compter(pieces) {
+  var n = { total: pieces.length, "validée": 0, "acceptée": 0, "à valider": 0, "inconnue": 0, sansAppelPayant: 0, appels: 0, cout: 0 };
+  pieces.forEach(function (p) {
+    if (n[p.statut] !== undefined) n[p.statut] += 1;
+    if (!(p.cout > 0)) n.sansAppelPayant += 1;
+    n.appels += p.appels || 0;
+    n.cout += p.cout || 0;
+  });
+  return n;
+}
+
+// Parts de croyance à afficher : les deux classes les plus probables, puis « autres ».
+function partage(p) {
+  var pr = p.probabilites;
+  if (!pr) return p.classe && p.probabilite !== null && p.probabilite !== undefined ? [{ classe: p.classe, part: p.probabilite }] : [];
+  var t = Object.keys(pr).map(function (c) { return { classe: c, part: pr[c] }; }).sort(function (a, b) { return b.part - a.part; });
+  var tete = t.slice(0, 2), reste = t.slice(2).reduce(function (s, x) { return s + x.part; }, 0);
+  if (reste > 0.005) tete.push({ classe: "autres", part: reste });
+  return tete;
+}
+
+// Décisions gardées d'une visite à l'autre : on écarte celles qui ne concernent plus cette nomenclature
+// ou qui ont déjà été importées (la pièce est validée avec la même classe).
+function nettoyer(decisions, pieces) {
+  var par = {}, out = {};
+  pieces.forEach(function (p) { par[p.pn] = p; });
+  Object.keys(decisions || {}).forEach(function (pn) {
+    var d = decisions[pn], p = par[pn];
+    if (p && d && d.classe && p.validee !== d.classe) out[pn] = { classe: String(d.classe), commentaire: String(d.commentaire || ""), motif: String(d.motif || "choix") };
+  });
+  return out;
+}
+
+if (typeof module !== "undefined") module.exports = { champCsv: champCsv, csvValidations: csvValidations, filtrer: filtrer, compter: compter, partage: partage, nettoyer: nettoyer, dansFile: dansFile, motifDe: motifDe };
+/*__LOGIQUE_FIN__*/
+</script>
+<script>
+(function () {
+  "use strict";
+  var D = JSON.parse(document.getElementById("donnees").textContent);
+  var PIECES = D.pieces || [], CLASSES = D.classes || [], SONDAGE = new Set(D.sondage || []);
+  var CLE = "erc-composition:" + (D.nomenclature || "");
+  var PAS = 40;
+  var etat = { file: "a-valider", texte: "", montre: PAS, ouverts: new Set(), decisions: {}, validateur: "" };
+
+  function lire(cle, defaut) { try { var v = localStorage.getItem(cle); return v === null ? defaut : JSON.parse(v); } catch (e) { return defaut; } }
+  function ecrire(cle, v) { try { localStorage.setItem(cle, JSON.stringify(v)); } catch (e) { /* stockage refusé : la page marche sans */ } }
+  etat.decisions = nettoyer(lire(CLE + ":decisions", {}), PIECES);
+  etat.validateur = String(lire("erc-composition:validateur", "") || "");
+
+  function el(nom, attrs, enfants) {
+    var e = document.createElement(nom);
+    Object.keys(attrs || {}).forEach(function (k) {
+      if (k === "class") e.className = attrs[k];
+      else if (k === "text") e.textContent = attrs[k];
+      else if (attrs[k] !== null && attrs[k] !== undefined && attrs[k] !== false) e.setAttribute(k, attrs[k] === true ? "" : attrs[k]);
+    });
+    (enfants || []).forEach(function (c) { if (c !== null && c !== undefined) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return e;
+  }
+  var nf0 = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }), nf2 = new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function pct(x) { return x === null || x === undefined ? "inconnu" : nf0.format(Math.round(x * 100)) + " %"; }
+  function eur(x) { return x === null || x === undefined ? "inconnu" : (Math.abs(x) < 10 ? nf2.format(x) : nf0.format(x)) + " €"; }
+
+  // ---------------------------------------------------------------- en-tête
+  function bandeau() {
+    var z = document.getElementById("etat");
+    var b = el("div", { class: "bandeau" + (D.demo ? " demo" : "") });
+    b.appendChild(el("span", { class: "mode", text: D.demo ? "Démonstration : pièces et documents fictifs" : "Données du dossier" }));
+    if (D.nomenclature) b.appendChild(el("span", { text: "Nomenclature : " + D.nomenclature }));
+    b.appendChild(el("span", { text: "Collecte de documents : " + (D.collecteur === "branché" ? "branchée" : "absente") + (D.fournisseurs_fictifs ? " (fictive)" : "") }));
+    b.appendChild(el("span", { text: "Modèle de langage : " + (D.modele || "absent") + (D.fournisseurs_fictifs ? " (fictif)" : "") }));
+    b.appendChild(el("span", { text: "Calculé le " + String(D.genere_le || "").replace("T", " à ") }));
+    z.appendChild(b);
+    if (!D.demo) z.appendChild(el("div", { class: "bandeau", text: "Cette page contient des références et des descriptions internes : elle ne sort pas de l'entreprise." }));
+  }
+
+  function bilan() {
+    var n = compter(PIECES), z = document.getElementById("bilan");
+    function cas(titre, valeur, lecture) {
+      z.appendChild(el("div", {}, [el("dt", { text: titre }), el("dd", { class: "valeur chiffres", text: valeur }), el("dd", { class: "lecture", text: lecture })]));
+    }
+    cas("Pièces", nf0.format(n.total), "dans la nomenclature");
+    cas("Validées", nf0.format(n["validée"]), "par une personne : la référence");
+    cas("Acceptées", nf0.format(n["acceptée"]), "probabilité d'au moins " + pct(D.seuils.acceptation));
+    cas("À valider", nf0.format(n["à valider"] + n["inconnue"]), n["inconnue"] ? "dont " + nf0.format(n["inconnue"]) + " sans aucune preuve" : "la chaîne hésite");
+    cas("Sans recherche payante", n.total ? pct(n.sansAppelPayant / n.total) : "inconnu", nf0.format(n.appels) + " appel(s) au modèle, " + eur(n.cout) + " d'acquisition");
+    var r = document.getElementById("repartition"), l = document.getElementById("legende");
+    [["validée", "rep-validee", "validées"], ["acceptée", "rep-acceptee", "acceptées"], ["à valider", "rep-a-valider", "à valider"], ["inconnue", "rep-inconnue", "sans preuve"]].forEach(function (x) {
+      if (!n[x[0]]) return;
+      r.appendChild(el("span", { class: x[1], style: "width:" + (100 * n[x[0]] / Math.max(n.total, 1)) + "%" }));
+      l.appendChild(el("span", {}, [el("i", { class: x[1] }), nf0.format(n[x[0]]) + " " + x[2]]));
+    });
+    r.setAttribute("aria-label", "Répartition des pièces : " + l.textContent);
+  }
+
+  // ---------------------------------------------------------------- files
+  var FILES = [
+    ["a-valider", "À valider", "Les pièces que la chaîne n'a pas su trancher, celles où trancher peut rapporter le plus en premier."],
+    ["sondage", "Sondage", "Des pièces acceptées tirées au hasard. Confirmez ou corrigez : c'est ce contrôle qui dit si la chaîne mérite sa confiance."],
+    ["acceptees", "Acceptées", "Les pièces que la chaîne a résolues seule. Vous pouvez en corriger une."],
+    ["validees", "Validées", "Les pièces déjà validées par une personne. Une nouvelle validation remplace l'ancienne."],
+    ["decisions", "Mes décisions", "Ce que vous avez décidé dans cette page et qui n'est pas encore exporté."],
+    ["toutes", "Toutes", "Toute la nomenclature, par référence."]
+  ];
+  function nombreDans(file) { return file === "decisions" ? Object.keys(etat.decisions).length : PIECES.filter(function (p) { return dansFile(p, file, SONDAGE, etat.decisions); }).length; }
+  function files() {
+    var z = document.getElementById("files");
+    z.textContent = "";
+    FILES.forEach(function (f) {
+      var b = el("button", { type: "button", "aria-pressed": etat.file === f[0] ? "true" : "false", "data-file": f[0] }, [f[1], el("span", { class: "compte", text: nf0.format(nombreDans(f[0])) })]);
+      z.appendChild(b);
+    });
+    document.getElementById("intro-file").textContent = FILES.filter(function (f) { return f[0] === etat.file; })[0][2];
+  }
+
+  // ---------------------------------------------------------------- une pièce
+  function puceStatut(p) {
+    if (p.statut === "validée") return el("span", { class: "puce bon", text: "validée" });
+    if (p.statut === "acceptée") return el("span", { class: "puce accent", text: "acceptée" });
+    if (p.statut === "à valider") return el("span", { class: "puce alerte", text: "à valider" });
+    return el("span", { class: "puce", text: "sans preuve" });
+  }
+  function blocIdentite(p) {
+    var d = el("div");
+    d.appendChild(el("div", { class: "pn", text: p.pn }));
+    d.appendChild(p.description ? el("div", { class: "description", text: p.description }) : el("div", { class: "description inconnu", text: "sans description" }));
+    var o = [p.fabricant, p.reference_fabricant].filter(Boolean).join(" · ");
+    if (o || p.fru) d.appendChild(el("div", { class: "origine-piece", text: [o, p.fru ? "FRU " + p.fru : null].filter(Boolean).join(" — ") }));
+    var puces = el("div", { class: "ligne-puces" }, [puceStatut(p)]);
+    if (p.interne) puces.appendChild(el("span", { class: "puce sans", text: "conception interne : aucune recherche extérieure" }));
+    if (SONDAGE.has(p.pn) && p.statut === "acceptée") puces.appendChild(el("span", { class: "puce sans", text: "tirée pour le sondage" }));
+    d.appendChild(puces);
+    return d;
+  }
+  function blocCroyance(p) {
+    var d = el("div");
+    if (!p.classe) {
+      d.appendChild(el("div", { class: "proposee inconnu", text: "Aucune proposition" }));
+      d.appendChild(el("div", { class: "partage", text: "Aucune source ne dit rien de cette pièce." }));
+    } else {
+      d.appendChild(el("div", { class: "proposee" }, [p.classe, el("small", { text: p.statut === "validée" ? "validée" : pct(p.probabilite) })]));
+      var parts = partage(p);
+      if (p.statut !== "validée" && parts.length) {
+        var barre = el("div", { class: "croyance", role: "img", "aria-label": parts.map(function (x) { return x.classe + " " + pct(x.part); }).join(", ") });
+        parts.forEach(function (x, i) { barre.appendChild(el("span", { class: x.classe === "autres" ? "c3" : "c" + (i + 1), style: "width:" + (100 * x.part) + "%" })); });
+        d.appendChild(barre);
+        if (parts.length > 1) {
+          var t = el("div", { class: "partage" });
+          parts.forEach(function (x, i) { if (i) t.appendChild(document.createTextNode(" · ")); t.appendChild(el("b", { text: x.classe })); t.appendChild(document.createTextNode(" " + pct(x.part))); });
+          d.appendChild(t);
+        }
+      }
+    }
+    var n = p.preuves.length;
+    if (n) {
+      var ouvert = etat.ouverts.has(p.pn);
+      d.appendChild(el("button", { class: "deplier", type: "button", "aria-expanded": ouvert ? "true" : "false", "data-ouvrir": p.pn, text: n + (n > 1 ? " sources" : " source") + " : qui dit quoi" }));
+    }
+    return d;
+  }
+  function blocDecision(p) {
+    var d = el("div"), dec = etat.decisions[p.pn];
+    if (p.statut !== "validée") {
+      var e = el("div", { class: "enjeu" });
+      if (p.enjeu === null || p.enjeu === undefined) e.appendChild(el("b", { text: "Enjeu inconnu" }));
+      else { e.appendChild(document.createTextNode("Trancher peut rapporter au plus ")); e.appendChild(el("b", { text: eur(p.enjeu) + " par an" })); }
+      d.appendChild(e);
+      if (p.suite) d.appendChild(el("div", { class: "suite", text: "Suite proposée : " + p.suite }));
+    }
+    var c = el("div", { class: "choix" });
+    if (dec) {
+      c.appendChild(el("span", { class: "puce bon", text: "Votre décision : " + dec.classe }));
+      c.appendChild(el("button", { class: "bouton lien", type: "button", "data-annuler": p.pn, text: "Annuler" }));
+    } else {
+      if (p.classe && p.statut !== "validée" && CLASSES.indexOf(p.classe) >= 0) c.appendChild(el("button", { class: "bouton", type: "button", "data-confirmer": p.pn, text: "Confirmer : " + p.classe }));
+      var s = el("select", { id: "choix-" + p.pn, "data-choisir": p.pn, "aria-label": "Choisir la classe de " + p.pn });
+      s.appendChild(el("option", { value: "", text: p.classe ? "Autre classe…" : "Choisir la classe…" }));
+      CLASSES.forEach(function (k) { if (k !== p.classe || p.statut === "validée") s.appendChild(el("option", { value: k, text: k })); });
+      if (p.statut === "validée" && p.classe && CLASSES.indexOf(p.classe) < 0) s.firstChild.textContent = "Corriger la classe…";
+      c.appendChild(s);
+    }
+    d.appendChild(c);
+    return d;
+  }
+  function blocPreuves(p) {
+    var z = el("div", { class: "preuves" }), l = el("ul");
+    p.preuves.forEach(function (x) {
+      var dit = el("div", { class: x.affirme ? "dit" : "dit ecarte" }, [x.affirme ? "dit : " : "écarte : ", el("b", { text: x.classe })]);
+      var droite = el("div", {}, [dit]);
+      var d = x.detail || {};
+      var precision = [x.origine && x.origine !== x.type ? x.origine : null, d.citation ? "« " + d.citation + " »" : null,
+        d.ressemblance !== undefined ? "ressemblance " + pct(d.ressemblance) : null].filter(Boolean).join(" — ");
+      if (precision) droite.appendChild(el("div", { class: "citation", text: precision }));
+      l.appendChild(el("li", {}, [el("div", {}, [el("div", { text: x.type }), el("div", { class: "petit discret", text: "fiabilité " + pct(x.fiabilite) })]), droite]));
+    });
+    z.appendChild(l);
+    var dec = etat.decisions[p.pn];
+    if (dec) {
+      var champ = el("input", { class: "texte", type: "text", id: "commentaire-" + p.pn, "data-commenter": p.pn, value: dec.commentaire || "", placeholder: "Ce qui vous fait décider (facultatif)" });
+      z.appendChild(el("div", { class: "commentaire" }, [el("label", { for: "commentaire-" + p.pn, text: "Commentaire" }), champ]));
+    }
+    return z;
+  }
+  function ligne(p) {
+    var li = el("li", { class: "piece" + (etat.decisions[p.pn] ? " decidee" : ""), "data-pn": p.pn }, [blocIdentite(p), blocCroyance(p), blocDecision(p)]);
+    if (etat.ouverts.has(p.pn) && p.preuves.length) li.appendChild(blocPreuves(p));
+    return li;
+  }
+
+  function liste() {
+    var z = document.getElementById("pieces"), t = filtrer(PIECES, etat.file, etat.texte, SONDAGE, etat.decisions);
+    z.textContent = "";
+    if (!t.length) {
+      var vide = { "a-valider": "Rien à valider : la chaîne a tranché toutes les pièces. Passez au sondage.", sondage: "Aucune pièce acceptée à contrôler pour l'instant.",
+        decisions: "Aucune décision en attente d'export." }[etat.file] || "Aucune pièce ne correspond.";
+      z.appendChild(el("li", { class: "vide", text: etat.texte ? "Aucune pièce ne correspond à « " + etat.texte + " » dans cette file." : vide }));
+    }
+    t.slice(0, etat.montre).forEach(function (p) { z.appendChild(ligne(p)); });
+    var b = document.getElementById("plus");
+    b.hidden = t.length <= etat.montre;
+    b.textContent = "Afficher la suite (" + nf0.format(Math.max(t.length - etat.montre, 0)) + " pièces restantes)";
+  }
+
+  // ---------------------------------------------------------------- export
+  function exporter() {
+    var n = Object.keys(etat.decisions).length;
+    document.getElementById("n-decisions").textContent = nf0.format(n);
+    document.getElementById("csv").value = csvValidations(etat.decisions, etat.validateur.trim());
+    document.getElementById("telecharger").disabled = !n;
+    document.getElementById("copier").disabled = !n;
+    document.getElementById("effacer").hidden = !n;
+  }
+  function decider(pn, classe) {
+    var piece = PIECES.filter(function (x) { return x.pn === pn; })[0];
+    if (classe) etat.decisions[pn] = { classe: classe, commentaire: (etat.decisions[pn] || {}).commentaire || "", motif: piece ? motifDe(piece, SONDAGE) : "choix" };
+    else delete etat.decisions[pn];
+    ecrire(CLE + ":decisions", etat.decisions);
+    files(); liste(); exporter();
+  }
+  function dire(t) { var r = document.getElementById("retour"); r.textContent = t; }
+
+  // ---------------------------------------------------------------- sources et coûts
+  function sources() {
+    var t = document.getElementById("t-fiab");
+    t.appendChild(el("thead", {}, [el("tr", {}, [el("th", { text: "Type de source" }), el("th", { class: "n", text: "Départ (hypothèse)" }), el("th", { class: "n", text: "Vérifiées" }),
+      el("th", { class: "n", text: "Justes" }), el("th", { text: "Fiabilité retenue" })])]));
+    var c = el("tbody");
+    (D.fiabilites || []).forEach(function (f) {
+      var barre = el("span", { class: "barre-mini" }, [el("span", { style: "width:" + (100 * (f.fiabilite || 0)) + "%" })]);
+      c.appendChild(el("tr", {}, [el("th", { text: f.type }), el("td", { class: "n", text: pct(f.a_priori) }), el("td", { class: "n", text: nf0.format(f.verifiees) }),
+        el("td", { class: "n", text: f.verifiees ? nf0.format(f.justes) : "—" }),
+        el("td", {}, [barre, el("span", { class: "chiffres", text: pct(f.fiabilite) }), f.verifiees ? null : el("span", { class: "petit discret", text: "  pas encore mesurée" })])]));
+    });
+    t.appendChild(c);
+    var a = document.getElementById("t-actions");
+    a.appendChild(el("thead", {}, [el("tr", {}, [el("th", { text: "Action" }), el("th", { class: "n", text: "Nombre" }), el("th", { class: "n", text: "Coût compté" })])]));
+    var ca = el("tbody");
+    if (!(D.actions || []).length) ca.appendChild(el("tr", {}, [el("td", { colspan: "3", class: "inconnu", text: "Aucune recherche payante n'a été lancée." })]));
+    (D.actions || []).forEach(function (x) { ca.appendChild(el("tr", {}, [el("th", { text: x.action }), el("td", { class: "n", text: nf0.format(x.nombre) }), el("td", { class: "n", text: eur(x.cout) })])); });
+    a.appendChild(ca);
+    var k = D.couts || {};
+    document.getElementById("note-couts").textContent = "Coûts unitaires comptés (hypothèses de travail, à remplacer par les vôtres) : " +
+      Object.keys(k).map(function (n) { return n + " " + eur(k[n]); }).join(" ; ") + ". Une recherche payante n'est lancée que si l'enjeu de la pièce dépasse son coût.";
+  }
+
+  // ---------------------------------------------------------------- événements
+  document.getElementById("files").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-file]");
+    if (!b) return;
+    etat.file = b.getAttribute("data-file"); etat.montre = PAS;
+    ecrire(CLE + ":file", etat.file);
+    files(); liste();
+  });
+  document.getElementById("recherche").addEventListener("input", function (e) { etat.texte = e.target.value; etat.montre = PAS; liste(); });
+  document.getElementById("plus").addEventListener("click", function () { etat.montre += PAS; liste(); });
+  document.getElementById("pieces").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var pn;
+    if ((pn = b.getAttribute("data-ouvrir"))) { if (etat.ouverts.has(pn)) etat.ouverts.delete(pn); else etat.ouverts.add(pn); liste(); }
+    else if ((pn = b.getAttribute("data-confirmer"))) { var p = PIECES.filter(function (x) { return x.pn === pn; })[0]; if (p) decider(pn, p.classe); }
+    else if ((pn = b.getAttribute("data-annuler"))) decider(pn, null);
+  });
+  document.getElementById("pieces").addEventListener("change", function (e) {
+    var s = e.target.closest("select[data-choisir]");
+    if (s && s.value) { decider(s.getAttribute("data-choisir"), s.value); return; }
+    var c = e.target.closest("input[data-commenter]");
+    if (c) { var pn = c.getAttribute("data-commenter"); if (etat.decisions[pn]) { etat.decisions[pn].commentaire = c.value; ecrire(CLE + ":decisions", etat.decisions); exporter(); } }
+  });
+  document.getElementById("validateur").addEventListener("input", function (e) { etat.validateur = e.target.value; ecrire("erc-composition:validateur", etat.validateur); exporter(); });
+  document.getElementById("telecharger").addEventListener("click", function () {
+    try {
+      var blob = new Blob(["﻿" + document.getElementById("csv").value], { type: "text/csv;charset=utf-8" });
+      var a = el("a", { href: URL.createObjectURL(blob), download: D.fichier_validations });
+      document.body.appendChild(a); a.click(); a.remove();
+      dire("Fichier demandé au navigateur. S'il n'apparaît pas, copiez le contenu.");
+    } catch (err) { dire("Téléchargement impossible ici : copiez le contenu."); }
+  });
+  document.getElementById("copier").addEventListener("click", function () {
+    var z = document.getElementById("csv");
+    function secours() { z.focus(); z.select(); dire("Contenu sélectionné : copiez-le (Ctrl+C)."); }
+    try { navigator.clipboard.writeText(z.value).then(function () { dire("Contenu copié."); }, secours); } catch (err) { secours(); }
+  });
+  var confirmeEffacer = false;
+  document.getElementById("effacer").addEventListener("click", function (e) {
+    if (!confirmeEffacer) { confirmeEffacer = true; e.target.textContent = "Confirmer l'effacement"; return; }
+    confirmeEffacer = false; e.target.textContent = "Effacer toutes mes décisions";
+    etat.decisions = {}; ecrire(CLE + ":decisions", {}); files(); liste(); exporter(); dire("Décisions effacées.");
+  });
+
+  // ---------------------------------------------------------------- démarrage
+  var memo = lire(CLE + ":file", null);
+  if (memo && FILES.some(function (f) { return f[0] === memo; })) etat.file = memo;
+  if (etat.file === "a-valider" && !nombreDans("a-valider") && nombreDans("sondage")) etat.file = "sondage";
+  document.getElementById("nom-fichier").textContent = D.fichier_validations;
+  document.getElementById("validateur").value = etat.validateur;
+  bandeau(); bilan(); files(); liste(); exporter(); sources();
+})();
+</script>
+</body>
+</html>

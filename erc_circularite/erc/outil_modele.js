@@ -24,7 +24,7 @@
   var OPTIONS = ["réemploi", "recyclage", "jeté"];
   var CHAMPS_REEMPLOI = ["n_par_fru", "extraction_min", "test_min", "p_reutilisable", "valeur_eur"];
   var CHAMPS_RECYCLAGE = ["n_par_fru", "poids_kg", "prix_recycleur_eur_kg", "tri_min"];
-  var MAX_PIECES_ENUM = 8;                 // 3^8 = 6 561 combinaisons par type de FRU
+  var MAX_PIECES_ENUM = 8;                 // jusqu'à 8 pièces calculables : énumération (3^8 = 6 561) ; au-delà : sans énumérer
   var CLES_LIGNE = ["heures_operateur_an", "taux_horaire_eur", "cout_traitement_eur_kg", "cout_installation_eur",
                     "amortissement_ans", "couts_fixes_annuels_eur"];
   var CLES_FRU = ["scrap_an", "poids_fru_kg", "ouverture_min", "ouverture_tri_min", "taux_horaire_eur"];
@@ -178,12 +178,37 @@
     return _CODES[n];
   }
 
-  /** Toutes les affectations pièce → option d'un type de FRU : heures, marge et kg détournés par FRU.
-   *  Seules les affectations calculables sont gardées (dans l'ordre de Python) : une option non calculable
-   *  n'est jamais choisie, puisque « tout laisser » (marge 0, 0 heure) est toujours calculable. */
-  function Options(fru, tauxDefaut) {
+  /** Affectations pièce → option d'un type de FRU, et le meilleur plan pour un prix donné de l'heure.
+   *  Deux méthodes, même résultat (comme la classe Options de ligne.py) :
+   *    énumération  jusqu'à MAX_PIECES_ENUM pièces calculables : toutes les affectations calculables, dans l'ordre de
+   *                 Python (une option non calculable n'est jamais choisie : « tout laisser » est toujours calculable) ;
+   *    séparable    au-delà : chaque pièce prend seule sa meilleure option, puis on compare « ne pas ouvrir »,
+   *                 « ouvrir sans réemploi » et « ouvrir avec au moins un réemploi ». Toutes les pièces sont examinées.
+   *  `separable` force la méthode (true ou false) ; laissé vide, elle est choisie d'après le nombre de pièces. */
+  function Options(fru, tauxDefaut, separable) {
     var taux = lire(fru, "taux_horaire_eur", tauxDefaut);
     var t = valeursOptions(fru, tauxDefaut).lignes;
+    var nbCalculables = t.filter(function (l) { return !(isNaN(l["1 Réemploi (€/FRU)"]) && isNaN(l["2 Recyclage (€/FRU)"])); }).length;
+    this.separable = separable === undefined || separable === null ? nbCalculables > MAX_PIECES_ENUM : !!separable;
+    if (this.separable) {
+      var gardees = t.filter(function (l) { return !(isNaN(l["1 Réemploi (€/FRU)"]) && isNaN(l["2 Recyclage (€/FRU)"])); });
+      this.noms = gardees.map(function (l) { return l["Pièce"]; });
+      this.noms_ignores = [];
+      this.ignorees = 0;
+      this.n = gardees.length;
+      var zero = function (x) { return isNaN(x) ? 0.0 : x; };
+      this.vRe = gardees.map(function (l) { return l["1 Réemploi (€/FRU)"]; });      // NaN = option non calculable
+      this.vRc = gardees.map(function (l) { return l["2 Recyclage (€/FRU)"]; });
+      this.hRe = gardees.map(function (l) { return zero(l["Heures réemploi"]); });
+      this.hRc = gardees.map(function (l) { return zero(l["Heures recyclage"]); });
+      this.kRe = gardees.map(function (l) { return zero(l["Kg détournés réemploi"]); });
+      this.kRc = gardees.map(function (l) { return zero(l["Kg détournés recyclage"]); });
+      this.ouv = ou0(fru.ouverture_min) / 60;
+      this.ouvTri = ou0(lire(fru, "ouverture_tri_min", fru.ouverture_min)) / 60;
+      this.taux = inconnu(taux) ? NaN : taux;
+      this.H = this.M = this.K = this.idx = null;
+      return;
+    }
     // Tri par meilleure valeur décroissante, inconnus à la fin, ex æquo dans l'ordre d'origine ; 8 premières gardées.
     var ordre = t.map(function (l, i) {
       var a = l["1 Réemploi (€/FRU)"], b = l["2 Recyclage (€/FRU)"];
@@ -258,8 +283,56 @@
     return e;
   };
 
+  /** Même réponse que l'énumération, en un passage sur les pièces (_meilleur_separable de ligne.py).
+   *  Les sommes sont faites dans l'ordre des pièces, comme en Python. */
+  Options.prototype.meilleurSeparable = function (mu) {
+    var n = this.n, VIDE = { e: [], h: 0.0, m: 0.0, k: 0.0 };
+    if (!n) return VIDE;
+    var rRe = new Array(n), rRc = new Array(n), avec = new Array(n), sans = new Array(n), j;
+    var unReemploi = false, reemploiPossible = false;
+    for (j = 0; j < n; j++) {
+      rRe[j] = isNaN(this.vRe[j]) ? -Infinity : this.vRe[j] - mu * this.hRe[j];
+      rRc[j] = isNaN(this.vRc[j]) ? -Infinity : this.vRc[j] - mu * this.hRc[j];
+      // à égalité : réemploi, puis recyclage
+      avec[j] = rRe[j] >= rRc[j] && rRe[j] >= 0 ? 0 : rRc[j] >= 0 ? 1 : 2;
+      sans[j] = rRc[j] >= 0 ? 1 : 2;
+      if (avec[j] === 0) unReemploi = true;
+      if (isFinite(rRe[j])) reemploiPossible = true;
+    }
+    if (!unReemploi && reemploiPossible) {              // aucun réemploi choisi : l'imposer à la pièce pour qui il coûte le moins
+      var meilleurEcart = -Infinity, jm = 0;
+      for (j = 0; j < n; j++) {
+        var ecart = rRe[j] - Math.max(rRc[j], 0.0);
+        if (ecart > meilleurEcart) { meilleurEcart = ecart; jm = j; }
+      }
+      avec[jm] = 0;
+    }
+    var self = this;
+    function bilan(code, avecReemploi) {
+      var re = false, rc = false, hh = 0.0, mm = 0.0, kk = 0.0, i;
+      for (i = 0; i < n; i++) { if (code[i] === 0) re = true; else if (code[i] === 1) rc = true; }
+      if (!(re || rc) || (avecReemploi && !re)) return null;
+      for (i = 0; i < n; i++) {
+        hh += code[i] === 0 ? self.hRe[i] : code[i] === 1 ? self.hRc[i] : 0.0;
+        mm += code[i] === 0 ? self.vRe[i] : code[i] === 1 ? self.vRc[i] : 0.0;
+        kk += code[i] === 0 ? self.kRe[i] : code[i] === 1 ? self.kRc[i] : 0.0;
+      }
+      var o = re ? self.ouv : self.ouvTri;
+      hh = hh + o;
+      mm = mm - (o !== 0 ? o * self.taux : 0.0);
+      return { r: mm - mu * hh, code: code, h: hh, m: mm, k: kk };
+    }
+    var a = bilan(avec, true), b = bilan(sans, false), best = a;
+    if (b !== null && (best === null || b.r > best.r)) best = b;       // à égalité, le plan avec réemploi
+    if (best === null || !(best.r > 1e-12)) return VIDE;
+    var e = [];
+    for (j = 0; j < n; j++) if (best.code[j] < 2) e.push([this.noms[j], OPTIONS[best.code[j]]]);
+    return { e: e, h: best.h, m: best.m, k: best.k };
+  };
+
   /** Plan qui maximise marge − mu × heures : {e, h, m, k}. Plan vide si rien n'est rentable. */
   Options.prototype.meilleur = function (mu) {
+    if (this.separable) return this.meilleurSeparable(mu);
     var M = this.M, H = this.H, best = -Infinity, bi = 0;
     for (var p = 0, nb = M.length; p < nb; p++) {
       var x = M[p] - mu * H[p];

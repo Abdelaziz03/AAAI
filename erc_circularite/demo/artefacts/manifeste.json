@@ -1,6 +1,6 @@
 {
  "donnees": "démonstration",
- "mis_a_jour": "2026-11-26T12:06:50",
+ "mis_a_jour": "2026-11-26T13:10:22",
  "artefacts": [
   {
    "etape": "sources",
@@ -8,7 +8,7 @@
    "type": "classeur",
    "fichier": "00_sources/00_sources.xlsx",
    "description": "Toutes les tables de l'étape « sources »",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration"
   },
   {
@@ -17,7 +17,7 @@
    "type": "json",
    "fichier": "00_sources/Perimetre.json",
    "description": "Mode (réel ou démonstration), période couverte, volumes lus, chemins",
-   "genere_le": "2026-11-26T12:06:34",
+   "genere_le": "2026-11-26T13:10:05",
    "donnees": "démonstration"
   },
   {
@@ -26,7 +26,7 @@
    "type": "table",
    "fichier": "00_sources/Controles_des_sources.csv",
    "description": "Ce que la lecture a toléré, écarté ou trouvé incohérent, avec le nombre de lignes concernées",
-   "genere_le": "2026-11-26T12:06:34",
+   "genere_le": "2026-11-26T13:10:05",
    "donnees": "démonstration",
    "lignes": 6,
    "colonnes": [
@@ -42,7 +42,7 @@
    "type": "table",
    "fichier": "00_sources/Etat_des_sources.csv",
    "description": "Chaque fichier attendu : chargé, absent ou en erreur, et ce à quoi il sert",
-   "genere_le": "2026-11-26T12:06:34",
+   "genere_le": "2026-11-26T13:10:05",
    "donnees": "démonstration",
    "lignes": 12,
    "colonnes": [
@@ -60,7 +60,7 @@
    "type": "classeur",
    "fichier": "01_classement/01_classement.xlsx",
    "description": "Toutes les tables de l'étape « classement »",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration"
   },
   {
@@ -69,7 +69,7 @@
    "type": "figure",
    "fichier": "01_classement/figures/Pre-selection.png",
    "description": "Chaque point est une pièce : en abscisse le nombre de FRU scrapées qui la contiennent (gisement), en ordonnée son MMICV total consommé (valeur). Les points bleus forment le front de Pareto : ce sont les candidates à examiner en premier.",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration"
   },
   {
@@ -78,7 +78,7 @@
    "type": "figure",
    "fichier": "01_classement/figures/Top_MMICV.png",
    "description": "Les pièces consommées classées par MMICV total (quantité × coût standard). Lecture : plus la barre est longue, plus la pièce pèse dans le coût standard consommé ; ce n'est pas ce que rapporterait son réemploi.",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration"
   },
   {
@@ -87,7 +87,7 @@
    "type": "json",
    "fichier": "01_classement/Notes.json",
    "description": "",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration"
   },
   {
@@ -96,7 +96,7 @@
    "type": "table",
    "fichier": "01_classement/Chiffres_a_verifier.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 5,
    "colonnes": [
@@ -116,7 +116,7 @@
    "type": "table",
    "fichier": "01_classement/Classement_MR.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 9,
    "colonnes": [
@@ -150,7 +150,7 @@
    "type": "table",
    "fichier": "01_classement/Classement_TSUI.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 6,
    "colonnes": [
@@ -184,7 +184,7 @@
    "type": "table",
    "fichier": "01_classement/Classement_tous_ateliers.csv",
    "description": "Pièces consommées sur la période : volume, MMICV unitaire et total, type de déchet, poids",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -218,7 +218,7 @@
    "type": "table",
    "fichier": "01_classement/Composants_des_FRU_scrapees.csv",
    "description": "Pièces présentes dans la nomenclature de consommation des FRU scrapées",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -238,7 +238,7 @@
    "type": "table",
    "fichier": "01_classement/Couples_FRU_x_piece.csv",
    "description": "Par couple : pièces consommées, réparations du FRU, maximum observé sur un PO (minimum de pièces par FRU)",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 23,
    "colonnes": [
@@ -260,7 +260,7 @@
    "type": "table",
    "fichier": "01_classement/FRU_scrapees.csv",
    "description": "FRU scrapées par type sur la période, avec poids",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 6,
    "colonnes": [
@@ -278,7 +278,7 @@
    "type": "table",
    "fichier": "01_classement/Mois_calendrier.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 6,
    "colonnes": [
@@ -294,7 +294,7 @@
    "type": "table",
    "fichier": "01_classement/Pieces_par_mois.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -313,7 +313,7 @@
    "type": "table",
    "fichier": "01_classement/Priorisation.csv",
    "description": "Critères de pré-sélection (valeur, gisement, risque matière, risque supply) et front de Pareto",
-   "genere_le": "2026-11-26T12:06:35",
+   "genere_le": "2026-11-26T13:10:06",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -349,7 +349,7 @@
    "type": "classeur",
    "fichier": "02_flux/02_flux.xlsx",
    "description": "Toutes les tables de l'étape « flux »",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration"
   },
   {
@@ -358,7 +358,7 @@
    "type": "figure",
    "fichier": "02_flux/figures/Cumul_estime_contre_pese.png",
    "description": "Masse cumulée estimée et masse cumulée pesée, flux par flux, sur les semaines comparables. Lecture : deux courbes qui se suivent valident l'estimation ; deux courbes qui s'écartent régulièrement désignent une cause permanente (périmètre de la benne, poids manquants).",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration"
   },
   {
@@ -367,7 +367,7 @@
    "type": "figure",
    "fichier": "02_flux/figures/Estime_contre_pese.png",
    "description": "Pour chaque flux de déchets : la masse estimée chaque semaine à partir des consommations (trait et bande bleus) et la masse pesée sur le terrain (points). Une pesée hors de la bande (losange orange) signale un écart à expliquer avant d'utiliser le flux dans le modèle.",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration"
   },
   {
@@ -376,7 +376,7 @@
    "type": "figure",
    "fichier": "02_flux/figures/FRU_scrapees_par_semaine.png",
    "description": "Le flux d'entrée du modèle de ligne : nombre de FRU scrapées chaque semaine, empilé par type de FRU (les cinq types les plus fréquents, puis les autres). Les semaines incomplètes sont hachurées et ne servent pas à calculer le scrap annuel.",
-   "genere_le": "2026-11-26T12:06:37",
+   "genere_le": "2026-11-26T13:10:08",
    "donnees": "démonstration"
   },
   {
@@ -385,7 +385,7 @@
    "type": "figure",
    "fichier": "02_flux/figures/Pieces_et_masse_par_type_de_dechet.png",
    "description": "Ce que les ateliers consomment, rangé par benne puis par type de déchet : nombre de pièces et masse correspondante. Lecture : la masse n'est fiable que pour les types dont les poids unitaires sont connus.",
-   "genere_le": "2026-11-26T12:06:37",
+   "genere_le": "2026-11-26T13:10:08",
    "donnees": "démonstration"
   },
   {
@@ -394,7 +394,7 @@
    "type": "figure",
    "fichier": "02_flux/figures/Scrap_annuel_par_type_de_FRU.png",
    "description": "Le scrap annuel de chaque type de FRU, tiré du suivi hebdomadaire : point = estimation moyenne, trait = intervalle à 90 %. Un intervalle large dit que la période observée est trop courte ou le flux trop irrégulier pour dimensionner la ligne à l'unité près.",
-   "genere_le": "2026-11-26T12:06:37",
+   "genere_le": "2026-11-26T13:10:08",
    "donnees": "démonstration"
   },
   {
@@ -403,7 +403,7 @@
    "type": "json",
    "fichier": "02_flux/Notes.json",
    "description": "",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration"
   },
   {
@@ -412,7 +412,7 @@
    "type": "table",
    "fichier": "02_flux/Composant_FRU_type_de_dechet.csv",
    "description": "Une ligne par couple (FRU, composant) : type de déchet, benne, poids",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 23,
    "colonnes": [
@@ -439,7 +439,7 @@
    "type": "table",
    "fichier": "02_flux/Composants_type_de_dechet.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -462,7 +462,7 @@
    "type": "table",
    "fichier": "02_flux/Estime_contre_pese.csv",
    "description": "Semaine, valeur estimée et mesurée, marge d'erreur, causes candidates de l'écart, cause constatée à saisir",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 77,
    "colonnes": [
@@ -497,7 +497,7 @@
    "type": "table",
    "fichier": "02_flux/FRU_scrapees_par_semaine.csv",
    "description": "Flux d'entrée du modèle : FRU scrapées par semaine et par type (0 les semaines sans scrap)",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 132,
    "colonnes": [
@@ -516,7 +516,7 @@
    "type": "table",
    "fichier": "02_flux/Masse_estimee_par_semaine.csv",
    "description": "Masse estimée par semaine et par flux, avec marge d'erreur",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 77,
    "colonnes": [
@@ -539,7 +539,7 @@
    "type": "table",
    "fichier": "02_flux/Prevision_des_FRU_scrapees.csv",
    "description": "Semaine suivante, par type et par méthode : moyenne et quantiles",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 36,
    "colonnes": [
@@ -559,7 +559,7 @@
    "type": "table",
    "fichier": "02_flux/Scrap_annuel.csv",
    "description": "FRU scrapées par an (bas, moyen, haut) tirées des semaines complètes",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 6,
    "colonnes": [
@@ -580,7 +580,7 @@
    "type": "table",
    "fichier": "02_flux/Synthese_par_benne.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 9,
    "colonnes": [
@@ -598,7 +598,7 @@
    "type": "table",
    "fichier": "02_flux/Verdict_par_flux.csv",
    "description": "Le flux est-il assez bien vérifié pour alimenter le modèle ?",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 2,
    "colonnes": [
@@ -617,12 +617,13 @@
    "type": "table",
    "fichier": "02_flux/Evaluation_des_previsions.csv",
    "description": "Chaque semaine prévue avec les seules semaines précédentes : écart quadratique relatif à la moyenne, perte de quantile, couverture",
-   "genere_le": "2026-11-26T12:06:36",
+   "genere_le": "2026-11-26T13:10:07",
    "donnees": "démonstration",
    "lignes": 6,
    "colonnes": [
     "Méthode",
     "Prévisions",
+    "Prévisions de la méthode",
     "Écart quadratique relatif",
     "Perte de quantile",
     "Couverture 80 %",
@@ -635,7 +636,7 @@
    "type": "classeur",
    "fichier": "03_fiabilite/03_fiabilite.xlsx",
    "description": "Toutes les tables de l'étape « fiabilite »",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration"
   },
   {
@@ -644,7 +645,7 @@
    "type": "figure",
    "fichier": "03_fiabilite/figures/Forme_de_Weibull.png",
    "description": "La forme k dit comment le risque de défaillance évolue avec l'âge de la pièce, ce qui conditionne l'intérêt d'un réemploi : sous 1, une pièce qui a déjà tourné est plus sûre qu'une neuve ; au-dessus de 1, l'âge du donneur compte.",
-   "genere_le": "2026-11-26T12:06:39",
+   "genere_le": "2026-11-26T13:10:10",
    "donnees": "démonstration"
   },
   {
@@ -653,7 +654,7 @@
    "type": "figure",
    "fichier": "03_fiabilite/figures/Kaplan-Meier.png",
    "description": "Courbes de Kaplan-Meier des références qui cumulent le plus de défaillances précoces, une courbe par origine de la pièce posée. Lecture : une courbe qui descend plus tôt signale des défaillances plus rapides après la pose.",
-   "genere_le": "2026-11-26T12:06:39",
+   "genere_le": "2026-11-26T13:10:10",
    "donnees": "démonstration"
   },
   {
@@ -662,7 +663,7 @@
    "type": "figure",
    "fichier": "03_fiabilite/figures/Pre-selection_avec_fiabilite.png",
    "description": "Chaque point est une pièce : en abscisse le nombre de FRU scrapées qui la contiennent (gisement), en ordonnée son MMICV total consommé (valeur). Les points bleus forment le front de Pareto : ce sont les candidates à examiner en premier. La fiabilité du réemploi est ajoutée aux critères quand elle a pu être calculée : le front peut différer de celui de l'étape classement.",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration"
   },
   {
@@ -671,7 +672,7 @@
    "type": "figure",
    "fichier": "03_fiabilite/figures/Taux_de_defaillance_precoce.png",
    "description": "Pour chaque référence, le taux de défaillance précoce d'une pièce neuve, réparée ou récupérée, avec son intervalle à 90 %. Lecture : deux intervalles qui se recouvrent ne permettent pas de dire qu'une origine est moins fiable que l'autre.",
-   "genere_le": "2026-11-26T12:06:39",
+   "genere_le": "2026-11-26T13:10:10",
    "donnees": "démonstration"
   },
   {
@@ -680,7 +681,7 @@
    "type": "figure",
    "fichier": "03_fiabilite/figures/Age_du_donneur_illustration.png",
    "description": "Illustration théorique, sans données de l'atelier : selon la forme k, une pièce déjà âgée tient mieux (k < 1), aussi bien (k = 1) ou moins bien (k > 1) la période de garantie qu'une pièce neuve. Sert à lire la figure des formes k.",
-   "genere_le": "2026-11-26T12:06:39",
+   "genere_le": "2026-11-26T13:10:10",
    "donnees": "démonstration"
   },
   {
@@ -689,7 +690,7 @@
    "type": "json",
    "fichier": "03_fiabilite/Notes.json",
    "description": "",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration"
   },
   {
@@ -698,7 +699,7 @@
    "type": "table",
    "fichier": "03_fiabilite/A_priori_physiques.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration",
    "lignes": 2,
    "colonnes": [
@@ -715,7 +716,7 @@
    "type": "table",
    "fichier": "03_fiabilite/Courbes_de_Kaplan-Meier.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration",
    "lignes": 282,
    "colonnes": [
@@ -733,7 +734,7 @@
    "type": "table",
    "fichier": "03_fiabilite/Fiabilite_par_reference.csv",
    "description": "Par référence et origine (neuve, réparée, récupérée) : défaillances précoces, forme de Weibull, taux et rapport au neuf",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration",
    "lignes": 8,
    "colonnes": [
@@ -768,7 +769,7 @@
    "type": "table",
    "fichier": "03_fiabilite/Priorisation_avec_fiabilite.csv",
    "description": "Pré-sélection de l'étape classement, avec le critère de fiabilité du réemploi quand il existe",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -804,7 +805,7 @@
    "type": "table",
    "fichier": "03_fiabilite/Vie_residuelle_grille_illustrative.csv",
    "description": "Effet de la forme k et de l'âge du donneur sur la tenue de la garantie (échelle arbitraire de 1 000 jours)",
-   "genere_le": "2026-11-26T12:06:38",
+   "genere_le": "2026-11-26T13:10:09",
    "donnees": "démonstration",
    "lignes": 12,
    "colonnes": [
@@ -821,7 +822,7 @@
    "type": "classeur",
    "fichier": "04_rex/04_rex.xlsx",
    "description": "Toutes les tables de l'étape « rex »",
-   "genere_le": "2026-11-26T12:06:42",
+   "genere_le": "2026-11-26T13:10:13",
    "donnees": "démonstration"
   },
   {
@@ -830,7 +831,7 @@
    "type": "figure",
    "fichier": "04_rex/figures/Banc_d_essai_regret.png",
    "description": "Banc d'essai SYNTHÉTIQUE du choix réemploi ou recyclage : regret cumulé de 3 règles de décision quand l'a priori est trop pessimiste. Lecture : une courbe qui s'aplatit a appris ; une droite qui monte répète la même erreur à chaque pièce.",
-   "genere_le": "2026-11-26T12:06:42",
+   "genere_le": "2026-11-26T13:10:13",
    "donnees": "démonstration"
   },
   {
@@ -839,7 +840,7 @@
    "type": "figure",
    "fichier": "04_rex/figures/Metriques_par_modele.png",
    "description": "Quatre mesures de la qualité de prédiction, pour le modèle retenu et ses deux références. Lecture : sur les trois premières, la barre la plus courte gagne ; la couverture doit être proche de 90 %. Si une référence fait mieux, l'a priori n'apporte rien sur ces données.",
-   "genere_le": "2026-11-26T12:06:41",
+   "genere_le": "2026-11-26T13:10:12",
    "donnees": "démonstration"
   },
   {
@@ -848,7 +849,7 @@
    "type": "figure",
    "fichier": "04_rex/figures/Probabilite_de_reemploi.png",
    "description": "Pour chaque couple (type de FRU, pièce) : la probabilité q qu'une pièce extraite soit réutilisable, avec son intervalle à 90 %, l'a priori tiré de la consommation (losange) et le nombre de pièces testées. C'est la valeur transmise au modèle de ligne.",
-   "genere_le": "2026-11-26T12:06:41",
+   "genere_le": "2026-11-26T13:10:12",
    "donnees": "démonstration"
   },
   {
@@ -857,7 +858,7 @@
    "type": "figure",
    "fichier": "04_rex/figures/Reglage_de_N0.png",
    "description": "Effet de la force de l'a priori N0 sur la qualité de prédiction. Lecture : l'axe vertical de la log-perte ne part pas de zéro, les écarts entre valeurs de N0 sont faibles ; la couverture doit rester proche de 90 %.",
-   "genere_le": "2026-11-26T12:06:41",
+   "genere_le": "2026-11-26T13:10:12",
    "donnees": "démonstration"
   },
   {
@@ -866,7 +867,7 @@
    "type": "json",
    "fichier": "04_rex/Notes.json",
    "description": "",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration"
   },
   {
@@ -875,7 +876,7 @@
    "type": "table",
    "fichier": "04_rex/A_posteriori.csv",
    "description": "Probabilité qu'une pièce extraite soit réutilisable : moyenne et intervalle à 90 %, après l'audit",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -899,7 +900,7 @@
    "type": "table",
    "fichier": "04_rex/A_priori_consommation.csv",
    "description": "q0 par (FRU, pièce) tiré de la consommation, avec le détail du calcul et les correctifs appliqués",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 19,
    "colonnes": [
@@ -920,7 +921,7 @@
    "type": "table",
    "fichier": "04_rex/Audit_de_demontage.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 30,
    "colonnes": [
@@ -937,7 +938,7 @@
    "type": "table",
    "fichier": "04_rex/Banc_d_essai_courbes_de_regret.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 400,
    "colonnes": [
@@ -953,7 +954,7 @@
    "type": "table",
    "fichier": "04_rex/Banc_d_essai_des_politiques.csv",
    "description": "Simulation SYNTHÉTIQUE : regret des règles de décision quand l'a priori est trop pessimiste",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 3,
    "colonnes": [
@@ -970,7 +971,7 @@
    "type": "table",
    "fichier": "04_rex/Metriques.csv",
    "description": "Brier, log-perte, écart absolu, couverture : chaque lot est prédit avant d'être appris ; deux références à battre",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 3,
    "colonnes": [
@@ -989,7 +990,7 @@
    "type": "table",
    "fichier": "04_rex/Predictions_lot_par_lot.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 90,
    "colonnes": [
@@ -1012,7 +1013,7 @@
    "type": "table",
    "fichier": "04_rex/Reglage_de_N0.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:40",
+   "genere_le": "2026-11-26T13:10:11",
    "donnees": "démonstration",
    "lignes": 5,
    "colonnes": [
@@ -1028,7 +1029,7 @@
    "type": "classeur",
    "fichier": "05_ligne/05_ligne.xlsx",
    "description": "Toutes les tables de l'étape « ligne »",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration"
   },
   {
@@ -1037,7 +1038,7 @@
    "type": "figure",
    "fichier": "05_ligne/figures/Actuel_contre_ligne.png",
    "description": "Le coût annuel de la situation actuelle (tous les FRU scrapés partent chez le recycleur actuel) comparé au bilan avec la ligne, poste par poste puis au total. Lecture : l'écart entre les deux barres du total est le gain annuel attendu de la ligne.",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:21",
    "donnees": "démonstration"
   },
   {
@@ -1046,7 +1047,7 @@
    "type": "figure",
    "fichier": "05_ligne/figures/Monte-Carlo.png",
    "description": "Ce que devient le résultat annuel quand tous les paramètres incertains varient dans leurs plages. Lecture : P5 et P95 encadrent neuf tirages sur dix ; la part de la distribution à gauche de zéro est le risque que la ligne ne soit pas rentable.",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:21",
    "donnees": "démonstration"
   },
   {
@@ -1055,7 +1056,7 @@
    "type": "figure",
    "fichier": "05_ligne/figures/Options_par_piece.png",
    "description": "Pour chaque pièce de chaque type de FRU : ce que rapporte le réemploi (bleu) et ce que rapporte le recyclage trié (orange), par FRU traité, comparés à la pièce laissée dans le FRU. Une option dont une donnée manque est écrite « inconnu », jamais tracée à zéro.",
-   "genere_le": "2026-11-26T12:06:49",
+   "genere_le": "2026-11-26T13:10:21",
    "donnees": "démonstration"
   },
   {
@@ -1064,7 +1065,7 @@
    "type": "figure",
    "fichier": "05_ligne/figures/Preparation_des_parametres.png",
    "description": "Où en est la collecte des paramètres du modèle : pour la ligne et pour chaque type de FRU, combien de paramètres sont saisis, tirés des données ou manquants. Lecture : seuls les segments orange empêchent un calcul ; ils désignent les données à obtenir en priorité.",
-   "genere_le": "2026-11-26T12:06:49",
+   "genere_le": "2026-11-26T13:10:20",
    "donnees": "démonstration"
   },
   {
@@ -1073,7 +1074,7 @@
    "type": "figure",
    "fichier": "05_ligne/figures/Semaine_par_semaine.png",
    "description": "En haut, le résultat de chaque semaine : la marge dégagée sur les FRU arrivés cette semaine-là, moins le coût fixe hebdomadaire. En bas, le cumul. Lecture : les semaines creuses coûtent le coût fixe ; les semaines chargées saturent les heures disponibles.",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:21",
    "donnees": "démonstration"
   },
   {
@@ -1082,7 +1083,7 @@
    "type": "figure",
    "fichier": "05_ligne/figures/Sensibilite_aux_heures.png",
    "description": "En haut, le résultat annuel selon les heures opérateur accordées à la ligne ; en bas, ce que rapporterait une heure de plus. Lecture : tant que la courbe du haut monte, les heures manquent ; quand elle plafonne, ajouter des heures ne rapporte plus rien.",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration"
   },
   {
@@ -1091,7 +1092,7 @@
    "type": "json",
    "fichier": "05_ligne/Modele.json",
    "description": "Paramètres effectifs sous la forme lue par le modèle (plages comprises)",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration"
   },
   {
@@ -1100,7 +1101,7 @@
    "type": "json",
    "fichier": "05_ligne/Notes.json",
    "description": "",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration"
   },
   {
@@ -1109,7 +1110,7 @@
    "type": "table",
    "fichier": "05_ligne/Actuel_contre_ligne.csv",
    "description": "Coût de la situation actuelle (recycleur actuel) contre la ligne de démontage et de tri",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 4,
    "colonnes": [
@@ -1125,7 +1126,7 @@
    "type": "table",
    "fichier": "05_ligne/Donnees_a_obtenir.csv",
    "description": "Ce qui manque pour calculer, et à qui le demander",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 7,
    "colonnes": [
@@ -1142,7 +1143,7 @@
    "type": "table",
    "fichier": "05_ligne/Monte-Carlo_tirages.csv",
    "description": "Résultat annuel pour chaque tirage des plages de paramètres",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 400,
    "colonnes": [
@@ -1158,7 +1159,7 @@
    "type": "table",
    "fichier": "05_ligne/Options_par_piece.csv",
    "description": "Valeur nette par FRU des trois options de chaque pièce : réemploi, recyclage trié, laissée dans le FRU",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 23,
    "colonnes": [
@@ -1185,7 +1186,7 @@
    "type": "table",
    "fichier": "05_ligne/Parametres_effectifs.csv",
    "description": "Chaque paramètre du modèle avec sa valeur et sa provenance : saisi, tiré des données, ou manquant",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 246,
    "colonnes": [
@@ -1203,7 +1204,7 @@
    "type": "table",
    "fichier": "05_ligne/Plan_optimal.csv",
    "description": "Pour chaque type de FRU : traiter ou non, pièces à réemployer et à recycler, heures et marge",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 5,
    "colonnes": [
@@ -1229,7 +1230,7 @@
    "type": "table",
    "fichier": "05_ligne/Periode_par_periode.csv",
    "description": "Le modèle rejoué sur le flux hebdomadaire réel : coût fixe payé chaque semaine, pas de stock",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 22,
    "colonnes": [
@@ -1251,7 +1252,7 @@
    "type": "table",
    "fichier": "05_ligne/Resume.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 15,
    "colonnes": [
@@ -1265,7 +1266,7 @@
    "type": "table",
    "fichier": "05_ligne/Sensibilite_aux_heures.csv",
    "description": "Résultat et valeur d'une heure supplémentaire selon les heures opérateur disponibles",
-   "genere_le": "2026-11-26T12:06:48",
+   "genere_le": "2026-11-26T13:10:19",
    "donnees": "démonstration",
    "lignes": 8,
    "colonnes": [
@@ -1283,7 +1284,7 @@
    "type": "classeur",
    "fichier": "06_synthese/06_synthese.xlsx",
    "description": "Toutes les tables de l'étape « synthese »",
-   "genere_le": "2026-11-26T12:06:33",
+   "genere_le": "2026-11-26T13:10:04",
    "donnees": "démonstration"
   },
   {
@@ -1292,7 +1293,7 @@
    "type": "figure",
    "fichier": "06_synthese/figures/Preparation_des_parametres.png",
    "description": "Où en est la collecte des paramètres du modèle : pour la ligne et pour chaque type de FRU, combien de paramètres sont saisis, tirés des données ou manquants. Lecture : seuls les segments orange empêchent un calcul ; ils désignent les données à obtenir en priorité.",
-   "genere_le": "2026-11-26T12:06:33",
+   "genere_le": "2026-11-26T13:10:03",
    "donnees": "démonstration"
   },
   {
@@ -1301,7 +1302,7 @@
    "type": "json",
    "fichier": "06_synthese/Donnees_de_l_outil.json",
    "description": "Tout ce que l'outil des décideurs affiche et recalcule",
-   "genere_le": "2026-11-26T12:06:32",
+   "genere_le": "2026-11-26T13:10:03",
    "donnees": "démonstration"
   },
   {
@@ -1310,7 +1311,7 @@
    "type": "outil",
    "fichier": "outil/ERC_Outil_Decision.html",
    "description": "Page autonome : s'ouvre dans un navigateur, recalcule le modèle en direct",
-   "genere_le": "2026-11-26T12:06:33",
+   "genere_le": "2026-11-26T13:10:04",
    "donnees": "démonstration"
   },
   {
@@ -1319,7 +1320,7 @@
    "type": "table",
    "fichier": "06_synthese/Anomalies.csv",
    "description": "Calculs qui ont échoué pendant l'exécution (table vide = aucun)",
-   "genere_le": "2026-11-26T12:06:33",
+   "genere_le": "2026-11-26T13:10:04",
    "donnees": "démonstration",
    "lignes": 0,
    "colonnes": [
@@ -1335,7 +1336,7 @@
    "type": "table",
    "fichier": "06_synthese/Limites_et_lecture.csv",
    "description": "",
-   "genere_le": "2026-11-26T12:06:32",
+   "genere_le": "2026-11-26T13:10:03",
    "donnees": "démonstration",
    "lignes": 7,
    "colonnes": [
@@ -1349,7 +1350,7 @@
    "type": "table",
    "fichier": "06_synthese/Tableau_de_decision.csv",
    "description": "Les indicateurs de décision au centre des plages et en probabilité",
-   "genere_le": "2026-11-26T12:06:32",
+   "genere_le": "2026-11-26T13:10:03",
    "donnees": "démonstration",
    "lignes": 11,
    "colonnes": [
@@ -1364,7 +1365,7 @@
    "type": "classeur",
    "fichier": "composition/composition.xlsx",
    "description": "Toutes les tables de l'étape « composition »",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration"
   },
   {
@@ -1373,7 +1374,16 @@
    "type": "json",
    "fichier": "composition/Notes.json",
    "description": "Volumes, statuts, appels au modèle, coûts supposés, état du cortex",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
+   "donnees": "démonstration"
+  },
+  {
+   "etape": "composition",
+   "nom": "Page de revue",
+   "type": "outil",
+   "fichier": "composition/ERC_Composition_Revue.html",
+   "description": "Page autonome : valider ou corriger les classes proposées, puis exporter les validations",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration"
   },
   {
@@ -1382,7 +1392,7 @@
    "type": "table",
    "fichier": "composition/Composition_proposee.csv",
    "description": "Classe matière la plus probable de chaque pièce, probabilité, sources, statut, suite à donner",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration",
    "lignes": 21,
    "colonnes": [
@@ -1405,15 +1415,17 @@
    "type": "table",
    "fichier": "composition/Fiabilite_des_sources.csv",
    "description": "Ce que valent les sources, appris sur les pièces validées, à côté de l'a priori de départ",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration",
-   "lignes": 7,
+   "lignes": 8,
    "colonnes": [
     "Type de source",
     "A priori (hypothèse)",
     "Affirmations vérifiées",
     "Justes",
     "Fausses",
+    "dont par sondage",
+    "dont dans la file",
     "Fiabilité",
     "Poids des observations"
    ]
@@ -1424,9 +1436,9 @@
    "type": "table",
    "fichier": "composition/File_de_revue.csv",
    "description": "Pièces à faire valider par une personne, par enjeu décroissant ; à remplir puis à réimporter",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration",
-   "lignes": 2,
+   "lignes": 1,
    "colonnes": [
     "PN",
     "Description",
@@ -1441,7 +1453,8 @@
     "Prochaine action",
     "Vaut une revue",
     "Classe validée",
-    "Validateur"
+    "Validateur",
+    "Motif"
    ]
   },
   {
@@ -1450,7 +1463,7 @@
    "type": "table",
    "fichier": "composition/Journal_des_acquisitions.csv",
    "description": "Chaque collecte et chaque appel au modèle, avec son coût",
-   "genere_le": "2026-11-26T12:06:50",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration",
    "lignes": 5,
    "colonnes": [
@@ -1467,16 +1480,16 @@
    "nom": "Valeur de l'information",
    "type": "table",
    "fichier": "composition/Valeur_de_l_information.csv",
-   "description": "Pièces du modèle de ligne dont la classe est incertaine : ce que rapporterait de la connaître",
-   "genere_le": "2026-11-26T12:06:50",
+   "description": "Pièces du modèle de ligne dont la classe n'est pas établie : ce que rapporterait de l'établir",
+   "genere_le": "2026-11-26T13:10:22",
    "donnees": "démonstration",
    "lignes": 0,
    "colonnes": [
-    "Type de FRU",
     "Pièce",
-    "Paramètre",
+    "Types de FRU",
+    "Classes possibles",
     "Borne (€/an)",
-    "Valeur de l'information (€/an)",
+    "Valeur d'établir la classe (€/an)",
     "La décision change",
     "Calcul exact",
     "À acquérir"

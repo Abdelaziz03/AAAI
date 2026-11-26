@@ -1521,9 +1521,7 @@ textarea { width: 100%; min-height: 220px; font-family: ui-monospace, "Cascadia 
     remplir($("plan-pied"), etat.frus.length ? h("tr", null, h("th", { scope: "row", text: "Total" }), h("td", { text: pluriel(tot.ok, "type calculé", "types calculés") + " sur " + nb(etat.frus.length) }),
       h("td", { class: "n", text: nb(tot.reb) }), h("td"), h("td"), h("td"), h("td", { class: "n", text: tot.ok ? nb(tot.n) : INCONNU }),
       h("td", { class: "n", text: tot.ok ? nb(tot.h) : INCONNU }), h("td"), h("td", { class: "n", text: tot.ok ? eur(tot.m) : INCONNU })) : null);
-    var gros = etat.frus.filter(function (f) { return f.pieces.length > M.MAX_PIECES_ENUM; }).length;
-    $("plan-note").textContent = "« Traiter » : le FRU passe sur la ligne. « Laisser » : il part entier chez le recycleur actuel, aucun devenir de ses pièces ne paie le temps passé. Marge = valeur tirée des pièces + traitement évité − main-d'œuvre, avant coûts fixes de la ligne." +
-      (gros ? " Au-delà de " + M.MAX_PIECES_ENUM + " pièces par type, seules les " + M.MAX_PIECES_ENUM + " pièces de plus forte valeur sont étudiées ; les autres restent dans le FRU." : "");
+    $("plan-note").textContent = "« Traiter » : le FRU passe sur la ligne. « Laisser » : il part entier chez le recycleur actuel, aucun devenir de ses pièces ne paie le temps passé. Marge = valeur tirée des pièces + traitement évité − main-d'œuvre, avant coûts fixes de la ligne.";
   }
   function majDetail(i) {
     var vue = vues[i], f = etat.frus[i], fm = calc.modele.frus[i], lg = calc.modele.ligne;

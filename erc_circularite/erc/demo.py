@@ -229,7 +229,8 @@ DOCUMENTS = {
                  "texte": "Fiche produit EPS-MB9. Assemblage électronique à forte densité. [[classe : Carte B]]"},
                 {"origine": "distributeur.example/EPS-MB9", "nature": "document",
                  "texte": "Annonce EPS-MB9. Module à dissipation thermique. [[classe : Composant de puissance]]"}],
-    "BET-C4700": [{"origine": "fabricant-beta.example/declaration/BET-C4700", "nature": "déclaration fabricant",
+    # une déclaration matière structurée donne la classe elle-même (champ « classe ») : aucun modèle n'est appelé
+    "BET-C4700": [{"origine": "fabricant-beta.example/declaration/BET-C4700", "nature": "déclaration fabricant", "classe": "Condensateur",
                    "texte": "Déclaration matière BET-C4700 : aluminium electrolytic capacitor, électrolyte, boîtier aluminium."}],
     "DEL-FAN120": [{"origine": "fabricant-delta.example/fiches/DEL-FAN120", "nature": "document",
                     "texte": "Fiche DEL-FAN120 : ventilateur axial, moteur à courant continu. [[classe : Composant standard]]"}],

@@ -165,10 +165,10 @@ def _milieu(x):
 OPTIONS = ("réemploi", "recyclage", "jeté")
 CHAMPS_REEMPLOI = ["n_par_fru", "extraction_min", "test_min", "p_reutilisable", "valeur_eur"]
 CHAMPS_RECYCLAGE = ["n_par_fru", "poids_kg", "prix_recycleur_eur_kg", "tri_min"]
-# Limite de calcul, pas une donnée : 3^8 = 6 561 combinaisons par type de FRU. Au-delà de 8 pièces, les pièces dont la
-# meilleure option seule vaut le moins (celles sans option calculable d'abord) restent dans le FRU. Le plan nomme dans
-# « Pièces non examinées » celles qui avaient une option calculable : pour ce type de FRU, le plan est alors un
-# minimum garanti et non plus l'optimum (une pièce écartée dont aucune option ne vaut plus que zéro ne change rien).
+# Seuil de méthode, pas une limite : jusqu'à 8 pièces calculables, les 3^8 = 6 561 affectations d'un type de FRU sont
+# énumérées ; au-delà, le meilleur plan est trouvé sans énumération, pièce par pièce (proposition 1 du cadre formel).
+# Les deux méthodes donnent le même optimum (tests/test_ligne.py) ; toutes les pièces sont toujours examinées, et la
+# colonne « Pièces non examinées » du plan, gardée pour les fichiers déjà produits, reste vide.
 MAX_PIECES_ENUM = 8
 COLONNES_DETAIL = ["Type de FRU", "Décision", "1 Réemploi", "2 Recyclage", "FRU traitées / an", "FRU scrapées / an", "Heures par FRU",
                    "Marge par FRU (€)", "Marge par heure (€)", "Heures / an", "Marge variable / an (€)", "Kg détournés / an",
@@ -287,20 +287,41 @@ def _codes(n: int) -> np.ndarray:
 
 
 class Options:
-    """Toutes les affectations pièce → option d'un type de FRU : heures, marge et kg détournés par FRU (tableaux numpy).
+    """Affectations pièce → option d'un type de FRU, et le meilleur plan pour un prix donné de l'heure.
 
-    Au plus MAX_PIECES_ENUM pièces sont examinées : celles dont la meilleure option seule vaut le plus (ex æquo dans
-    l'ordre de saisie, pièces sans option calculable en dernier). `noms_ignores` nomme, dans l'ordre de saisie, les
-    pièces écartées par cette limite alors qu'une de leurs options était calculable ; elles restent dans le FRU.
+    Deux méthodes, même résultat :
+      énumération   jusqu'à MAX_PIECES_ENUM pièces calculables : toutes les affectations (tableaux numpy H, M, K) ;
+      séparable     au-delà : sans énumérer. Pour un prix mu de l'heure, chaque pièce prend seule sa meilleure option,
+                    et il ne reste qu'à comparer trois cas : ne pas ouvrir, ouvrir sans réemploi (ouverture sommaire),
+                    ouvrir avec au moins un réemploi (ouverture soignée). C'est la proposition 1 du cadre formel
+                    (docs/Formal_framework.md), écrite sans supposer que l'ouverture soignée est la plus longue.
+    `separable` force la méthode (True ou False) ; forcée à False avec plus de MAX_PIECES_ENUM pièces calculables,
+    l'énumération ne garde que celles dont la meilleure option seule vaut le plus et nomme les autres dans
+    `noms_ignores` : usage réservé aux tests et à `options_fru`.
     """
 
-    def __init__(self, fru: dict, taux_defaut):
+    def __init__(self, fru: dict, taux_defaut, separable=None):
         taux = fru.get("taux_horaire_eur", taux_defaut)
         t = valeurs_options(fru, taux_defaut)
         calculables = []
         if len(t):
             t = t.assign(meilleur=t[["1 Réemploi (€/FRU)", "2 Recyclage (€/FRU)"]].max(axis=1))
             calculables = list(t.loc[t["meilleur"].notna(), "Pièce"])
+        self.separable = len(calculables) > MAX_PIECES_ENUM if separable is None else bool(separable)
+        ouv = _facultatif(fru.get("ouverture_min")) / 60                        # inconnue : aucun plan valide ne l'utilise
+        ouv_tri = _facultatif(fru.get("ouverture_tri_min", fru.get("ouverture_min"))) / 60
+        if self.separable:
+            t = t[t["meilleur"].notna()] if len(t) else t                       # pièces calculables, dans l'ordre de saisie
+            self.noms = list(t["Pièce"]) if len(t) else []
+            self.noms_ignores, self.ignorees = [], 0
+            col = lambda c: t[c].to_numpy(float) if len(t) else np.zeros(0)
+            self._v = np.stack([col("1 Réemploi (€/FRU)"), col("2 Recyclage (€/FRU)")])            # (2, n) ; NaN = option non calculable
+            self._h = np.nan_to_num(np.stack([col("Heures réemploi"), col("Heures recyclage")]))
+            self._k = np.nan_to_num(np.stack([col("Kg détournés réemploi"), col("Kg détournés recyclage")]))
+            self._ouv, self._ouv_tri, self._taux = ouv, ouv_tri, (np.nan if _inconnu(taux) else float(taux))
+            self.C = self.H = self.M = self.K = None
+            return
+        if len(t):
             t = t.sort_values("meilleur", ascending=False, kind="mergesort").head(MAX_PIECES_ENUM)
         self.noms = list(t["Pièce"]) if len(t) else []
         self.noms_ignores = [p for p in calculables if p not in set(self.noms)]
@@ -312,8 +333,6 @@ class Options:
         k = np.stack([col("Kg détournés réemploi"), col("Kg détournés recyclage"), np.zeros(len(self.noms))])
         j = np.arange(len(self.noms))
         valide = ~np.isnan(v[C, j]).any(axis=1)                                 # une option non calculable n'est jamais choisie
-        ouv = _facultatif(fru.get("ouverture_min")) / 60                        # inconnue : aucun plan valide ne l'utilise
-        ouv_tri = _facultatif(fru.get("ouverture_tri_min", fru.get("ouverture_min"))) / 60
         o = np.where((C == 0).any(axis=1), ouv, np.where((C == 1).any(axis=1), ouv_tri, 0.0))
         cout_ouv = np.where(o != 0, o * (np.nan if _inconnu(taux) else taux), 0.0)
         self.C = C
@@ -328,16 +347,59 @@ class Options:
 
     def meilleur(self, mu: float):
         """Plan qui maximise marge − mu × heures : (étiquette, heures, marge, kg). Plan vide si rien n'est rentable."""
+        if self.separable:
+            return self._meilleur_separable(mu)
         i = int(np.argmax(self.M - mu * self.H))
         e = self.etiquette(i)
         if e and self.M[i] - mu * self.H[i] > 1e-12:
             return e, float(self.H[i]), float(self.M[i]), float(self.K[i])
         return (), 0.0, 0.0, 0.0
 
+    def _meilleur_separable(self, mu: float):
+        """Même réponse que l'énumération, en un passage sur les pièces. Sommes faites dans l'ordre des pièces, comme
+        dans l'outil (erc/outil_modele.js), pour que les deux donnent le même plan jusque dans les cas d'égalité."""
+        n = len(self.noms)
+        if not n:
+            return (), 0.0, 0.0, 0.0
+        v, h, k = self._v, self._h, self._k
+        r = np.where(np.isnan(v), -np.inf, v - mu * h)                          # valeur de chaque option à ce prix de l'heure
+        r_re, r_rc = r[0], r[1]
+        # avec au moins un réemploi : chaque pièce prend sa meilleure option (à égalité : réemploi, puis recyclage) ;
+        # si aucune ne choisit le réemploi, on l'impose à celle pour qui il coûte le moins
+        avec = np.where((r_re >= r_rc) & (r_re >= 0), 0, np.where(r_rc >= 0, 1, 2))
+        if not (avec == 0).any() and np.isfinite(r_re).any():
+            avec[int(np.argmax(r_re - np.maximum(r_rc, 0.0)))] = 0
+        # sans réemploi : recycler ce qui rapporte
+        sans = np.where(r_rc >= 0, 1, 2)
+        j = np.arange(n)
+
+        def bilan(code):
+            re, rc = code == 0, code == 1
+            if not (re.any() or rc.any()) or (code is avec and not re.any()):
+                return None
+            o = self._ouv if re.any() else self._ouv_tri
+            ligne_ = np.where(re, 0, 1)
+            pris = re | rc
+            somme = lambda x: float(np.cumsum(np.where(pris, x[ligne_, j], 0.0))[-1])       # somme dans l'ordre des pièces
+            hh = somme(h) + o
+            mm = somme(v) - (o * self._taux if o != 0 else 0.0)
+            return mm - mu * hh, code, hh, mm, somme(k)
+
+        meilleur = None
+        for b in (bilan(avec), bilan(sans)):                                    # à égalité, le plan avec réemploi
+            if b is not None and (meilleur is None or b[0] > meilleur[0]):
+                meilleur = b
+        if meilleur is None or not meilleur[0] > 1e-12:
+            return (), 0.0, 0.0, 0.0
+        _, code, hh, mm, kk = meilleur
+        nom = ("réemploi", "recyclage")
+        return tuple((p, nom[c]) for p, c in zip(self.noms, code) if c < 2), hh, mm, kk
+
 
 def options_fru(fru: dict, taux_defaut):
-    """Compatibilité : (étiquettes, heures/FRU, marge/FRU, kg par étiquette) de toutes les affectations valides."""
-    o = Options(fru, taux_defaut)
+    """Compatibilité : (étiquettes, heures/FRU, marge/FRU, kg par étiquette) de toutes les affectations valides.
+    Énumération : au-delà de MAX_PIECES_ENUM pièces calculables, seules les plus rentables sont énumérées."""
+    o = Options(fru, taux_defaut, separable=False)
     ok = np.isfinite(o.M)
     etiq = [o.etiquette(i) for i in np.flatnonzero(ok)]
     return etiq, o.H[ok], o.M[ok], {e: float(k) for e, k in zip(etiq, o.K[ok])}
@@ -353,8 +415,9 @@ def optimiser_ligne(ligne: dict, frus: dict) -> dict:
     Relâché continu résolu par multiplicateur de Lagrange mu sur les heures : chaque type de FRU prend le plan qui
     maximise marge − mu × heures ; mu est trouvé par dichotomie. Au point de rupture, les heures restantes sont
     données aux types de FRU dont le plan change, dans l'ordre du gain par heure supplémentaire. Le résultat est
-    l'optimum du programme linéaire du document (vérifié contre un solveur exact dans tests/test_ligne.py), sauf pour
-    un type de FRU de plus de MAX_PIECES_ENUM pièces calculables, où c'est un minimum garanti (« Pièces non examinées »).
+    l'optimum du programme linéaire du document, quel que soit le nombre de pièces par type de FRU (vérifié contre un
+    solveur exact dans tests/test_ligne.py). Au-delà de MAX_PIECES_ENUM pièces calculables, le meilleur plan d'un type
+    est trouvé sans énumération (classe Options).
     Entre deux plans de même marge, le premier énuméré est retenu : la marge est la même, les heures peuvent différer.
     Le multiplicateur rendu est la valeur d'une heure de plus (pente à droite de la marge) ; 0 si les heures suffisent.
     Heures opérateur inconnues = pas de limite ; négatives = aucune heure.

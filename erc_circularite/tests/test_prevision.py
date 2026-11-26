@@ -80,3 +80,57 @@ def test_modele_externe_et_series():
     Y, E = PV.series_hebdo(flux, ev)
     assert list(Y.columns) == s[:2] and Y.loc["A"].tolist() == [1, 0]                    # la semaine incomplète est écartée
     assert E.loc["A"].tolist() == [3, 0] and E.loc["B"].tolist() == [0, 1]               # arrivées = réparations + FRU scrapées
+
+
+def test_methodes_notees_sur_les_memes_previsions():
+    """Un type sans arrivées n'est pas prévu par le modèle structurel : il ne compte alors pour aucune méthode."""
+    rng = np.random.default_rng(4)
+    E = pd.DataFrame(rng.poisson(30, (5, 30)), index=list("ABCDE"), columns=semaines(30))
+    Y = pd.DataFrame(rng.binomial(E.to_numpy(), 0.2), index=E.index, columns=E.columns)
+    E.loc["E"] = 0                                             # arrivées inconnues pour ce type
+    Y.loc["E"] = rng.poisson(50, 30)                          # et un flux très différent : il fausserait la référence
+    r = PV.evaluer(Y, E, methodes=("moyenne", "structurel"), depart=8)["resume"].set_index("Méthode")
+    assert r.at["moyenne", "Prévisions de la méthode"] == 5 * 22 and r.at["structurel", "Prévisions de la méthode"] == 4 * 22
+    assert r.at["moyenne", "Prévisions"] == r.at["structurel", "Prévisions"] == 4 * 22
+    seuls = PV.evaluer(Y.drop("E"), E.drop("E"), methodes=("moyenne", "structurel"), depart=8)["resume"].set_index("Méthode")
+    assert math.isclose(r.at["structurel", "Écart quadratique relatif"], seuls.at["structurel", "Écart quadratique relatif"], rel_tol=0.02)
+    # une série d'arrivées plus longue que celle des FRU scrapées est alignée par ses semaines, pas par sa position
+    plus_long = pd.concat([pd.DataFrame(7, index=E.index, columns=[pd.Timestamp("2025-12-29")]), E], axis=1)
+    r2 = PV.evaluer(Y, plus_long, methodes=("moyenne", "structurel"), depart=8)["resume"].set_index("Méthode")
+    assert math.isclose(r2.at["structurel", "Perte de quantile"], r.at["structurel", "Perte de quantile"])
+
+
+def test_a_priori_entre_types():
+    """La loi a priori d'un type vient des autres types, hasard de comptage retiré. Vingt types de même taux : mise en
+    commun presque complète. Moins de deux autres types : a priori faible, les données du type ne servent pas deux fois."""
+    rng = np.random.default_rng(5)
+    forces = []
+    for _ in range(100):
+        arrivees = np.full(19, 30.0)
+        a, b = PV._moments_beta(rng.binomial(30, 0.2, 19).astype(float), arrivees)
+        forces.append(a + b)
+    assert np.median(forces) > 200                             # sans retirer la variance binomiale, la force restait vers 30
+    assert PV._moments_beta(np.array([5.0]), np.array([26.0])) == (0.5, 0.5) and PV._moments_beta(np.array([]), np.array([])) == (0.5, 0.5)
+    a, b = PV._moments_beta(np.array([2.0, 30.0, 12.0]), np.array([40.0, 40.0, 40.0]))      # types qui diffèrent vraiment : a priori large
+    assert a + b < 10 and math.isclose(a / (a + b), 44 / 120)
+    assert PV._moments_gamma(np.array([12.0]), 26) == (0.5, 0.0)
+    a, b = PV._moments_gamma(np.array([26.0, 27.0, 25.0]), 26)                              # même taux : taux commun, précision des données réunies
+    assert math.isclose(a, 78.5) and math.isclose(b, 78.0)
+    Y = pd.DataFrame([[2, 0, 1, 3, 0, 2, 1, 1]], index=["A"], columns=semaines(8))          # un seul type : sa moyenne, à un demi près
+    seul = PV.prevoir(Y, methodes=("gamma_poisson",))
+    assert math.isclose(seul.loc[0, "Moyenne"], (0.5 + 10) / 8)
+
+
+def test_moyennes_exactes_graines_par_methode_et_valeurs_manquantes():
+    rng = np.random.default_rng(6)
+    Y = pd.DataFrame(rng.poisson([[3.0], [0.4], [1.2]], (3, 26)), index=["A", "B", "C"], columns=semaines(26))
+    tout, seule = PV.prevoir(Y), PV.prevoir(Y, methodes=("gamma_poisson",))
+    pd.testing.assert_frame_equal(tout[tout["Méthode"].eq("gamma_poisson")].reset_index(drop=True), seule)   # ne dépend pas des autres méthodes
+    m = tout[tout["Méthode"].eq("moyenne")].set_index("FRU")["Moyenne"]
+    assert np.allclose(m.to_numpy(), Y.mean(axis=1).to_numpy())                            # moyenne exacte, pas celle d'un tirage
+    c = tout[tout["Méthode"].eq("croston")].set_index("FRU")["Moyenne"]
+    assert math.isclose(c["B"], PV.croston(Y.loc["B"]))
+    Z = Y.astype(float)
+    Z.iloc[0, 3] = np.nan
+    with pytest.raises(ValueError, match="sans valeur"):
+        PV.prevoir(Z)

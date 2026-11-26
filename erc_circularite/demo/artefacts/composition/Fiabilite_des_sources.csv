@@ -1,8 +1,9 @@
-﻿Type de source;A priori (hypothèse);Affirmations vérifiées;Justes;Fausses;Fiabilité;Poids des observations
-analogie;0,65;0;0;0;0,65;0,0
-classement antérieur;0,7;6;6;0;0,8800000000000001;0,6
-document;0,8;0;0;0;0,8;0,0
-déclaration fabricant;0,95;0;0;0;0,95;0,0
-modèle : extraction;0,6;0;0;0;0,6;0,0
-modèle : validation;0,7;0;0;0;0,7;0,0
-règle;0,75;6;5;1;0,8;0,6
+﻿Type de source;A priori (hypothèse);Affirmations vérifiées;Justes;Fausses;dont par sondage;dont dans la file;Fiabilité;Poids des observations
+analogie;0,65;0;0;0;0;0;0,65;0,0
+classement antérieur;0,7;6;6;0;0;0;0,8800000000000002;0,6
+document;0,8;0;0;0;0;0;0,8;0,0
+déclaration fabricant;0,95;0;0;0;0;0;0,95;0,0
+modèle : extraction;0,6;0;0;0;0;0;0,6;0,0
+modèle : extraction confirmée;0,75;0;0;0;0;0;0,75;0,0
+modèle : validation;0,7;0;0;0;0;0;0,7;0,0
+règle;0,75;12;10;2;0;0;0,8125;0,75

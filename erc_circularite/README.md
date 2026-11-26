@@ -70,12 +70,14 @@ il s'ouvre dans un navigateur, sans installation ni connexion.
 python -m erc.composition --demo
 ```
 
-Sur les données réelles : déposer la nomenclature (colonnes code article et description, et si possible fabricant, référence du fabricant, conception interne) dans `BOM/` sous le dossier des extractions, ou la désigner par `--bom`. Les règles description → classe se saisissent dans l'onglet `Regles_composition` du classeur de paramètres. Un modèle local se branche par `--modele-url` ; une collecte de documents se branche en Python (notebook 07). Aucun code article interne ni aucune description ne sort du poste.
+Sur les données réelles : déposer la nomenclature (colonnes code article et description, et si possible fabricant, référence du fabricant, conception interne) dans `BOM/` sous le dossier des extractions, ou la désigner par `--bom`. Les règles description → classe se saisissent dans l'onglet `Regles_composition` du classeur de paramètres. Un modèle local se branche par `--modele-url` (et un second, pour contrôler le premier, par `--controle-url`) ; une collecte de documents se branche en Python (notebook 07). Aucun code article interne ni aucune description ne sort du poste ; le nom de l'entreprise se déclare par `--fabricant-interne` pour qu'elle ne soit jamais recherchée comme fabricant. Avant de brancher une collecte, vérifier que la colonne « référence fabricant » de la nomenclature contient bien des références de fabricant.
+
+La chaîne produit `artefacts/composition/ERC_Composition_Revue.html`, une page de revue qui s'ouvre dans un navigateur sans connexion : la personne qui connaît les pièces y confirme ou corrige les classes proposées (file « à valider », puis sondage de pièces acceptées tirées au hasard), télécharge le fichier de validations et le dépose dans `Acquisition/`. Au passage suivant, ces validations sont la référence du cortex. Une recherche déjà payée pour une pièce n'est pas refaite.
 
 Fichiers de terrain facultatifs, à déposer dans le dossier des extractions :
 `Acquisition/pesees_hebdo.csv` (`Semaine;Flux;Masse mesurée (kg)`) et
 `Acquisition/audit_demontage.csv` (`Date;Type de FRU;Pièce;Pièces testées;Pièces bonnes`) et
-`Acquisition/validations_composition.csv` (`PN;Classe validée;Validateur;Commentaire`).
+`Acquisition/validations_composition*.csv` (`PN;Classe validée;Validateur;Commentaire;Motif` ; un fichier par personne ou par séance).
 
 ## Règles du dossier
 
@@ -92,13 +94,14 @@ python -m pytest tests
 
 | Fichier | Ce qu'il vérifie |
 |---|---|
-| `test_ligne.py` | Le modèle de ligne : formules du document, optimalité contre un solveur exact, valeur d'une heure, entrées inconnues |
+| `test_ligne.py` | Le modèle de ligne : formules du document, optimalité contre un solveur exact, valeur d'une heure, entrées inconnues, types de plus de huit pièces sans énumération |
 | `test_outil.py` | L'outil des décideurs recalcule exactement comme le modèle Python (scénarios tirés au hasard, exécutés par `node`) |
 | `test_stats.py` | Fiabilité (forme retrouvée, intervalle, lectures prudentes), modèle de Rex (pas de fuite, exploration), flux hebdomadaire, risques |
 | `test_donnees.py` | Premier lancement sur données réelles, fichiers manquants ou abîmés, classeur jamais réécrit, manifeste, répétabilité |
-| `test_information.py` | Valeur de l'information, et les six propositions du cadre formel sur des cas tirés au hasard |
-| `test_prevision.py` | Prévision du flux : méthodes, lois prédictives, évaluation sans fuite |
-| `test_composition.py` | Cortex et chaîne de composition : fusion des preuves, minimum d'appels, rien d'interne ne sort |
+| `test_information.py` | Valeur de l'information et valeur d'établir une classe ; les propositions du cadre formel sur des cas tirés au hasard |
+| `test_prevision.py` | Prévision du flux : méthodes, lois prédictives, évaluation sans fuite et sur les mêmes prévisions pour toutes les méthodes |
+| `test_composition.py` | Cortex et chaîne de composition : fusion des preuves, fiabilité par strates, budget par pièce, recherche jamais payée deux fois, pannes, rien d'interne ne sort |
+| `test_composition_outil.py` | Page de revue : fidèle au cortex, autonome, et boucle fermée (décision dans la page → fichier → validation dans le cortex) |
 
 Les tests tournent sur Python 3.9 avec pandas 1.5 comme sur les versions récentes.
 

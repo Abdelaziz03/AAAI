@@ -33,7 +33,80 @@ def test_evpi_exemple_a_la_main():
     assert math.isclose(r["Valeur de l'information (€/an)"], 100.0)
     assert r["La décision change"] is True
     borne = I.borne_prix(100, 1, 2.0, [1.0, 5.0])
-    assert math.isclose(borne, 100 * 1 * 2.0 * 2.0) and borne >= r["Valeur de l'information (€/an)"]
+    assert math.isclose(borne, 0.5 * 100 * 1 * 2.0 * 2.0) and borne >= r["Valeur de l'information (€/an)"]
+
+
+def test_borne_atteinte():
+    """La borne ½ × exemplaires × poids × E|p − p̄| ne peut pas être resserrée : prix 0 ou 4 €/kg, seuil de tri à 2 €/kg
+    (4 € de tri pour 2 kg). Sans information, au prix moyen 2 : 4 − 4 = 0. Avec : 0,5 × (8 − 4) × 100 = 200."""
+    ligne, frus = une_piece()
+    r = I.evpi(ligne, frus, "F", "p", "prix_recycleur_eur_kg", [0.0, 4.0])
+    assert math.isclose(r["Valeur de l'information (€/an)"], 200.0) and math.isclose(I.borne_prix(100, 1, 2.0, [0.0, 4.0]), 200.0)
+
+
+def test_parametre_commun_a_plusieurs_types():
+    """La classe d'une pièce est la même dans tous les types de FRU qui la contiennent : la valeur de l'information et
+    sa borne se somment sur ces types. Cinq types identiques : cinq fois la valeur d'un seul."""
+    ligne, frus = une_piece()
+    cinq = {f"F{i}": frus["F"] for i in range(5)}
+    un = I.evpi(ligne, frus, "F", "p", "prix_recycleur_eur_kg", [1.0, 5.0])["Valeur de l'information (€/an)"]
+    tous = I.evpi(ligne, cinq, None, "p", "prix_recycleur_eur_kg", [1.0, 5.0])["Valeur de l'information (€/an)"]
+    assert math.isclose(tous, 5 * un) and I.types_de(cinq, "p") == list(cinq) and I.types_de(cinq, "absente") == []
+    inc = pd.DataFrame([{"Type de FRU": None, "Pièce": "p", "Paramètre": "prix_recycleur_eur_kg", "Valeurs": [1.0, 5.0], "Probabilités": None}])
+    t = I.priorites(ligne, cinq, inc, cout_information=50.0)
+    assert t.loc[0, "Type de FRU"] == "tous" and math.isclose(t.loc[0, "Borne (€/an)"], 5 * I.borne_prix(100, 1, 2.0, [1.0, 5.0]))
+    assert math.isclose(t.loc[0, "Valeur de l'information (€/an)"], tous) and t.loc[0, "Borne (€/an)"] >= tous
+
+
+def reemploi(**plus):
+    """Un type, une pièce réemployable : test de 60 min à 40 €/h = 40 €, valeur 10 €, 0,1 kg. Avec un délai évité de
+    4 semaines à 50 €, un exemplaire bon vaut 210 € : réemploi rentable à q = 0,9 (189 €), pas à q = 0,1 (21 €)."""
+    ligne, frus = une_piece()
+    frus["F"]["pieces"]["p"] = dict({"n_par_fru": 1, "extraction_min": 0.0, "test_min": 60.0, "p_reutilisable": 0.5, "valeur_eur": 10.0,
+                                     "delai_semaines": 4, "valeur_semaine_eur": 50.0, "poids_kg": 0.1, "prix_recycleur_eur_kg": 1.0, "tri_min": 60.0}, **plus)
+    return ligne, frus
+
+
+def test_borne_de_rendement_delai_evite_et_prix_inconnu():
+    """Le gain par exemplaire bon de plus est le coefficient de q dans la valeur du réemploi telle que le modèle la
+    calcule : avec le délai évité, et selon que le poids et le prix sont connus ou non."""
+    assert math.isclose(I.gain_par_exemplaire_bon(10.0, 4, 50.0, 0.1, 1.0, 5.0), 210.0 - 0.1)      # l'exemplaire refusé est vendu au kilo
+    assert math.isclose(I.gain_par_exemplaire_bon(10.0, 4, 50.0, 10.0, None, 5.0), 210.0 + 50.0)   # prix inconnu : il retourne à la benne
+    assert math.isclose(I.gain_par_exemplaire_bon(10.0, None, 50.0, None, 1.0, 5.0), 10.0)         # ni délai ni poids
+    assert math.isnan(I.gain_par_exemplaire_bon(None))
+    q = [0.1, 0.9]
+    for plus, traitement in (({}, 0.0), ({"prix_recycleur_eur_kg": None, "poids_kg": 10.0}, 5.0), ({"poids_kg": None}, 0.0)):
+        ligne, frus = reemploi(**plus)
+        ligne["cout_traitement_eur_kg"] = traitement
+        e = frus["F"]["pieces"]["p"]
+        r = I.evpi(ligne, frus, "F", "p", "p_reutilisable", q)
+        gain = I.gain_par_exemplaire_bon(e["valeur_eur"], e["delai_semaines"], e["valeur_semaine_eur"], e["poids_kg"], e["prix_recycleur_eur_kg"], traitement)
+        borne = I.borne_rendement(100, 1, gain, q)
+        assert 0 < r["Valeur de l'information (€/an)"] <= borne + 1e-9, (plus, r, borne)
+        t = I.priorites(ligne, frus, pd.DataFrame([{"Type de FRU": "F", "Pièce": "p", "Paramètre": "p_reutilisable", "Valeurs": q, "Probabilités": None}]), 50.0)
+        assert math.isclose(t.loc[0, "Borne (€/an)"], borne) and t.loc[0, "Calcul exact"] == "oui" and bool(t.loc[0, "À acquérir"])
+
+
+def test_valeur_d_etablir_une_classe():
+    """Sans classe, la pièce ne peut pas être triée : elle vaut 0. Classe à 1 €/kg : 2 − 4 < 0, on laisse. À 5 €/kg :
+    10 − 4 = 6 par pièce, 600 par an. Deux classes à parts égales : 300 par an à gagner. Borne : 100 × 2 kg × 3 = 600."""
+    ligne, frus = une_piece()
+    r = I.resolution(ligne, frus, "p", [1.0, 5.0])
+    assert math.isclose(r["Valeur sans information (€/an)"], 0.0) and math.isclose(r["Valeur de l'information (€/an)"], 300.0) and r["La décision change"]
+    assert math.isclose(I.borne_resolution(100, 2.0, [1.0, 5.0]), 600.0)
+    # deux classes au même prix : rien à apprendre sur le prix, mais tout à gagner à pouvoir trier
+    r = I.resolution(ligne, frus, "p", [3.0, 3.0])
+    assert math.isclose(r["Valeur de l'information (€/an)"], 200.0) and math.isclose(I.borne_prix(100, 1, 2.0, [3.0, 3.0]), 0.0)
+    assert I.borne_resolution(100, 2.0, [3.0, 3.0]) >= 200.0
+    assert math.isclose(I.borne_resolution(100, 2.0, [-1.0, 5.0], cout_traitement=0.5), 100 * 2.0 * 0.5 * 5.5)
+    assert math.isnan(I.borne_resolution(None, 2.0, [1.0, 5.0])) and math.isnan(I.resolution(ligne, frus, "absente", [1.0])["Valeur de l'information (€/an)"])
+    t = I.priorites_classes(ligne, frus, {"p": {"A": 0.5, "B": 0.5, "C": 0.001}, "hors modèle": {"A": 1.0}}, {"A": 1.0, "B": 5.0, "C": 9.0}, cout_information=5.0)
+    assert list(t["Pièce"]) == ["p"] and math.isclose(t.loc[0, "Valeur d'établir la classe (€/an)"], 300.0) and bool(t.loc[0, "À acquérir"])
+    assert math.isclose(t.loc[0, "Borne (€/an)"], 600.0) and t.loc[0, "Types de FRU"] == "F"
+    t = I.priorites_classes(ligne, frus, {"p": {"A": 0.5, "B": 0.5}}, {"A": 1.0, "B": 5.0}, cout_information=1000.0)
+    assert t.loc[0, "Calcul exact"].startswith("non : la borne") and not bool(t.loc[0, "À acquérir"])
+    t = I.priorites_classes(ligne, frus, {"p": {"A": 0.5, "Sans prix": 0.5}}, {"A": 1.0}, cout_information=5.0)
+    assert math.isnan(t.loc[0, "Borne (€/an)"]) and "n'a pas de prix" in t.loc[0, "Calcul exact"]
 
 
 def test_evpi_nulle_quand_la_decision_ne_change_pas():
@@ -55,7 +128,7 @@ def test_priorites_borne_puis_calcul():
     inc = pd.DataFrame([{"Type de FRU": "F", "Pièce": "p", "Paramètre": "prix_recycleur_eur_kg", "Valeurs": [1.0, 5.0], "Probabilités": None}])
     t = I.priorites(ligne, frus, inc, cout_information=50.0)
     assert t.loc[0, "Calcul exact"] == "oui" and bool(t.loc[0, "À acquérir"]) and math.isclose(t.loc[0, "Valeur de l'information (€/an)"], 100.0)
-    t = I.priorites(ligne, frus, inc, cout_information=1000.0)                            # la borne (400) est sous le coût : pas de calcul
+    t = I.priorites(ligne, frus, inc, cout_information=1000.0)                            # la borne (200) est sous le coût : pas de calcul
     assert t.loc[0, "Calcul exact"].startswith("non") and not bool(t.loc[0, "À acquérir"])
 
 
@@ -158,5 +231,23 @@ def test_proposition_6_convexite_et_borne(graine):
     assert r["Valeur avec information (€/an)"] >= r["Valeur sans information (€/an)"] - 1e-6        # V convexe en prix
     q, pq = I.scenarios_beta(2, 3, 7)
     r = I.evpi(ligne, frus, f, pc, "p_reutilisable", q, pq)
-    borne = I.borne_rendement(frus[f]["scrap_an"], e["n_par_fru"], e["valeur_eur"], e["poids_kg"], e["prix_recycleur_eur_kg"], q, pq)
+    gain = I.gain_par_exemplaire_bon(e["valeur_eur"], None, None, e["poids_kg"], e["prix_recycleur_eur_kg"], ligne["cout_traitement_eur_kg"])
+    borne = I.borne_rendement(frus[f]["scrap_an"], e["n_par_fru"], gain, q, pq)
     assert -1e-7 <= r["Valeur de l'information (€/an)"] <= borne + 1e-6
+
+
+@pytest.mark.parametrize("graine", range(12))
+def test_proposition_7_valeur_d_etablir_une_classe(graine):
+    """E[V(prix de la classe)] − V(pièce non triable) est borné par exemplaires × poids × E[(prix + traitement)⁺], la
+    pièce pouvant figurer dans plusieurs types de FRU ; il est positif ou nul quand aucune classe ne coûte plus que la benne."""
+    rng = np.random.default_rng(600 + graine)
+    ligne, frus = cas(rng, n_types=3)
+    pc = "p0"                                                                           # présente dans les trois types
+    besoin = valeur(ligne, frus)["Heures utilisées / an"]
+    ligne["heures_operateur_an"] = float(rng.uniform(0.3, 1.2)) * besoin
+    prix = rng.uniform(0.0, 12.0, 4)
+    probs = rng.dirichlet(np.ones(4))
+    r = I.resolution(ligne, frus, pc, prix, probs)
+    borne = sum(I.borne_resolution(frus[f]["scrap_an"] * frus[f]["pieces"][pc]["n_par_fru"], frus[f]["pieces"][pc]["poids_kg"], prix, probs,
+                                   ligne["cout_traitement_eur_kg"]) for f in I.types_de(frus, pc))
+    assert len(I.types_de(frus, pc)) == 3 and -1e-6 <= r["Valeur de l'information (€/an)"] <= borne + 1e-6

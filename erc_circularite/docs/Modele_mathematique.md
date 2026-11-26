@@ -66,7 +66,7 @@ $x_{f s_0 t}$ = FRU en scrap direct (décision A = non). Tout autre $s$ = FRU d�
 8. **Coût fixe par période** : payé dès que la ligne existe, quel que soit le volume de la période.
 9. **Valeur de réemploi** $v_p$ : fraction du MMICV, pas un prix de vente ; la tenue en service (taux de défaillance précoce d'une pièce réemployée) s'en retranche via le coût d'une défaillance terrain.
 10. **Entrées facultatives** : transport, délai d'approvisionnement évité, revente au kilo des exemplaires refusés au test et traitement évité ne sont comptés que s'ils sont saisis ; la colonne « Non compté faute de donnée » dit, pièce par pièce, ce qui a été laissé de côté. En revanche un coût de traitement du recycleur actuel inconnu bloque le calcul : la comparaison à la situation actuelle n'aurait pas de sens (saisir 0 si l'enlèvement est gratuit).
-11. **Au plus huit pièces examinées par type de FRU** : au-delà, les pièces dont la meilleure option seule vaut le moins restent dans le FRU ; le plan les nomme dans « Pièces non examinées » et le résultat est alors un minimum garanti.
+11. **Nombre de pièces par type de FRU : aucune limite.** Jusqu'à huit pièces calculables, tous les plans sont énumérés ; au-delà, le meilleur plan est trouvé pièce par pièce, sans énumération (proposition 1 du cadre formel), avec le même résultat. La colonne « Pièces non examinées », gardée pour les fichiers déjà produits, reste vide.
 12. **Pas de stock entre périodes** : une FRU scrapée en $t$ est traitée ou jetée en $t$ (à lever avec une variable de stock si la place le permet).
 
 ## 5. Fonctions coûts
@@ -157,20 +157,24 @@ Quand l'écart cumulé d'un flux tient dans la marge sur au moins trois semaines
 
 ## 10. Cadre formel, valeur de l'information, prévision, composition
 
-Le cadre complet, en anglais et au format d'une revue, est dans `Formal_framework.md`. Il généralise ce document (types d'unités, composants, devenirs, niveaux d'ouverture, ressources) pour couvrir aussi la production, et démontre six propositions, toutes vérifiées numériquement dans `tests/test_information.py` :
+Le cadre complet, en anglais et au format d'une revue, est dans `Formal_framework.md`. Il généralise ce document (types d'unités, composants, devenirs, niveaux d'ouverture, ressources) pour couvrir aussi la production, et démontre sept propositions, vérifiées numériquement dans `tests/test_information.py` et `tests/test_ligne.py` :
 
 | Proposition | Ce qu'elle dit |
 |---|---|
-| 1 | À niveau d'ouverture donné, le choix du devenir de chaque pièce est séparable : pas besoin d'énumérer les plans |
+| 1 | À niveau d'ouverture donné, le choix du devenir de chaque pièce est séparable : pas besoin d'énumérer les plans. C'est ce qui lève la limite du nombre de pièces par FRU |
 | 2 | La valeur est concave en heures ; le multiplicateur est la valeur d'une heure de plus |
 | 3 | À l'optimum, au plus un type de FRU est traité de deux façons |
 | 4 | Règle de seuil : réemployer une pièce si sa probabilité d'être bonne dépasse un seuil qui monte quand les heures sont rares |
 | 5 | La valeur au flux moyen majore ce que peut rapporter n'importe quelle politique (stock, prévision, apprentissage par renforcement) : l'écart avec le rejeu semaine par semaine dit si un pilotage plus fin vaut la peine |
-| 6 | Connaître un paramètre incertain a une valeur positive ou nulle, bornée par masse annuelle × écart moyen des prix : on ne cherche la composition d'une pièce que si cela peut changer une décision |
+| 6 | Connaître un paramètre incertain (probabilité de réemploi, valeur, prix d'une classe connue) a une valeur positive ou nulle, au plus la moitié de : exemplaires par an × effet d'une unité du paramètre × écart moyen |
+| 7 | Sans classe matière, une pièce ne peut pas être triée. Établir sa classe rapporte au plus : exemplaires par an × poids × moyenne de (prix + traitement évité)⁺. C'est l'enjeu qui décide si une recherche vaut son coût |
 
-Trois modules s'appuient dessus :
+Ce cadre a été relu par trois relectures automatiques indépendantes (démonstrations, références, code) et corrigé en conséquence ; aucune personne ne l'a relu, et cela ne remplace pas un comité de lecture.
 
-- `erc/information.py` : valeur de l'information et sa borne.
+Modules qui s'appuient dessus :
+
+- `erc/information.py` : valeur de l'information et ses bornes ; valeur d'établir une classe.
 - `erc/prevision.py` : prévision du flux hebdomadaire de FRU scrapées, pour séries courtes et intermittentes, avec son évaluation et un point d'entrée pour les modèles de fondation de séries temporelles.
-- `erc/cortex.py` et `erc/composition.py` : base de connaissance à sources faillibles, et chaîne qui va d'une nomenclature (code article, description) à la classe matière de chaque pièce avec le moins d'appels possible à un modèle de langage.
-
+- `erc/cortex.py` : base de connaissance à sources faillibles. Chaque source affirme, une personne valide, et la fiabilité de chaque type de source se mesure sur les validations, par strates (pièces de la file, pièces acceptées tirées au sondage) pour ne pas la sous-estimer.
+- `erc/composition.py` : chaîne qui va d'une nomenclature (code article, description) à la classe matière de chaque pièce avec le moins d'appels possible. Une action payante n'est lancée que si l'enjeu de la pièce couvre ce qui a déjà été dépensé pour elle plus cette action ; une recherche payée n'est jamais refaite.
+- `erc/composition_outil.py` : page de revue où une personne confirme ou corrige les classes proposées ; ses décisions reviennent dans le cortex.

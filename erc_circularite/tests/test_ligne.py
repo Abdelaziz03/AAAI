@@ -1449,47 +1449,99 @@ def fru_nombreuses_pieces(valeurs: dict) -> dict:
     return {"scrap_an": 10.0, "poids_fru_kg": 3.0, "ouverture_min": 0.0, "pieces": pieces}
 
 
-def test_au_dela_de_huit_pieces_les_moins_rentables_restent_dans_le_fru_et_le_plan_le_dit():
+def test_au_dela_de_huit_pieces_toutes_sont_examinees_et_le_plan_est_l_optimum():
+    """Dix pièces : aucune n'est écartée. Le plan est l'optimum du document, heures illimitées ou non."""
     assert L.MAX_PIECES_ENUM == 8
     ligne = ligne_main(cout_traitement_eur_kg=0.0)
     valeurs = {f"P{i:02d}": float(v) for i, v in enumerate([50, 10, 90, 30, 70, 20, 100, 40, 80, 60], start=1)}      # dix pièces, 10 à 100 €
     frus = {"FRU-GROS": fru_nombreuses_pieces(valeurs), "FRU-T1": fru_main()}
     res = L.optimiser_ligne(ligne, frus)
     d = res["detail"].set_index("Type de FRU")
-    # les deux pièces de moindre valeur (P02 : 10 €, P06 : 20 €) ne sont pas examinées, et le plan les nomme
-    assert d.at["FRU-GROS", "Pièces non examinées"] == "P02, P06" and d.at["FRU-T1", "Pièces non examinées"] == ""
-    assert ensemble(d.at["FRU-GROS", "1 Réemploi"]) == frozenset(valeurs) - {"P02", "P06"}
-    assert d.at["FRU-GROS", "Marge par FRU (€)"] == vaut(520.0)               # 550 € avec les dix pièces : le plan est un minimum garanti
-    assert d.at["FRU-GROS", "Heures par FRU"] == vaut(0.8)
-    assert res["resume"][MARGE] == vaut(5200.0 + 100 * (31.0 - 12.0))
-    # le résultat est exactement celui du même FRU réduit aux huit pièces gardées
-    huit = {"FRU-GROS": fru_nombreuses_pieces({p: v for p, v in valeurs.items() if p not in ("P02", "P06")}), "FRU-T1": fru_main()}
-    for heures in (None, 12.0, 3.0):
-        a = L.optimiser_ligne(dict(ligne, heures_operateur_an=heures), frus)
-        b = L.optimiser_ligne(dict(ligne, heures_operateur_an=heures), huit)
-        assert all(pareil(a["resume"][c], b["resume"][c]) for c in CLES_RESUME)
-        controler(dict(ligne, heures_operateur_an=heures), huit, b)
-        assert set(a["detail"].loc[a["detail"]["Type de FRU"].eq("FRU-GROS"), "Pièces non examinées"]) == {"P02, P06"}
-    # ex æquo : à valeur égale, les premières pièces saisies sont gardées
-    egales = {"FRU-GROS": fru_nombreuses_pieces({f"P{i:02d}": 10.0 for i in range(1, 11)})}
-    assert L.optimiser_ligne(ligne, egales)["detail"].iloc[0]["Pièces non examinées"] == "P09, P10"
+    assert d.at["FRU-GROS", "Pièces non examinées"] == "" and d.at["FRU-T1", "Pièces non examinées"] == ""
+    assert ensemble(d.at["FRU-GROS", "1 Réemploi"]) == frozenset(valeurs)
+    assert d.at["FRU-GROS", "Marge par FRU (€)"] == vaut(550.0) and d.at["FRU-GROS", "Heures par FRU"] == vaut(1.0)
+    assert res["resume"][MARGE] == vaut(5500.0 + 100 * (31.0 - 12.0))
+    for heures in (None, 12.0, 3.0, 0.5):
+        r = controler(dict(ligne, heures_operateur_an=heures), frus)
+        assert heures is None or r["heures"] <= heures * (1 + 1e-9)
+    # heures comptées : les pièces les moins rentables à l'heure sont laissées, les autres gardées (toutes prennent 0,1 h)
+    d3 = L.optimiser_ligne(dict(ligne, heures_operateur_an=3.0), {"FRU-GROS": frus["FRU-GROS"]})["detail"]
+    assert all(e == "" for e in d3["Pièces non examinées"])
+    assert d3["Heures / an"].sum() == vaut(3.0)
     o = L.Options(dict(frus["FRU-GROS"], _c_trait=0.0), 60.0)
-    assert o.noms_ignores == ["P02", "P06"] and o.ignorees == 2 and len(o.noms) == 8 and len(o.M) == 3 ** 8
+    assert o.separable and o.noms == list(valeurs) and o.noms_ignores == [] and o.ignorees == 0 and o.M is None
+    # l'énumération demandée explicitement garde les huit pièces les plus rentables et nomme les deux autres
+    e = L.Options(dict(frus["FRU-GROS"], _c_trait=0.0), 60.0, separable=False)
+    assert not e.separable and e.noms_ignores == ["P02", "P06"] and e.ignorees == 2 and len(e.noms) == 8 and len(e.M) == 3 ** 8
 
 
-def test_pieces_sans_option_calculable_ecartees_d_abord_et_sans_alerte():
-    """Onze pièces dont trois sans donnée : les huit calculables sont toutes examinées, rien n'est signalé, et le plan
-    est l'optimum. Une pièce écartée qui ne vaut rien seule est nommée, sans que la marge en souffre."""
+def test_pieces_sans_option_calculable_ne_comptent_pas_dans_le_seuil():
+    """Onze pièces dont trois sans donnée : huit calculables, donc énumération ; rien n'est signalé et le plan est
+    l'optimum. Une neuvième pièce calculable, perdante seule, fait passer à la méthode sans énumération : même marge."""
     ligne = ligne_main(cout_traitement_eur_kg=0.0)
     valeurs = {f"P{i:02d}": 10.0 * i for i in range(1, 9)}
     fru = fru_nombreuses_pieces(valeurs)
     pieces = {"U1": {}, **{p: fru["pieces"][p] for p in list(valeurs)[:4]}, "U2": {"n_par_fru": 1.0}, **{p: fru["pieces"][p] for p in list(valeurs)[4:]}, "U3": None}
+    assert not L.Options(dict(fru, pieces=pieces, _c_trait=0.0), 60.0).separable
     res = L.optimiser_ligne(ligne, {"F": dict(fru, pieces=pieces)})
     d = res["detail"].iloc[0]
     assert d["Pièces non examinées"] == "" and ensemble(d["1 Réemploi"]) == frozenset(valeurs) and d["Marge par FRU (€)"] == vaut(360.0)
     perdante = dict(pieces, N1={"n_par_fru": 1.0, "extraction_min": 6.0, "test_min": 0.0, "p_reutilisable": 1.0, "valeur_eur": 1.0})    # −5 € seule
+    assert L.Options(dict(fru, pieces=perdante, _c_trait=0.0), 60.0).separable
     d = L.optimiser_ligne(ligne, {"F": dict(fru, pieces=perdante)})["detail"].iloc[0]
-    assert d["Pièces non examinées"] == "N1" and d["Marge par FRU (€)"] == vaut(360.0)
+    assert d["Pièces non examinées"] == "" and ensemble(d["1 Réemploi"]) == frozenset(valeurs) and d["Marge par FRU (€)"] == vaut(360.0)
+    controler(ligne, {"F": dict(fru, pieces={p: e for p, e in perdante.items() if e is not None})})     # la référence des tests ne lit pas une pièce vide
+
+
+@pytest.mark.parametrize("graine", range(6))
+def test_methode_sans_enumeration_egale_a_l_enumeration(graine):
+    """Proposition 1 du cadre formel : pour tout prix de l'heure, le meilleur plan trouvé pièce par pièce vaut celui de
+    l'énumération. Les cas tirés comprennent des options non calculables, un coût de traitement négatif et une
+    ouverture sommaire plus longue que l'ouverture soignée (l'hypothèse d'emboîtement du document n'est pas requise)."""
+    rng = np.random.default_rng(700 + graine)
+    inverses = 0
+    for essai in range(250):
+        ligne, frus = ligne_aleatoire(rng, types=(1, 2), pieces=(1, 7))
+        for f, d in frus.items():
+            if rng.random() < 0.3 and d.get("ouverture_min") is not None:
+                d["ouverture_tri_min"] = d["ouverture_min"] + float(rng.uniform(1, 30))
+                inverses += 1
+            taux = ligne["taux_horaire_eur"]
+            avec = dict(d, _c_trait=ligne["cout_traitement_eur_kg"])
+            a, b = L.Options(avec, taux, separable=False), L.Options(avec, taux, separable=True)
+            assert a.ignorees == 0
+            for mu in (0.0, 1.0, 17.0, 60.0, 400.0, float(rng.uniform(0, 300))):
+                ea, ha, ma, ka = a.meilleur(mu)
+                eb, hb, mb, kb = b.meilleur(mu)
+                va, vb = ma - mu * ha, mb - mu * hb
+                assert abs(va - vb) <= 1e-9 * max(1.0, abs(va)), f"essai {essai}, {f}, prix de l'heure {mu} : énumération {va}, sans énumération {vb}"
+                plans = plans_document(ligne, d)                # le plan rendu existe dans le document, avec ces heures et cette marge
+                cle = (frozenset(p for p, o in eb if o == "réemploi"), frozenset(p for p, o in eb if o == "recyclage"))
+                if eb:
+                    h, g, k = plans[cle]
+                    assert hb == vaut(h) and mb == vaut(g) and kb == vaut(k)
+    assert inverses >= 20
+
+
+@pytest.mark.parametrize("graine", range(4))
+def test_gros_types_optimum_du_document_et_du_solveur_exact(graine):
+    """Types de 9 à 10 pièces (méthode sans énumération) : plan réalisable, marge égale à la borne duale du document,
+    et égale à l'optimum du solveur exact quand scipy est installé."""
+    rng = np.random.default_rng(900 + graine)
+    try:
+        from scipy.optimize import linprog
+    except ImportError:
+        linprog = None
+    for essai in range(3):
+        ligne, frus = ligne_aleatoire(rng, types=(1, 2), pieces=(9, 10))
+        ligne["heures_operateur_an"] = capacite_aleatoire(rng, ligne, frus)
+        res = L.optimiser_ligne(ligne, frus)
+        assert all(e in ("", None) or (isinstance(e, float) and math.isnan(e)) for e in res["detail"]["Pièces non examinées"])
+        controler(ligne, frus, res)
+        if linprog is not None:
+            exact = optimum_solveur_exact(linprog, ligne, frus)
+            marge = 0.0 if inconnu(res["resume"][MARGE]) else res["resume"][MARGE]
+            assert abs(marge - exact) <= REL * max(1.0, abs(exact)), f"graine {graine}, essai {essai} : marge {marge}, optimum exact {exact}"
 
 
 # =========================================================================== 6. interface et compatibilité

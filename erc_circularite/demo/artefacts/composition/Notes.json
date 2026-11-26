@@ -1,13 +1,15 @@
 {
  "pieces": 21,
  "statuts": {
-  "acceptée": 13,
+  "acceptée": 14,
   "validée": 6,
-  "à valider": 2
+  "à valider": 1
  },
- "appels_au_modele": 3,
- "cout_des_acquisitions_eur": 0.19,
- "pieces_sans_appel_payant": 19,
+ "appels_au_modele": 0,
+ "cout_des_acquisitions_eur": 0.0,
+ "pieces_sans_appel_payant": 21,
+ "pieces_hors_referentiel": 0,
+ "codes_article_repetes_ignores": 0,
  "classes": [
   "Carte B",
   "Carte C",
@@ -27,15 +29,19 @@
  },
  "collecteur": "branché",
  "modele": "branché",
+ "modele_de_controle": "le même que le modèle de lecture",
  "cortex": {
   "sujets": 21,
-  "affirmations": 43,
+  "affirmations": 65,
   "sujets validés": 6,
   "coût cumulé des acquisitions": 0.19
  },
  "nomenclature": "BOM_demo.xlsx",
- "validations_importees": 6,
+ "validations_importees": 0,
+ "fichiers_de_validations_illisibles": [],
  "regles": 7,
  "regles_invalides": [],
- "fournisseurs_fictifs": true
+ "fournisseurs_fictifs": true,
+ "traitement_evite_dans_l_enjeu": "compté",
+ "masse_annuelle_d_une_piece": "exemplaires remplacés en réparation, plus exemplaires contenus dans les FRU scrapées du modèle de ligne"
 }

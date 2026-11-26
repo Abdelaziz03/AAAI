@@ -111,23 +111,38 @@ def etape_sources(ctx: Contexte) -> dict:
 
 
 def _classes_du_cortex(ctx: Contexte) -> int:
-    """Une classe matière validée par une personne dans le cortex complète ou corrige le classement matière des sources.
-    Seules les validations comptent : une classe seulement « probable » ne devient jamais une donnée du dossier."""
+    """Ce que le cortex sait de la classe matière des pièces complète le classement matière des sources.
+
+    Une classe VALIDÉE par une personne remplace le classement de la pièce. Une classe ACCEPTÉE par la chaîne (probable,
+    non validée) ne fait que combler un vide : elle ne remplace jamais un classement existant. Le niveau de preuve dit
+    d'où vient chaque classe, et commence par « cortex » : la chaîne de composition sait ainsi ne pas reprendre comme
+    preuve ce qu'elle a elle-même fourni."""
     cfg, s = ctx.cfg, ctx.src
     if not cfg.cortex.is_file():
         return 0
     from . import composition, cortex
     with cortex.Cortex(cfg.cortex) as cx:
         v = cx.verites(composition.DOMAINE, composition.ATTRIBUT)
+        c = cx.conclusions(composition.DOMAINE, composition.ATTRIBUT)
+    if "Classement avant cortex" not in s.classification:      # ce que disait le classement des sources avant toute reprise du cortex
+        s.classification["Classement avant cortex"] = s.classification["Catégorie proposée"]
     n = 0
     for pn, classe in v.items():
         if pn not in s.classification.index or s.classification.at[pn, "Catégorie proposée"] != classe:
             s.classification.loc[pn, "Catégorie proposée"] = classe
             s.classification.loc[pn, "Niveau de preuve"] = "cortex : classe validée par une personne"
             n += 1
-    if n and hasattr(s, "_constat"):
-        s._constat("Cortex", cfg.cortex.name, "information", f"{n} classe(s) matière reprise(s) des validations du cortex")
-    return n
+    m = 0
+    for _, r in c[c["statut"].eq("acceptée")].iterrows():
+        pn = r["sujet"]
+        deja = pn in s.classification.index and isinstance(s.classification.at[pn, "Catégorie proposée"], str) and s.classification.at[pn, "Catégorie proposée"].strip()
+        if pn not in v and not deja and isinstance(r["valeur"], str) and r["valeur"] != cortex.HORS:
+            s.classification.loc[pn, "Catégorie proposée"] = r["valeur"]
+            s.classification.loc[pn, "Niveau de preuve"] = f"cortex : classe acceptée, non validée (probabilité {r['probabilite']:.0%})"
+            m += 1
+    if (n or m) and hasattr(s, "_constat"):
+        s._constat("Cortex", cfg.cortex.name, "information", f"{n} classe(s) matière validée(s) et {m} acceptée(s) reprises du cortex")
+    return n + m
 
 
 # =========================================================================== 1. classement

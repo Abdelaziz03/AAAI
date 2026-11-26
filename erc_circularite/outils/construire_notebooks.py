@@ -362,12 +362,14 @@ Chaque semaine est prévue avec les seules semaines précédentes, puis comparé
 
 | Colonne | Lecture |
 |---|---|
+| Prévisions | nombre de (type de FRU, semaine) sur lesquels les méthodes sont notées : les mêmes pour toutes |
+| Prévisions de la méthode | ce que cette méthode a su prévoir ; le modèle structurel ne prévoit pas un type dont les arrivées sont inconnues |
 | Écart quadratique relatif | erreur rapportée à celle de la simple moyenne ; sous 1, la méthode fait mieux |
 | Perte de quantile | note la loi entière, pas seulement la moyenne ; plus bas est mieux |
 | Couverture 80 % | part des semaines tombées entre q10 et q90 ; doit être proche de 80 %, un peu au-dessus pour des comptages |
 | Biais | prévision moins réalité, en moyenne ; proche de 0 |
 
-**Limite** : sur un flux régulier, aucune méthode ne bat la moyenne, et c'est normal. Les méthodes plus riches ne servent que si le flux change de niveau ou suit le volume des réparations. Les modèles de fondation de séries temporelles (Chronos, TimesFM, Moirai, Toto, Timestral) se comparent avec la même table en les enregistrant par `erc.prevision.enregistrer_modele` sur un poste qui dispose de leurs poids.
+**Limite** : sur un flux régulier, aucune méthode ne bat la moyenne, et c'est normal. Aucun modèle de fondation n'a été exécuté pour ce dossier. Les méthodes plus riches ne servent que si le flux change de niveau ou suit le volume des réparations. Les modèles de fondation de séries temporelles (Chronos, TimesFM, Moirai, Toto, Timestral) se comparent avec la même table en les enregistrant par `erc.prevision.enregistrer_modele` sur un poste qui dispose de leurs poids.
 """),
     code('aff.table(ctx, "flux", "Évaluation des prévisions")'),
     md("## Notes de l'étape\n\nRègle qui date un scrap, granularité du suivi (par benne ou par type de déchet), nombre de semaines pesées."),
@@ -720,9 +722,11 @@ N07 = ("07_Composition_des_pieces", [
 
 **Comment ça marche.** Chaque source (une règle sur la description, une pièce validée qui lui ressemble, le classement antérieur, un document du fabricant, un modèle de langage) *affirme* une classe. Aucune n'est crue sur parole : le **cortex** garde ces affirmations, les compare aux validations faites par une personne, et en déduit ce que vaut chaque type de source. La probabilité d'une classe combine les affirmations selon cette fiabilité.
 
-**Le moins d'appels possible.** La chaîne commence par ce qui est gratuit. Une recherche de documents ou un appel à un modèle n'est lancé que si l'**enjeu** de la pièce (ce que rapporterait au plus de connaître sa classe : masse annuelle × écart entre les prix possibles) dépasse le coût de l'action.
+**Le moins d'appels possible.** Sans classe, une pièce n'a pas de bac : elle ne peut pas être triée. L'**enjeu** d'une pièce est ce que rapporterait au plus, par an, d'établir sa classe : masse annuelle × moyenne de (prix du recycleur + traitement évité) sur les classes possibles. La chaîne commence par ce qui est gratuit. Une recherche de documents ou un appel à un modèle n'est lancé que si l'enjeu couvre ce qui a déjà été dépensé pour la pièce, plus cette action. Une recherche déjà payée n'est jamais refaite.
 
-**Confidentialité.** Aucun code article interne ni aucune description ne sort du poste : une recherche ne contient que le fabricant, sa référence et un type générique. Une pièce de conception interne n'est jamais recherchée à l'extérieur.
+**La confiance se gagne.** Tant qu'aucune validation n'a montré qu'un modèle lit juste, sa lecture d'un document ne suffit pas à accepter une classe, même relue par lui. Elle y suffit une fois que les validations l'ont montré.
+
+**Confidentialité.** Aucun code article interne ni aucune description ne sort du poste. Une recherche ne contient que le fabricant, sa référence et un type générique, et n'est émise que si le fabricant est nommé, n'est pas l'entreprise, et si la référence n'est le code article d'aucune pièce. Une pièce déclarée de conception interne n'est jamais recherchée. À vérifier avant de brancher une collecte : la colonne « référence fabricant » de la nomenclature contient bien des références de fabricant.
 
 Vocabulaire : « collecte » désigne ici la recherche de documents sur le web ; « scrapé » reste réservé aux pièces mises au scrap.
 """),
@@ -740,11 +744,11 @@ Une ligne par pièce : la classe la plus probable, sa probabilité, les sources 
 | Statut | Sens |
 |---|---|
 | validée | une personne a fixé la classe : c'est la vérité du dossier |
-| acceptée | la probabilité dépasse le seuil d'acceptation ; à contrôler par sondage |
-| à valider | des preuves existent mais ne suffisent pas |
+| acceptée | la classe est probable (seuil d'acceptation) et une erreur coûterait moins qu'une revue ; contrôlée par sondage |
+| à valider | des preuves existent mais ne suffisent pas, ou la classe est probable mais une erreur coûterait plus qu'une revue |
 | inconnue | aucune source ne s'est prononcée |
 
-**Lecture** : « Enjeu » borne ce que la connaissance de la classe peut rapporter par an. « Prochaine action » dit quoi faire, y compris « aucune » quand apprendre la classe coûterait plus que cela ne rapporte.
+**Lecture** : « Enjeu » borne ce qu'établir la classe peut rapporter par an. « Prochaine action » dit quoi faire, y compris « aucune » quand établir la classe coûterait plus que cela ne rapporte. Une classe affirmée hors du référentiel des grades apparaît comme « hors référentiel » : elle demande une revue.
 
 **Limite** : en démonstration, la nomenclature, les documents et le modèle sont fictifs.
 """),
@@ -752,7 +756,13 @@ Une ligne par pièce : la classe la plus probable, sa probabilité, les sources 
     md("""
 ## 2. File de revue
 
-Les pièces à faire valider par une personne, par enjeu décroissant. Remplir « Classe validée » et « Validateur », puis déposer le fichier sous `Acquisition/validations_composition.csv` (colonnes `PN;Classe validée;Validateur;Commentaire`) dans le dossier des extractions : à l'exécution suivante, ces validations entrent dans le cortex et améliorent la fiabilité estimée des sources.
+Les pièces à faire valider par une personne, par enjeu décroissant.
+
+**Le plus simple : la page de revue.** `artefacts/composition/ERC_Composition_Revue.html` s'ouvre dans un navigateur, sans connexion. Elle montre pour chaque pièce la classe proposée, qui dit quoi, et ce que rapporterait de trancher. La personne confirme ou corrige, puis télécharge un fichier de validations à déposer dans `Acquisition/` (dossier des extractions). Deux files y sont proposées : les pièces **à valider**, et un **sondage** de pièces acceptées tirées au hasard. Le sondage compte autant que la file : sans lui, la fiabilité des sources n'est mesurée que sur les cas douteux, et elle est sous-estimée.
+
+**À la main.** Remplir « Classe validée » et « Validateur » dans la table ci-dessous et la déposer sous `Acquisition/validations_composition.csv` (colonnes `PN;Classe validée;Validateur;Commentaire;Motif`, le motif valant `file` pour ces pièces). Tous les fichiers `validations_composition*.csv` du dossier sont lus : une personne ou une séance par fichier.
+
+À l'exécution suivante, ces validations entrent dans le cortex : elles fixent la classe des pièces validées, servent d'exemples aux pièces de description voisine et mesurent ce que vaut chaque type de source.
 """),
     code('aff.table(ctx, "composition", "File de revue", colonnes=["PN", "Description", "Classe retenue", "Probabilité", "Enjeu (€/an, borne)", "Vaut une revue", "Prochaine action"])'),
     md("""
@@ -760,7 +770,7 @@ Les pièces à faire valider par une personne, par enjeu décroissant. Remplir �
 
 Pour chaque type de source : l'a priori de départ, qui est une hypothèse de travail, puis ce qui est observé sur les pièces validées. Plus il y a de validations, plus la fiabilité repose sur les faits et moins sur l'hypothèse (« Poids des observations »).
 
-**Lecture** : une source souvent contredite par les validations voit sa fiabilité baisser, et pèse moins dans toutes les probabilités. Un modèle de langage est une source comme une autre.
+**Lecture** : une source souvent contredite par les validations voit sa fiabilité baisser, et pèse moins dans toutes les probabilités. Un modèle de langage est une source comme une autre. Les colonnes « dont par sondage » et « dont dans la file » disent d'où viennent les validations : celles de la file ne renseignent que les pièces non tranchées, celles du sondage que les pièces acceptées.
 
 **Limite** : le calcul suppose que les types de source se trompent indépendamment. Si les règles saisies ici reprennent celles qui ont produit le classement antérieur, les deux comptent en double : ne garder que l'une des deux.
 """),
@@ -768,17 +778,33 @@ Pour chaque type de source : l'a priori de départ, qui est une hypothèse de tr
     md("""
 ## 4. Journal des acquisitions
 
-Chaque recherche de documents et chaque appel au modèle, avec son coût supposé. Une table courte est le signe que la chaîne s'arrête tôt.
+Chaque recherche de documents et chaque appel au modèle, avec son coût supposé. Une table courte est le signe que la chaîne s'arrête tôt. Une panne (collecte ou modèle) y figure comme « échec » : elle n'est pas comptée et l'action sera reprise au passage suivant.
 """),
     code('aff.table(ctx, "composition", "Journal des acquisitions")'),
     md("""
-## 5. Valeur de l'information dans le modèle de ligne
+## 5. Valeur d'établir une classe, dans le modèle de ligne
 
-Pour les pièces encore incertaines qui figurent dans le modèle de ligne : ce que rapporterait de connaître leur classe, calculé en résolvant le modèle sous chaque classe possible. « La décision change » dit si la réponse modifierait le plan. Table vide = aucune pièce du modèle n'est incertaine.
+Pour les pièces à valider qui figurent dans le modèle de ligne : ce que rapporterait d'établir leur classe, calculé en résolvant le modèle sous chaque classe possible, comparé au modèle où la pièce ne peut pas être triée. « La décision change » dit si la réponse modifierait le plan. Table vide = aucune pièce du modèle de ligne n'attend de validation.
 
-La justification est dans `docs/Formal_framework.md`, section 8 (proposition 6).
+La justification est dans `docs/Formal_framework.md`, section 8.3 (proposition 7).
 """),
     code('aff.table(ctx, "composition", "Valeur de l\'information")'),
+    md("""
+**Illustration.** Le même calcul sur une pièce du modèle de ligne, en supposant que sa classe hésite entre les deux grades les mieux payés du référentiel. C'est une supposition faite ici pour montrer le calcul, pas un résultat du dossier.
+"""),
+    code("""
+from erc import information
+import pandas as pd
+m = ctx.res.get("ligne", {}).get("Modèle")
+prix = {k: float(v) for k, v in ctx.src.prix_recycleur.items()}
+if m and len(prix) >= 2:
+    piece = next((pc for d in m["frus"].values() for pc, e in d["pieces"].items() if pc != "CARCASSE" and e.get("poids_kg") is not None), None)
+    deux = sorted(prix, key=prix.get, reverse=True)[:2]
+    exemple = information.priorites_classes(m["ligne"], m["frus"], {piece: {deux[0]: 0.6, deux[1]: 0.4}}, prix, cout_information=composition.Reglages().cout_revue) if piece else pd.DataFrame()
+    display(exemple)
+else:
+    print("Modèle de ligne ou référentiel des grades absent : pas d'illustration.")
+"""),
     md("""
 ## 6. Brancher une collecte de documents et un modèle local
 
@@ -790,13 +816,18 @@ from erc import composition
 def ma_collecte(requete):
     # requete = {"fabricant": ..., "reference_fabricant": ..., "type": ...} : rien d'interne
     # rendre une liste de documents : {"origine": "site ou URL", "texte": "...", "nature": "document" ou "déclaration fabricant"}
+    # ajouter "classe": "..." quand le document donne lui-même la classe (déclaration matière structurée) : aucun modèle n'est alors appelé
     return []
 
-qwen = composition.ModeleLocal("http://localhost:11434/v1", "nom-du-modele")   # tout serveur compatible « chat completions »
-compo = composition.executer(ctx, collecteur=ma_collecte, modele=qwen)
+qwen = composition.ModeleLocal("http://localhost:11434/v1", "nom-du-modele")   # tout serveur compatible « chat completions », sur ce poste
+reglages = composition.Reglages(fabricants_internes=("Nom de l'entreprise",))  # jamais recherché à l'extérieur
+compo = composition.executer(ctx, collecteur=ma_collecte, modele=qwen, reglages=reglages)
+# un second modèle pour contrôler les lectures du premier : composition.executer(..., modele_controle=autre_modele)
 ```
 
-Le modèle répond sous contrainte : la classe doit être dans la liste proposée, et la citation qui la justifie doit se trouver mot pour mot dans le document, sinon la réponse est rejetée.
+Le modèle répond sous contrainte : la classe doit être dans la liste proposée, et la citation qui la justifie doit se trouver mot pour mot dans le document, sinon la réponse est rejetée. Il doit tourner sur ce poste : pour un serveur distant, il faut l'accepter explicitement (`distant=True`), car le texte des documents lui est envoyé.
+
+Votre méthode de collecte existante se branche telle quelle derrière `ma_collecte` : il suffit qu'elle rende des documents sous cette forme.
 """),
     code('aff.notes(ctx, "composition")'),
     md("---\\nCe notebook est une entrée du dossier : relancer **00_Demarrage** après avoir validé des pièces pour que leurs classes soient reprises partout."),
