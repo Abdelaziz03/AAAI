@@ -1,13 +1,13 @@
 {
  "pieces": 21,
  "statuts": {
-  "acceptée": 14,
+  "acceptée": 12,
   "validée": 6,
-  "à valider": 1
+  "à valider": 3
  },
- "appels_au_modele": 0,
- "cout_des_acquisitions_eur": 0.0,
- "pieces_sans_appel_payant": 21,
+ "appels_au_modele": 8,
+ "cout_des_acquisitions_eur": 0.32,
+ "pieces_sans_appel_payant": 18,
  "pieces_hors_referentiel": 0,
  "codes_article_repetes_ignores": 0,
  "classes": [
@@ -29,15 +29,18 @@
  },
  "collecteur": "branché",
  "modele": "branché",
+ "modele_heberge": "ce poste",
+ "descriptions_lues_par_le_modele": true,
+ "couts_hypotheses_lecture_description": 0.01,
  "modele_de_controle": "le même que le modèle de lecture",
  "cortex": {
   "sujets": 21,
-  "affirmations": 65,
+  "affirmations": 47,
   "sujets validés": 6,
-  "coût cumulé des acquisitions": 0.19
+  "coût cumulé des acquisitions": 0.32
  },
  "nomenclature": "BOM_demo.xlsx",
- "validations_importees": 0,
+ "validations_importees": 6,
  "fichiers_de_validations_illisibles": [],
  "regles": 7,
  "regles_invalides": [],

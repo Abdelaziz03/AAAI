@@ -1,6 +1,12 @@
 ﻿cree_le;domaine;sujet;action;cout;resultat
-2026-11-26T12:06:50;composition;P-5001;collecte;0,02;1 document(s)
-2026-11-26T12:06:50;composition;P-5001;lecture par le modèle;0,05;Carte C
-2026-11-26T12:06:50;composition;P-6001;collecte;0,02;2 document(s)
-2026-11-26T12:06:50;composition;P-6001;lecture par le modèle;0,05;Carte B
-2026-11-26T12:06:50;composition;P-6001;lecture par le modèle;0,05;Composant de puissance
+2026-11-26T20:33:50;composition;P-1005;lecture de la description;0,01;Carte B | modèle fictif (démo) | 06e05bffe841
+2026-11-26T20:33:50;composition;P-1005;lecture par le modèle;0,05;Carte B
+2026-11-26T20:33:50;composition;P-1005;collecte;0,02;1 document(s)
+2026-11-26T20:33:50;composition;P-5001;lecture de la description;0,01;Carte C | modèle fictif (démo) | aeffd49bcea5
+2026-11-26T20:33:50;composition;P-5001;lecture par le modèle;0,05;Carte C
+2026-11-26T20:33:50;composition;P-5001;collecte;0,02;1 document(s)
+2026-11-26T20:33:50;composition;P-6001;lecture de la description;0,01;Carte B | modèle fictif (démo) | 1bf185d4d57d
+2026-11-26T20:33:50;composition;P-6001;lecture par le modèle;0,05;Carte B
+2026-11-26T20:33:50;composition;P-6001;lecture par le modèle;0,05;Composant de puissance
+2026-11-26T20:33:50;composition;P-6001;collecte;0,02;2 document(s)
+2026-11-26T20:33:50;composition;P-6001;contrôle par le modèle;0,03;confirme
