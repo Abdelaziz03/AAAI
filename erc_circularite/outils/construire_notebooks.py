@@ -812,6 +812,8 @@ else:
 
 Un modèle hébergé chez vous peut lire les **descriptions internes** des pièces : c'est la seule source automatique pour une pièce de conception interne. Un modèle qui n'est pas chez vous ne reçoit que le texte de documents publics. Pour choisir entre plusieurs modèles, `python -m erc.modele --comparer modele-a modele-b` les note sur vos pièces validées.
 
+**Le modèle apprend de vos validations, sans réentraînement.** `python -m erc.modele --optimiser` fait améliorer par le modèle lui-même les conseils de lecture des descriptions (méthode GEPA, en local), à partir des pièces validées, et mesure le gain sur des pièces qu'il n'a jamais vues. Les conseils ne sont adoptés que s'ils ne font pas moins bien sur ces pièces. Il faut au moins 24 pièces validées.
+
 **En Python**, pour brancher aussi votre collecte de documents :
 
 ```python
@@ -902,6 +904,9 @@ def main(argv=None) -> int:
         return 2
     if o.executer and not o.reel:
         os.environ["ERC_DEMO"] = "1"                  # les notebooks enregistrés dans le dossier ne montrent que la démonstration
+        if not o.noms:                                # tout est refait : la démonstration repart d'un cortex vide, pour que ses
+            import shutil                             # résultats enregistrés soient ceux d'un premier lancement, partout les mêmes
+            shutil.rmtree(Path(os.environ.get("ERC_DOSSIER") or DOSSIER) / "demo" / "cortex", ignore_errors=True)
     # Données réelles : les copies exécutées vont avec les artefacts (hors du dépôt public), jamais dans notebooks/.
     sortie = Path(os.environ.get("ERC_DOSSIER") or DOSSIER) / "artefacts" / "notebooks" if (o.executer and o.reel) else NOTEBOOKS
     echecs = 0

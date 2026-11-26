@@ -558,7 +558,7 @@ def executer(ctx, collecteur=None, modele=None, reglages: Reglages | None = None
             mod_modele.preparer_reglage(cfg)
         rm = mod_modele.lire_reglage(cfg)
         try:
-            modele, controle_regle = mod_modele.modeles_du_reglage(rm)
+            modele, controle_regle = mod_modele.modeles_du_reglage(rm, cfg=cfg)
             modele_controle = modele_controle if modele_controle is not None else controle_regle
         except ValueError as e:                                  # serveur ni local ni déclaré : on ne lui parle pas
             notes_modele["modele_refuse"] = str(e)

@@ -121,11 +121,34 @@ Candidats à essayer, relevés le 26 novembre 2026 dans des extraits de recherch
 
 Un modèle plus gros n'est pas forcément meilleur ici : mieux vaut comparer deux familles différentes (Qwen et Gemma) que deux tailles de la même.
 
-## 7. Débit
+## 7. Améliorer les consignes du modèle avec vos validations (GEPA)
+
+Le modèle ne connaît pas votre vocabulaire : abréviations, mots trompeurs, familles de pièces. Plutôt que de le réentraîner, on améliore la **consigne** qu'il reçoit. La méthode GEPA (Agrawal et al., 2025) le fait faire au modèle lui-même : on lui montre ses erreurs sur des pièces validées, il réécrit ses conseils, et une réécriture n'est gardée que si elle fait mieux.
+
+```bash
+python -m erc.modele --optimiser --budget 200
+```
+
+Tout se passe entre le dossier et votre modèle. Les pièces validées sont partagées en trois jeux : l'un sert à montrer les erreurs, le deuxième à choisir entre les consignes, le troisième, **l'essai**, n'est jamais vu pendant la recherche et sert à mesurer le gain. La commande affiche le taux de justes avant et après sur l'essai, et dit si l'écart peut être dû au hasard.
+
+Ce qui limite les appels : le budget est un nombre maximal d'appels au modèle ; aucune paire (consigne, pièce) n'est exécutée deux fois ; la longueur des conseils est plafonnée, car elle se paie ensuite à chaque lecture. Une meilleure lecture des descriptions, faite chez vous, évite ensuite des recherches extérieures.
+
+Ce qui empêche les raccourcis :
+
+- des conseils qui contiennent un code article, ou recopient une désignation entière, sont refusés : ils doivent énoncer des règles, pas une table de réponses ;
+- une réponse dont l'indice n'est pas dans la désignation compte comme fausse, et se taire vaut mieux que se tromper ;
+- les conseils ne sont adoptés que s'ils ne font pas moins bien sur les pièces d'essai ;
+- le cadre de la consigne (liste des classes, forme de la réponse) ne peut pas être réécrit.
+
+Les conseils adoptés sont gardés dans `parametres/consignes_modele.json`, par modèle. Tirés de vos pièces, ils restent dans le dossier et ne vont pas dans le dépôt. Il faut au moins 24 pièces validées avec description ; avec peu de pièces, le gain mesuré est incertain, et la commande le dit. Un autre modèle peut écrire les conseils (`--reflexion nom-du-modele`), par exemple un modèle plus gros que celui qui lit.
+
+Cette écriture de GEPA est propre au dossier (`erc/gepa.py`) : elle suit la boucle de l'article, sans son étape de croisement, et n'utilise pas le paquet officiel. Elle n'a été essayée qu'avec des modèles d'essai ; son effet sur un vrai modèle et sur vos pièces est à mesurer, ce que la commande fait.
+
+## 8. Débit
 
 La chaîne envoie les lectures de descriptions plusieurs à la fois (`appels_paralleles`, 4 par défaut dans `composition.Reglages`). Régler le serveur pour autant de requêtes simultanées (`-np 4` pour llama-server, `OLLAMA_NUM_PARALLEL=4` pour Ollama) et garder le modèle chargé. Une lecture déjà faite n'est jamais refaite, sauf si la description ou le modèle change.
 
-## 8. Avant de s'y fier
+## 9. Avant de s'y fier
 
 - [ ] `python -m erc.modele --verifier` répond « Prêt : True ».
 - [ ] Le serveur n'écoute que sa machine, ou que l'adresse privée voulue, et le pare-feu ferme son port au reste du réseau.
@@ -134,7 +157,7 @@ La chaîne envoie les lectures de descriptions plusieurs à la fois (`appels_par
 - [ ] La colonne « référence fabricant » de la nomenclature contient bien des références de fabricant, et le nom de votre entreprise est déclaré dans `fabricants_internes`.
 - [ ] Après les premières validations, la page de revue montre la fiabilité mesurée du type de source « modèle : description ».
 
-## 9. Ce qui n'est pas fait
+## 10. Ce qui n'est pas fait
 
 - Aucun vrai modèle n'a été appelé pour ce dossier : les tests utilisent un serveur d'essai.
 - La relecture indépendante de ce guide (sécurité, noms de modèles) n'a pas pu être menée à son terme.

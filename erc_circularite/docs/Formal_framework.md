@@ -287,6 +287,8 @@ Four consequences are deliberate.
 - **Independence is enforced by provenance, as far as it is traced.** Ten web pages that reproduce one data sheet are one piece of evidence: claims are counted once per source type and origin. A model that re-reads its own reading does not add a source: a "yes" turns the reading into a confirmed reading, a "no" withdraws it. A verdict by another model on the same document is treated as conditionally independent, which is an assumption. Two readers of the same text, a rule and a language model reading the same description, count as one piece of evidence when they agree, the more reliable of the two; when they disagree both count.
 - **Unknown stays unknown.** A component whose class is not established has no bin, hence no price: in (P) it is in the state $\varnothing_j$ of Section 2, where sorting is unavailable. It is not valued at an average price.
 
+**Adapting the reader without retraining.** The instruction given to the self-hosted model for reading descriptions is itself learned from the validations, by reflective prompt evolution (GEPA, Agrawal et al. 2025): candidate instructions are scored per example, a candidate is drawn among those that are best on at least one example (Pareto front), a reflection model rewrites it from its errors on a small batch, and the rewrite is kept only if it does better on that batch. The search has a budget in model calls and never sees a held-out test set, on which the gain is then measured; an instruction that contains a part number or copies a description is rejected, and one that does worse on the test set is not adopted. This changes no weight and needs no data outside the owner's machine. **[implemented]** `erc/gepa.py`, without the merge step of the paper and independently of its reference implementation; checked with stand-in models only, so its effect on a real model is **[to measure]**.
+
 ### 8.3 Value of information
 
 Two cases must be kept apart. For a parameter on which the decision maker can act at its mean (a yield, a value, the price of an established class known with error), the reference is the decision taken at the mean. For the class of a component, there is no "decision at the mean class": without a class the component cannot be sorted.
@@ -405,6 +407,7 @@ Without an implemented application, the options are the following. In the same j
 | 8.3 acquisition chain, budget, acceptance | `erc/composition.py` | `tests/test_composition.py`: minimum of calls, no repeated payment, failures, order independence |
 | 8.3 bounds and exact values | `erc/information.py` | `tests/test_information.py`: Propositions 2 to 7 on random instances, tight case of the bound |
 | 8.3 human review and audit sample | `erc/composition_outil.py`, `erc/composition_gabarit.html` | `tests/test_composition_outil.py`: decisions exported by the page return to the knowledge base |
+| 8.2 instruction learned from validations (GEPA) | `erc/gepa.py` | `tests/test_gepa.py`: Pareto selection, budget, rejected shortcuts, gain measured on unseen parts |
 | 8.4 confidentiality | `erc/composition.py::requete_publique`, `erc/modele.py` | `tests/test_composition.py`, `tests/test_modele.py`: internal codes, free text, own company, in-house flag, descriptions sent to a private model only, model output never in a request |
 | input flow verified against weighing | `erc/flux.py` | `tests/test_stats.py` |
 
@@ -430,6 +433,7 @@ Without an implemented application, the options are the following. In the same j
 
 Status: **V** = bibliographic details matched, during the preparation of this document, against a publisher, repository or index record returned by web search (the pages of some publishers could not be opened from the working environment, so the match is with the record, not with the article itself); **C** = cited from memory, to be checked before submission. What a paper is said to contain rests on its abstract unless stated otherwise.
 
+- Agrawal, L. A., et al. (2025). GEPA: Reflective prompt evolution can outperform reinforcement learning. arXiv:2507.19457. **C**
 - Ansari, A. F., et al. (2024). Chronos: Learning the language of time series. *Transactions on Machine Learning Research*, October 2024. arXiv:2403.07815. **V** (author list to be written out)
 - Badanidiyuru, A., Kleinberg, R., Slivkins, A. (2018). Bandits with knapsacks. *Journal of the ACM* 65(3), 1–55. **V** (article number to add)
 - Cohen, B., Khwaja, E., Wang, K., Masson, C., Ramé, E., Doubli, Y., Abou-Amal, O. (2024). Toto: Time series optimized transformer for observability. arXiv:2407.07874. **V**

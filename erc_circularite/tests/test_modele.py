@@ -499,3 +499,20 @@ def test_le_dossier_utilise_le_modele_du_reglage(tmp_path, serveur, monkeypatch)
     recues = len(Serveur.recues)
     n = C.executer(ctx, collecteur=Espion())["Notes"]
     assert n["modele"] == "absent" and "n'est pas déclaré" in n["modele_refuse"] and len(Serveur.recues) == recues
+
+
+def test_commande_optimiser_trop_peu_de_pieces_validees(tmp_path, serveur, monkeypatch, capsys):
+    """La commande d'amélioration des consignes va jusqu'au bout de son chemin ; avec les six pièces validées de la
+    démonstration, elle dit qu'il en faut davantage et ne change rien."""
+    for v in ("ERC_MODELE_URL", "ERC_MODELE_NOM", "ERC_MODELE_CLE"):
+        monkeypatch.delenv(v, raising=False)
+    cfg = erc.charger_config(dossier=tmp_path, demo=True)
+    cfg.figures, cfg.n_monte_carlo = False, 20
+    C.executer(erc.executer("ligne", cfg=cfg, silencieux=True))                                             # crée le cortex de la démonstration
+    Serveur.reponse = bon_modele
+    M.chemin_reglage(cfg).write_text(f"[modele]\nurl = {serveur}\nnom = qwen-test\n", encoding="utf-8")
+    recues = len(Serveur.recues)
+    assert M.main(["--demo", "--dossier", str(tmp_path), "--optimiser", "--budget", "50"]) == 0
+    sortie = capsys.readouterr().out
+    assert "il en faut au moins 24" in sortie and "ne sont pas changés" in sortie and len(Serveur.recues) == recues
+    assert M.lire_conseils(cfg) == {}

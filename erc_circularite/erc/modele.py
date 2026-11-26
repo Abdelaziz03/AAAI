@@ -20,6 +20,7 @@ La clé du serveur ne s'écrit pas dans ce fichier : elle se lit dans une variab
     python -m erc.modele --preparer          crée le fichier de réglage s'il n'existe pas
     python -m erc.modele --verifier          interroge le serveur : modèles disponibles, réponses contraintes, délais
     python -m erc.modele --comparer A B C    compare des modèles du serveur sur vos pièces validées (descriptions)
+    python -m erc.modele --optimiser         améliore les conseils de lecture du modèle sur vos pièces validées (erc/gepa.py)
 
 Garde-fous, sans appel supplémentaire : la classe rendue doit être dans la liste proposée ; la citation doit se trouver
 mot pour mot dans le document ; l'indice qui justifie une classe doit se trouver dans la description. Une réponse qui
@@ -132,6 +133,19 @@ def _propre(s: str) -> str:
 
 
 AUCUNE = "aucune"                       # réponse « je ne peux pas dire », quand la sortie est contrainte à une liste
+FICHIER_CONSEILS = "consignes_modele.json"
+LONGUEUR_MAX_CONSEILS = 3000            # une consigne longue se paie à chaque appel
+
+
+def consigne_description(classes, conseils: str = "") -> str:
+    """Consigne donnée au modèle pour classer une pièce d'après sa désignation. Le cadre (tâche, liste des classes,
+    forme de la réponse) est fixe ; seuls les CONSEILS, au milieu, changent : ce sont eux que erc/gepa.py améliore."""
+    conseils = texte(conseils).strip()
+    return ("Tu classes une pièce de rechange d'après sa désignation, souvent abrégée, en anglais ou en français. Choisis la classe "
+            "matière la plus probable parmi cette liste, et seulement si la désignation le permet : " + " ; ".join(map(str, classes)) + "."
+            + (f"\n\nConseils tirés des pièces déjà validées :\n{conseils}\n\n" if conseils else " ")
+            + 'Réponds en JSON : {"classe": "<une classe de la liste, ou aucune>", "indice": "<le ou les mots de la désignation, '
+              'recopiés tels quels, qui le justifient>"}')
 # Champs propres aux serveurs qui coupent le raisonnement d'un modèle qui « réfléchit » ; essayés par `diagnostiquer`.
 REGLAGES_DE_RAISONNEMENT = [{}, {"reasoning_effort": "none"}, {"chat_template_kwargs": {"enable_thinking": False}}]
 
@@ -173,6 +187,7 @@ class ModeleLocal:
         self._structure = True                                 # sortie structurée : essayée, abandonnée si le serveur la refuse
         self.derniere_duree = float("nan")
         self.raisonnement_vu = False                           # le modèle a écrit un raisonnement avant de répondre : plus lent, à couper
+        self.conseils = {}                                     # conseils ajoutés aux consignes, par usage (« description ») : voir erc/gepa.py
 
     # ------------------------------------------------------------------ transport
     def _requete(self, chemin: str, corps: dict | None = None):
@@ -256,26 +271,35 @@ class ModeleLocal:
         v = texte((o or {}).get("verdict")).strip().lower()
         return True if v == "oui" else False if v == "non" else None
 
-    def classer(self, description: str, classes, contexte: str = "") -> tuple:
-        """Classe matière proposée d'après la description interne d'une pièce, avec le mot de la description qui la
-        justifie. Réservé à un modèle privé : la description ne part jamais vers un autre serveur."""
+    def classer_detail(self, description: str, classes, contexte: str = "", conseils: str | None = None) -> dict:
+        """Lecture d'une description, avec ce qu'il faut pour comprendre un refus :
+        {"classe": classe retenue ou None, "indice", "repondu": ce que le modèle a dit, "rejet": pourquoi la réponse est écartée}.
+        conseils : conseils à essayer à la place de ceux du modèle (erc/gepa.py)."""
         if not self.prive:
             raise PermissionError("Ce modèle n'est pas privé : il ne lit pas les descriptions internes.")
         classes, description = list(classes), texte(description).strip()
         if not description:
-            return None, ""
-        consigne = ("Tu classes une pièce de rechange d'après sa désignation, souvent abrégée, en anglais ou en français. Choisis la classe "
-                    "matière la plus probable parmi cette liste, et seulement si la désignation le permet : " + " ; ".join(classes) +
-                    '. Réponds en JSON : {"classe": "<une classe de la liste, ou aucune>", "indice": "<le ou les mots de la désignation, '
-                    'recopiés tels quels, qui le justifient>"}')
-        o = _objet_json(self.demander(consigne, f"Désignation : {description[:400]}" + (f"\nType de pièce : {contexte}" if contexte else ""),
+            return {"classe": None, "indice": "", "repondu": None, "rejet": "désignation vide"}
+        conseils = self.conseils.get("description", "") if conseils is None else conseils
+        o = _objet_json(self.demander(consigne_description(classes, conseils),
+                                      f"Désignation : {description[:400]}" + (f"\nType de pièce : {contexte}" if contexte else ""),
                                       schema_de_reponse("description", classes)))
-        if not isinstance(o, dict) or o.get("classe") not in classes:
-            return None, ""
-        indice = texte(o.get("indice")).strip()
+        if not isinstance(o, dict):
+            return {"classe": None, "indice": "", "repondu": None, "rejet": "réponse illisible"}
+        repondu, indice = texte(o.get("classe")).strip() or None, texte(o.get("indice")).strip()
+        if repondu is None or plier(repondu) == AUCUNE:
+            return {"classe": None, "indice": indice, "repondu": None, "rejet": "le modèle ne se prononce pas"}
+        if repondu not in classes:
+            return {"classe": None, "indice": indice, "repondu": repondu, "rejet": "classe hors de la liste"}
         if len(plier(indice)) < 3 or plier(indice) not in plier(description):
-            return None, ""                                    # l'indice n'est pas dans la désignation : réponse non fondée, rejetée
-        return o["classe"], indice
+            return {"classe": None, "indice": indice, "repondu": repondu, "rejet": "l'indice cité n'est pas dans la désignation"}
+        return {"classe": repondu, "indice": indice, "repondu": repondu, "rejet": None}
+
+    def classer(self, description: str, classes, contexte: str = "") -> tuple:
+        """Classe matière proposée d'après la description interne d'une pièce, avec le mot de la description qui la
+        justifie. Réservé à un modèle privé : la description ne part jamais vers un autre serveur."""
+        d = self.classer_detail(description, classes, contexte)
+        return (d["classe"], d["indice"]) if d["classe"] else (None, "")
 
     # ------------------------------------------------------------------ vérification
     def verifier(self) -> dict:
@@ -417,14 +441,40 @@ def lire_reglage(cfg) -> Reglage:
                    fabricants_internes=_liste(lu("collecte", "fabricants_internes")), erreurs=tuple(erreurs))
 
 
-def modeles_du_reglage(reglage: Reglage, distant: bool = False) -> tuple:
+def lire_conseils(cfg) -> dict:
+    """Conseils améliorés gardés dans le dossier : {nom du modèle: {usage: {"texte": ..., ...}}}. Fichier absent ou abîmé : rien."""
+    f = Path(cfg.parametres) / FICHIER_CONSEILS
+    try:
+        d = json.loads(f.read_text(encoding="utf-8")) if f.is_file() else {}
+        return d if isinstance(d, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def garder_conseils(cfg, nom_modele: str, usage: str, conseils: str, **mesures) -> Path:
+    """Garde les conseils d'un modèle pour un usage, avec ce qui a été mesuré. Ils restent dans le dossier, hors du dépôt :
+    tirés de vos pièces, ils peuvent en reprendre le vocabulaire."""
+    f = Path(cfg.parametres) / FICHIER_CONSEILS
+    d = lire_conseils(cfg)
+    d.setdefault(nom_modele, {})[usage] = {"texte": texte(conseils).strip(), "ecrit_le": time.strftime("%Y-%m-%dT%H:%M"), **mesures}
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+    return f
+
+
+def modeles_du_reglage(reglage: Reglage, distant: bool = False, cfg=None) -> tuple:
     """(modèle de lecture, modèle de contrôle) d'après le réglage ; None quand l'adresse ou le nom manque.
-    Un serveur qui n'est ni ce poste ni déclaré de confiance lève ValueError : on ne lui parle pas par mégarde."""
+    Un serveur qui n'est ni ce poste ni déclaré de confiance lève ValueError : on ne lui parle pas par mégarde.
+    cfg : s'il est donné, chaque modèle reçoit les conseils gardés pour lui dans le dossier."""
+    gardes = lire_conseils(cfg) if cfg is not None else {}
+
     def creer(url, nom):
         if not url or not nom:
             return None
-        return ModeleLocal(url, nom, cle=reglage.cle, delai=reglage.delai_s, distant=distant, confiance=reglage.confiance,
-                           certificat=reglage.certificat or None, corps=reglage.corps)
+        m = ModeleLocal(url, nom, cle=reglage.cle, delai=reglage.delai_s, distant=distant, confiance=reglage.confiance,
+                        certificat=reglage.certificat or None, corps=reglage.corps)
+        m.conseils = {u: texte(v.get("texte")) for u, v in (gardes.get(nom) or {}).items() if isinstance(v, dict) and texte(v.get("texte")).strip()}
+        return m
     return creer(reglage.url, reglage.nom), creer(reglage.controle_url or reglage.url, reglage.controle_nom)
 
 
@@ -533,6 +583,9 @@ def main(argv=None) -> int:
     a.add_argument("--verifier", action="store_true", help="interroge le serveur du réglage avec des questions d'essai")
     a.add_argument("--comparer", nargs="+", metavar="MODELE", help="compare ces modèles du serveur sur les pièces validées du cortex")
     a.add_argument("--pieces", type=int, default=None, help="nombre maximal de pièces pour la comparaison")
+    a.add_argument("--optimiser", action="store_true", help="améliore les conseils de lecture des descriptions sur les pièces validées (GEPA, en local)")
+    a.add_argument("--budget", type=int, default=200, help="nombre maximal d'appels au modèle de lecture pendant l'amélioration")
+    a.add_argument("--reflexion", metavar="MODELE", help="modèle du même serveur qui écrit les nouveaux conseils (défaut : le modèle de lecture)")
     o = a.parse_args(argv)
     cfg = charger(dossier=o.dossier, demo=True if o.demo else None)
     if o.preparer or not chemin_reglage(cfg).exists():
@@ -543,7 +596,7 @@ def main(argv=None) -> int:
     r = lire_reglage(cfg)
     for e in r.erreurs:
         print("Attention :", e)
-    if not r.url or not (r.nom or o.comparer):
+    if not r.url or not (r.nom or (o.comparer and not o.optimiser)):
         print(f"Aucun modèle réglé : renseigner « url » et « nom » dans {chemin_reglage(cfg)}.")
         return 1
     try:
@@ -564,7 +617,32 @@ def main(argv=None) -> int:
                 print(t["resume"].round(3).to_string(index=False))
             print("Tables : artefacts/composition/")
             return 0
-        m, _ = modeles_du_reglage(r)
+        m, _ = modeles_du_reglage(r, cfg=cfg)
+        if o.optimiser:
+            from . import composition, gepa
+            from .cortex import Cortex
+            from .etapes import executer as pipeline
+            reflexion = ModeleLocal(r.url, o.reflexion, cle=r.cle, delai=r.delai_s, confiance=r.confiance, certificat=r.certificat or None) if o.reflexion else m
+            ctx = pipeline("sources", cfg=cfg, silencieux=True)
+            classes = list(ctx.src.prix_recycleur.index.astype(str)) or sorted(set(ctx.src.classification["Catégorie proposée"].dropna().astype(str)))
+            with Cortex(cfg.cortex) as cx:
+                g = gepa.optimiser_descriptions(cx, m, classes, reflexion, composition.DOMAINE, composition.ATTRIBUT, budget=o.budget)
+            if len(g["resume"]):
+                ctx.depot.table("composition", "Amélioration des consignes", g["resume"], "Consigne de départ et consigne retenue, notées sur des pièces d'essai jamais vues")
+                ctx.depot.table("composition", "Amélioration des consignes, candidats", g["candidats"], "Consignes essayées, avec leur note sur le jeu de sélection")
+                ctx.depot.table("composition", "Amélioration des consignes, pièces d'essai", g["essai"], "Réponse de chaque consigne sur chaque pièce d'essai")
+                ctx.depot.ecrire_manifeste()
+                with pd.option_context("display.width", 200, "display.max_columns", 20):
+                    print(g["resume"].round(3).to_string(index=False))
+            print("Appels :", ", ".join(f"{k} {v}" for k, v in g["appels"].items()))
+            print("Résultat :", g["raison"])
+            if g["adopte"]:
+                f = garder_conseils(cfg, m.modele, "description", g["conseils"], pieces_d_essai=int(g["jeux"]["essai"]),
+                                    note_essai_avant=float(g["resume"]["Note moyenne"].iloc[0]), note_essai_apres=float(g["resume"]["Note moyenne"].iloc[1]))
+                print(f"Conseils adoptés et gardés dans {f.name} ; la chaîne les utilisera au prochain passage.")
+            else:
+                print("Les conseils du modèle ne sont pas changés.")
+            return 0
     except ValueError as e:
         print(e)
         return 1
