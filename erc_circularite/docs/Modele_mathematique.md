@@ -177,4 +177,5 @@ Modules qui s'appuient dessus :
 - `erc/prevision.py` : prévision du flux hebdomadaire de FRU scrapées, pour séries courtes et intermittentes, avec son évaluation et un point d'entrée pour les modèles de fondation de séries temporelles.
 - `erc/cortex.py` : base de connaissance à sources faillibles. Chaque source affirme, une personne valide, et la fiabilité de chaque type de source se mesure sur les validations, par strates (pièces de la file, pièces acceptées tirées au sondage) pour ne pas la sous-estimer.
 - `erc/composition.py` : chaîne qui va d'une nomenclature (code article, description) à la classe matière de chaque pièce avec le moins d'appels possible. Une action payante n'est lancée que si l'enjeu de la pièce couvre ce qui a déjà été dépensé pour elle plus cette action ; une recherche payée n'est jamais refaite.
+- `erc/modele.py` : le modèle de langage hébergé chez vous (réglage, vérification, comparaison sur vos pièces validées). Lui seul lit les descriptions internes ; voir `Modele_local.md`.
 - `erc/composition_outil.py` : page de revue où une personne confirme ou corrige les classes proposées ; ses décisions reviennent dans le cortex.

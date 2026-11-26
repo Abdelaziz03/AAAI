@@ -806,9 +806,13 @@ else:
     print("Modèle de ligne ou référentiel des grades absent : pas d'illustration.")
 """),
     md("""
-## 6. Brancher une collecte de documents et un modèle local
+## 6. Brancher le modèle hébergé chez vous et une collecte de documents
 
-Sans collecteur ni modèle, la chaîne s'arrête aux sources gratuites et dit ce qui manque. Les deux se branchent sans modifier le dossier :
+**Le modèle.** Les données sont privées : le modèle de langage tourne sur une machine qui vous appartient, de préférence celle qui détient les données. Il se règle sans code dans `parametres/modele_local.cfg` (créé par `python -m erc.modele --preparer`), se vérifie par `python -m erc.modele --verifier`, et la chaîne l'utilise alors d'elle-même. Guide : `docs/Modele_local.md`.
+
+Un modèle hébergé chez vous peut lire les **descriptions internes** des pièces : c'est la seule source automatique pour une pièce de conception interne. Un modèle qui n'est pas chez vous ne reçoit que le texte de documents publics. Pour choisir entre plusieurs modèles, `python -m erc.modele --comparer modele-a modele-b` les note sur vos pièces validées.
+
+**En Python**, pour brancher aussi votre collecte de documents :
 
 ```python
 from erc import composition
@@ -819,13 +823,15 @@ def ma_collecte(requete):
     # ajouter "classe": "..." quand le document donne lui-même la classe (déclaration matière structurée) : aucun modèle n'est alors appelé
     return []
 
-qwen = composition.ModeleLocal("http://localhost:11434/v1", "nom-du-modele")   # tout serveur compatible « chat completions », sur ce poste
+qwen = composition.ModeleLocal("http://localhost:11434/v1", "nom-du-modele")   # sur ce poste ; pour une autre de vos machines : confiance=("nom-de-la-machine",)
 reglages = composition.Reglages(fabricants_internes=("Nom de l'entreprise",))  # jamais recherché à l'extérieur
 compo = composition.executer(ctx, collecteur=ma_collecte, modele=qwen, reglages=reglages)
 # un second modèle pour contrôler les lectures du premier : composition.executer(..., modele_controle=autre_modele)
 ```
 
-Le modèle répond sous contrainte : la classe doit être dans la liste proposée, et la citation qui la justifie doit se trouver mot pour mot dans le document, sinon la réponse est rejetée. Il doit tourner sur ce poste : pour un serveur distant, il faut l'accepter explicitement (`distant=True`), car le texte des documents lui est envoyé.
+Le modèle répond sous contrainte : la classe doit être dans la liste proposée, la citation doit se trouver mot pour mot dans le document, et l'indice qui justifie une classe doit se trouver dans la description ; sinon la réponse est rejetée. Un serveur qui n'est ni ce poste ni l'une de vos machines déclarées est refusé, sauf acceptation explicite (`distant=True`) ; il ne lit alors jamais une description.
+
+Une règle et un modèle qui lisent la même description ne font pas deux preuves : d'accord, ils comptent pour une ; en désaccord, la classe n'est plus acquise et la pièce demande une autre preuve.
 
 Votre méthode de collecte existante se branche telle quelle derrière `ma_collecte` : il suffit qu'elle rende des documents sous cette forme.
 """),

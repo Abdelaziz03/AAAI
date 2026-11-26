@@ -246,8 +246,23 @@ class ModeleFictif:
     """Modèle de langage FICTIF pour la démonstration : il « lit » la balise [[classe : …]] du document. Aucun modèle
     réel n'est appelé. Même interface que erc.composition.ModeleLocal."""
 
+    prive, nature, modele = True, "ce poste", "modèle fictif (démo)"   # tient lieu d'un modèle hébergé chez vous
+    # Ce que ce modèle fictif « comprend » d'une désignation : un peu plus que les règles, sans être infaillible.
+    LECTURE = [("preamp|keypad", "Carte C"), ("mainboard|board|carte", "Carte B"), ("igbt", "Composant de puissance"),
+               ("capacitor|condensateur", "Condensateur"), ("cable|harness", "Câbles"), ("fan|fuse|resist", "Composant standard"),
+               ("coque|joystick|soufflet", "Plastique"), ("grille|vis|radiateur", "Métal")]
+
     def __init__(self):
         self.appels = 0
+
+    def classer(self, description, classes, contexte=""):
+        import re
+        self.appels += 1
+        for motif, classe in self.LECTURE:
+            m = re.search(motif, description, re.I)
+            if m and classe in list(classes):
+                return classe, m.group(0)
+        return None, ""
 
     def extraire(self, texte, classes):
         import re

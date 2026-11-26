@@ -12,6 +12,7 @@ La chaîne va du moins cher au plus cher et s'arrête dès que possible :
   3  le classement antérieur de la pièce, s'il existe                                  gratuit
   ── la suite coûte : chaque action n'est lancée que si l'enjeu de la pièce couvre ce qui a déjà été dépensé pour
      elle plus le coût de l'action, et la chaîne s'arrête dès que la classe est acceptée ──
+  3b lecture de la description interne par le modèle, s'il est PRIVÉ (chez vous)       un appel au modèle
   4  collecte de documents publics (fiche du fabricant, déclaration matière)           un appel au collecteur
   5  lecture du document par un modèle de langage, sauf classe donnée par le document  un appel au modèle
   6  contrôle de la classe retenue par un modèle (Qwen ou autre), seulement si un      un appel au modèle
@@ -34,37 +35,46 @@ nomenclature. Une pièce déclarée de conception interne n'est jamais recherch�
 colonne « interne » vaut « interne ». La garantie suppose que la colonne « référence fabricant » contient bien des
 références de fabricant : c'est à vérifier sur la nomenclature avant de brancher une collecte.
 
+Le modèle de langage tourne chez vous (erc/modele.py) : sur ce poste, ou sur une machine de votre réseau que vous avez
+déclarée. Lui seul peut lire une description interne ; c'est la seule source automatique pour une pièce de conception
+interne. Un modèle qui n'est pas chez vous ne reçoit jamais que le texte de documents publics. Le modèle ne construit
+jamais une requête vers l'extérieur : les requêtes de collecte sont faites des seuls champs de la nomenclature.
+
 Le collecteur et le modèle sont des pièces rapportées : toute fonction ou tout objet qui respecte l'interface convient
-(votre méthode de collecte existante, un serveur Qwen local). Sans eux, la chaîne s'arrête à l'étape 3 et dit ce qui manque.
+(votre méthode de collecte existante, un serveur Qwen chez vous). Sans eux, la chaîne s'arrête à l'étape 3 et dit ce qui manque.
 
     collecteur(requete) -> [{"origine": ..., "texte": ..., "nature": "document" | "déclaration fabricant", "classe": ...}]
         requete = {"fabricant", "reference_fabricant", "type"} ; « classe » est facultative (déclaration structurée)
     modele.extraire(texte, classes) -> (classe ou None, citation)
     modele.valider(classe, texte)   -> True, False ou None
+    modele.classer(description, classes, type) -> (classe ou None, indice)   appelé seulement si modele.prive est vrai
 
 Vocabulaire : « collecte » désigne la recherche de documents sur le web ; « scrapé » reste réservé aux pièces mises au scrap.
 """
 from __future__ import annotations
 
-import json
+import dataclasses
+import hashlib
+from concurrent.futures import ThreadPoolExecutor
 import re
 import unicodedata
-import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-from urllib.parse import urlparse
 
 import numpy as np
 import pandas as pd
 
 from . import composition_outil
 from . import cortex as mod_cortex
+from . import modele as mod_modele
 from .cortex import HORS, plier, texte
+from .modele import Indisponible, ModeleLocal  # noqa: F401  (importables d'ici, comme avant)
 from .risques import type_piece
 from .sources import _cle, ref
 
 DOMAINE, ATTRIBUT = "composition", "classe matière"
 mod_cortex.A_PRIORI_SOURCES.setdefault("classement antérieur", 0.70)       # hypothèse de travail, comme les autres a priori
+mod_cortex.A_PRIORI_SOURCES.setdefault("modèle : description", 0.60)       # modèle privé qui lit la description interne
 
 COLONNES_BOM = {
     "PN": ("pn", "partnumber", "item", "componentitem", "reference", "ref", "codearticle", "code", "article"),
@@ -96,6 +106,9 @@ class Reglages:
     cout_extraction: float = 0.05        # € par lecture de document par le modèle
     cout_validation: float = 0.03        # € par contrôle par le modèle
     cout_revue: float = 5.0              # € par revue humaine d'une pièce (quelques minutes)
+    cout_description: float = 0.01       # € par lecture d'une description par le modèle privé (calcul sur votre machine)
+    lire_descriptions: bool = True       # le modèle privé peut lire les descriptions internes ; sans effet sur un autre modèle
+    appels_paralleles: int = 4           # lectures de descriptions envoyées en même temps au modèle privé (traiter)
     max_documents: int = 3
     recollecter: bool = False            # True : refaire la recherche payante d'une pièce déjà cherchée
     fabricants_internes: tuple = ()      # noms de l'entreprise et de ses sites : jamais recherchés à l'extérieur
@@ -193,73 +206,6 @@ def requete_publique(piece: dict, pns=(), fabricants_internes=()):
     return {"fabricant": fab, "reference_fabricant": mpn, "type": "" if t.startswith("(") else t}
 
 
-# --------------------------------------------------------------------------- modèle de langage local (Qwen ou autre)
-class Indisponible(Exception):
-    """Le serveur du modèle n'a pas répondu : l'appel est à refaire, il n'est pas compté."""
-
-
-class ModeleLocal:
-    """Client d'un serveur compatible avec l'interface « chat completions » (Ollama, LM Studio, llama.cpp, vLLM…).
-
-    Deux usages, tous deux à réponse contrainte :
-      extraire(texte, classes) : classe matière lue dans un document, avec la citation qui la justifie ;
-      valider(classe, texte)   : le document confirme-t-il cette classe ? oui, non, ou ne sait pas.
-    Garde-fous sans appel supplémentaire : la classe doit être une des classes proposées, et la citation doit se
-    trouver mot pour mot dans le document ; sinon la réponse est rejetée. Une panne du serveur lève `Indisponible`.
-    Le serveur doit tourner sur ce poste (localhost) : le texte des documents et la liste des classes lui sont envoyés.
-    Pour un serveur distant, le dire explicitement avec distant=True.
-    """
-
-    def __init__(self, url: str = "http://localhost:11434/v1", modele: str = "qwen", cle: str | None = None, delai: float = 60.0,
-                 distant: bool = False):
-        hote = (urlparse(url).hostname or "").lower()
-        if not (hote in ("localhost", "::1") or hote.startswith("127.")) and not distant:
-            raise ValueError(f"Le serveur de modèle « {hote} » n'est pas sur ce poste. Les documents lus lui seraient envoyés : "
-                             "pour l'accepter, créer le modèle avec distant=True.")
-        self.url, self.modele, self.cle, self.delai, self.appels = url.rstrip("/"), modele, cle, delai, 0
-
-    def demander(self, consigne: str, contenu: str) -> str:
-        self.appels += 1
-        corps = json.dumps({"model": self.modele, "temperature": 0, "messages": [{"role": "system", "content": consigne},
-                                                                                {"role": "user", "content": contenu}]}).encode("utf-8")
-        entetes = {"Content-Type": "application/json", **({"Authorization": f"Bearer {self.cle}"} if self.cle else {})}
-        try:
-            with urllib.request.urlopen(urllib.request.Request(f"{self.url}/chat/completions", data=corps, headers=entetes), timeout=self.delai) as r:
-                return str(json.loads(r.read().decode("utf-8"))["choices"][0]["message"]["content"])
-        except Exception as e:
-            raise Indisponible(type(e).__name__) from e
-
-    @staticmethod
-    def _objet(reponse):
-        m = re.search(r"\{.*\}", reponse or "", re.S)
-        try:
-            return json.loads(m.group(0)) if m else None
-        except ValueError:
-            return None
-
-    def extraire(self, document: str, classes) -> tuple:
-        classes = list(classes)
-        consigne = ("Tu lis un document technique sur un composant. Choisis la classe matière qui lui correspond parmi cette liste, "
-                    "et seulement si le document le permet : " + " ; ".join(classes) + ". Réponds en JSON : "
-                    '{"classe": "<une classe de la liste, ou null>", "citation": "<passage du document, recopié mot pour mot, qui le justifie>"}')
-        o = self._objet(self.demander(consigne, document[:6000]))
-        if not isinstance(o, dict) or o.get("classe") not in classes:
-            return None, ""
-        citation = str(o.get("citation") or "")
-        propre = lambda s: re.sub(r"\s+", " ", s).strip().lower()
-        if len(propre(citation)) < 8 or propre(citation) not in propre(document):
-            return None, ""                                    # citation absente du document : réponse non fondée, rejetée
-        return o["classe"], citation
-
-    def valider(self, classe: str, document: str):
-        consigne = ("Tu vérifies une affirmation contre un document. Réponds en JSON : "
-                    '{"verdict": "oui"} si le document confirme l\'affirmation, {"verdict": "non"} s\'il la contredit, '
-                    '{"verdict": "indetermine"} s\'il ne permet pas de trancher.')
-        o = self._objet(self.demander(consigne, f"Affirmation : ce composant relève de la classe matière « {classe} ».\n\nDocument :\n{document[:6000]}"))
-        v = str((o or {}).get("verdict", "")).strip().lower()
-        return True if v == "oui" else False if v == "non" else None
-
-
 # --------------------------------------------------------------------------- enjeu d'une pièce
 def _valeurs_nettes(probabilites: dict, prix: dict, cout_traitement):
     """{classe: (probabilité, (prix + traitement évité)⁺)}. None si des classes de la liste sans prix pèsent plus de
@@ -306,7 +252,7 @@ def preuves_gratuites(cx: mod_cortex.Cortex, piece: dict, regles, reglages: "Reg
     pn, desc = str(piece["PN"]), texte(piece.get("Description"))
     r = regle(desc, regles)
     if r:
-        cx.affirmer(DOMAINE, pn, ATTRIBUT, r[0], "règle", "règle", {"motif": r[1]})
+        cx.affirmer(DOMAINE, pn, ATTRIBUT, r[0], "règle", "règle", {"motif": r[1]}, base="description")
     else:
         cx.retirer(DOMAINE, pn, ATTRIBUT, "règle")
     voisins = cx.voisins(DOMAINE, ATTRIBUT, desc, k=1, seuil=reglages.seuil_analogie, sauf=pn)
@@ -336,7 +282,7 @@ def _deja_cherchee(cx: mod_cortex.Cortex, pn: str, modele, g: Reglages) -> bool:
 def resoudre(cx: mod_cortex.Cortex, piece: dict, classes, prix: dict, regles: pd.DataFrame | None = None, reglages: Reglages | None = None,
              masse_annuelle_kg=None, collecteur=None, modele=None, classement_anterieur: str | None = None,
              fiabilites: pd.DataFrame | None = None, modele_controle=None, cout_traitement=0.0, pns=(),
-             preuves_posees: bool = False) -> dict:
+             preuves_posees: bool = False, lectures: dict | None = None, sonder: bool = False) -> dict:
     """Résout la classe matière d'une pièce en suivant la chaîne décrite en tête de module ; écrit dans le cortex.
 
     fiabilites      : fiabilité des sources à utiliser (défaut : celle que le cortex déduit de ses validations)
@@ -344,6 +290,9 @@ def resoudre(cx: mod_cortex.Cortex, piece: dict, classes, prix: dict, regles: pd
                       source de plus. Si c'est le même, un « oui » ne fait que confirmer sa propre lecture (une seule
                       source, plus fiable), et un « non » la retire.
     pns             : codes article de la nomenclature, pour ne jamais en envoyer un comme référence de fabricant
+    lectures        : réponses du modèle privé déjà obtenues pour des descriptions, {code article: (classe, indice) ou l'erreur} ;
+                      `traiter` les demande à l'avance, plusieurs à la fois
+    sonder          : True = ne rien résoudre ; dire seulement si la description de cette pièce est à faire lire par le modèle
     """
     g = reglages or Reglages()
     classes = list(classes)
@@ -376,9 +325,40 @@ def resoudre(cx: mod_cortex.Cortex, piece: dict, classes, prix: dict, regles: pd
         preuves_gratuites(cx, piece, regles, g, classement_anterieur)
     b = croire()
     if b["validee"]:
-        return bilan(b, "validée", "aucune")
-    # 4 à 6 : sources payantes
+        return {} if sonder else bilan(b, "validée", "aucune")
+    # La requête de collecte est faite ici, des seuls champs de la nomenclature, avant tout appel au modèle : rien de ce
+    # qu'un modèle répond n'entre jamais dans une requête vers l'extérieur.
     requete = requete_publique(piece, pns, g.fabricants_internes)
+    # 3b : le modèle privé lit la description interne. Jamais un modèle qui n'est pas chez vous.
+    if (not acceptee(b) and modele is not None and g.lire_descriptions and getattr(modele, "prive", False) is True
+            and callable(getattr(modele, "classer", None)) and desc.strip() and permis(b, g.cout_description)):
+        nom_modele = texte(getattr(modele, "modele", "")) or type(modele).__name__
+        empreinte = f"{nom_modele} | {hashlib.sha256(desc.encode('utf-8')).hexdigest()[:12]}"
+        if g.recollecter or not any(r.endswith(empreinte) for r in cx.actions(DOMAINE, pn, "lecture de la description")):
+            t = type_piece(desc)
+            contexte = "" if t.startswith("(") else t
+            if sonder:
+                return {"_a_lire": (desc, contexte)}
+            try:
+                reponse = lectures[pn] if lectures and pn in lectures else modele.classer(desc, classes, contexte)
+                if isinstance(reponse, Exception):
+                    raise reponse
+                classe, indice = reponse
+            except Exception as ex:                            # panne : rien n'est compté, la lecture sera reprise
+                cx.noter(DOMAINE, pn, "lecture de la description", 0.0, f"échec : {type(ex).__name__}")
+            else:
+                appels, cout = appels + 1, cout + g.cout_description
+                if isinstance(classe, str) and classe in classes:
+                    cx.affirmer(DOMAINE, pn, ATTRIBUT, classe, "modèle : description", "description", {"indice": texte(indice)[:120], "modele": nom_modele},
+                                base="description")
+                else:
+                    cx.retirer(DOMAINE, pn, ATTRIBUT, "modèle : description")
+                # le journal garde la classe et l'empreinte (modèle, description) : la même lecture n'est pas refaite
+                cx.noter(DOMAINE, pn, "lecture de la description", g.cout_description, f"{classe if isinstance(classe, str) and classe in classes else 'sans réponse fondée'} | {empreinte}")
+            b = croire()
+    if sonder:
+        return {}
+    # 4 à 6 : sources payantes extérieures
     par_classe, lues = {}, {}            # classe → (origine, texte) du document qui la soutient ; origine → classe lue par le modèle
     if not acceptee(b) and collecteur is not None and requete is not None and not _deja_cherchee(cx, pn, modele, g) and permis(b, g.cout_collecte):
         cout += g.cout_collecte
@@ -501,9 +481,24 @@ def traiter(cx: mod_cortex.Cortex, bom: pd.DataFrame, classes, prix: dict, regle
     for _, p in bom.iterrows():
         preuves_gratuites(cx, p.to_dict(), regles, g, (classement or {}).get(str(p["PN"])))
     fiab_figee = cx.fiabilites(DOMAINE, ATTRIBUT)
-    lignes = [resoudre(cx, p.to_dict(), classes, prix, regles, g, (masses or {}).get(str(p["PN"])), collecteur, modele,
-                       (classement or {}).get(str(p["PN"])), fiab_figee, modele_controle, cout_traitement, pns, preuves_posees=True)
-              for _, p in bom.iterrows()]
+    resoudre_ = lambda p, **plus: resoudre(cx, p.to_dict(), classes, prix, regles, g, (masses or {}).get(str(p["PN"])), collecteur, modele,
+                                           (classement or {}).get(str(p["PN"])), fiab_figee, modele_controle, cout_traitement, pns,
+                                           preuves_posees=True, **plus)
+    # Les descriptions que le modèle privé doit lire sont repérées d'abord, puis envoyées plusieurs à la fois : le serveur
+    # les traite en parallèle. Le résultat est le même que pièce par pièce, puisque chaque lecture ne dépend que de sa pièce.
+    lectures = {}
+    if modele is not None and g.lire_descriptions and getattr(modele, "prive", False) is True and callable(getattr(modele, "classer", None)):
+        a_lire = {str(p["PN"]): r["_a_lire"] for _, p in bom.iterrows() for r in [resoudre_(p, sonder=True)] if r.get("_a_lire")}
+
+        def lire(item):
+            try:
+                return modele.classer(item[0], classes, item[1])
+            except Exception as ex:                            # une panne reste attachée à sa pièce : elle sera journalisée et reprise
+                return ex
+        if a_lire:
+            with ThreadPoolExecutor(max_workers=max(1, int(g.appels_paralleles))) as fils:
+                lectures = dict(zip(a_lire, fils.map(lire, a_lire.values())))
+    lignes = [resoudre_(p, lectures=lectures) for _, p in bom.iterrows()]
     cx.base.commit()
     croyances = {l["PN"]: l.pop("_probabilites") for l in lignes}
     res = pd.DataFrame(lignes, columns=COLS_RESULTAT)
@@ -524,6 +519,10 @@ def traiter(cx: mod_cortex.Cortex, bom: pd.DataFrame, classes, prix: dict, regle
                       "classes": classes, "seuil_acceptation": g.seuil_acceptation, "couts_hypotheses_de_travail": {
                           "collecte": g.cout_collecte, "lecture par le modèle": g.cout_extraction, "contrôle par le modèle": g.cout_validation, "revue humaine": g.cout_revue},
                       "collecteur": "branché" if collecteur is not None else "absent", "modele": "branché" if modele is not None else "absent",
+                      "modele_heberge": (getattr(modele, "nature", None) or ("privé" if getattr(modele, "prive", False) else "non déclaré privé")) if modele is not None else None,
+                      "descriptions_lues_par_le_modele": bool(modele is not None and g.lire_descriptions and getattr(modele, "prive", False) is True
+                                                                and callable(getattr(modele, "classer", None))),
+                      "couts_hypotheses_lecture_description": g.cout_description,
                       "modele_de_controle": "distinct" if modele_controle is not None and modele_controle is not modele else "le même que le modèle de lecture" if modele is not None else "absent",
                       "cortex": mod_cortex.Cortex.bilan(cx, DOMAINE, ATTRIBUT)}}
 
@@ -550,10 +549,25 @@ def executer(ctx, collecteur=None, modele=None, reglages: Reglages | None = None
     g = reglages or Reglages()
     prix = {k: float(v) for k, v in src.prix_recycleur.items()}
     classes = list(prix) or sorted({c for c in src.classification["Catégorie proposée"].dropna().astype(str)})
-    fictifs = False
+    fictifs, notes_modele = False, {}
     if cfg.demo and collecteur is None and modele is None:
         from . import demo
         collecteur, modele, fictifs = demo.collecteur_fictif, demo.ModeleFictif(), True
+    elif modele is None:                                         # le modèle privé décrit dans parametres/modele_local.cfg
+        if not cfg.demo:
+            mod_modele.preparer_reglage(cfg)
+        rm = mod_modele.lire_reglage(cfg)
+        try:
+            modele, controle_regle = mod_modele.modeles_du_reglage(rm)
+            modele_controle = modele_controle if modele_controle is not None else controle_regle
+        except ValueError as e:                                  # serveur ni local ni déclaré : on ne lui parle pas
+            notes_modele["modele_refuse"] = str(e)
+        if rm.erreurs:
+            notes_modele["reglage_du_modele_a_corriger"] = list(rm.erreurs)
+        if rm.fabricants_internes and not g.fabricants_internes:
+            g = dataclasses.replace(g, fabricants_internes=rm.fabricants_internes)
+        if not rm.lire_les_descriptions:
+            g = dataclasses.replace(g, lire_descriptions=False)
     chemin = cfg.chemin_bom()
     if chemin is not None:
         bom, origine_bom = lire_bom(chemin), chemin.name
@@ -605,6 +619,7 @@ def executer(ctx, collecteur=None, modele=None, reglages: Reglages | None = None
                     illisibles.append(f"{f.name} : {type(ex).__name__}")
             tables = traiter(cx, bom, classes, prix, regles, g, masses, collecteur, modele, classement, modele_controle, tau if tau_connu else 0.0)
             croyances, fiab_utilisees = tables.pop("Croyances"), tables.pop("Fiabilités utilisées")
+            tables["Notes"].update(notes_modele)
             tables["Notes"].update({"nomenclature": origine_bom, "validations_importees": importees, "fichiers_de_validations_illisibles": illisibles,
                                     "regles": 0 if regles is None else len(regles), "regles_invalides": regles_invalides(regles),
                                     "fournisseurs_fictifs": fictifs,
@@ -640,23 +655,38 @@ def main(argv=None) -> int:
     a.add_argument("--demo", action="store_true")
     a.add_argument("--dossier")
     a.add_argument("--bom", help="fichier Excel ou CSV de la nomenclature (PN, Description, et si possible Fabricant, Référence fabricant)")
-    a.add_argument("--modele-url", help="serveur local compatible « chat completions », par exemple http://localhost:11434/v1")
-    a.add_argument("--modele-nom", default="qwen")
+    a.add_argument("--modele-url", help="serveur du modèle (interface « chat completions »), par exemple http://localhost:11434/v1 ; "
+                   "défaut : celui de parametres/modele_local.cfg")
+    a.add_argument("--modele-nom", default=None)
     a.add_argument("--controle-url", help="second serveur, pour contrôler les lectures par un autre modèle (défaut : le même modèle)")
-    a.add_argument("--controle-nom", default="qwen")
-    a.add_argument("--distant", action="store_true", help="accepter un serveur de modèle qui n'est pas sur ce poste")
+    a.add_argument("--controle-nom", default=None)
+    a.add_argument("--serveur-de-confiance", action="append", default=[], help="une de vos machines, par son nom ou son adresse (répétable)")
+    a.add_argument("--distant", action="store_true", help="accepter un serveur qui n'est pas à vous : il ne lira que des documents publics")
     a.add_argument("--fabricant-interne", action="append", default=[], help="nom de l'entreprise ou d'un de ses sites, jamais recherché (répétable)")
     o = a.parse_args(argv)
     cfg = charger(dossier=o.dossier, demo=True if o.demo else None)
     if o.bom:
         cfg.bom = o.bom
     ctx = pipeline("ligne", cfg=cfg, silencieux=True)
-    modele = ModeleLocal(o.modele_url, o.modele_nom, distant=o.distant) if o.modele_url else None
-    controle = ModeleLocal(o.controle_url, o.controle_nom, distant=o.distant) if o.controle_url else None
-    t = executer(ctx, modele=modele, reglages=Reglages(fabricants_internes=tuple(o.fabricant_interne)), modele_controle=controle)
+    rm = mod_modele.lire_reglage(cfg)
+    confiance = tuple(o.serveur_de_confiance) + tuple(rm.confiance)
+    creer = lambda url, nom: ModeleLocal(url, nom, cle=rm.cle, delai=rm.delai_s, distant=o.distant, confiance=confiance,
+                                         certificat=rm.certificat or None, corps=rm.corps)
+    try:
+        modele = creer(o.modele_url, o.modele_nom or rm.nom or "qwen") if o.modele_url else None
+        controle = creer(o.controle_url or o.modele_url or rm.url, o.controle_nom) if o.controle_nom and (o.controle_url or o.modele_url or rm.url) else None
+    except ValueError as e:
+        print(e)
+        return 1
+    reglages = Reglages(fabricants_internes=tuple(o.fabricant_interne) + tuple(rm.fabricants_internes), lire_descriptions=rm.lire_les_descriptions)
+    t = executer(ctx, modele=modele, reglages=reglages, modele_controle=controle)
     n = t["Notes"]
     print(f"{n.get('pieces', 0)} pièces | statuts : {n.get('statuts', {})} | appels au modèle : {n.get('appels_au_modele', 0)} | "
           f"sans appel payant : {n.get('pieces_sans_appel_payant', 0)}")
+    if n.get("modele_refuse"):
+        print("Modèle non utilisé :", n["modele_refuse"])
+    print(f"modèle : {n.get('modele')}" + (f" ({n.get('modele_heberge')})" if n.get("modele_heberge") else "") +
+          f" | descriptions lues par le modèle : {'oui' if n.get('descriptions_lues_par_le_modele') else 'non'}")
     print("Tables et page de revue : artefacts/composition/")
     return 0
 

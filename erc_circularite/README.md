@@ -72,6 +72,8 @@ python -m erc.composition --demo
 
 Sur les données réelles : déposer la nomenclature (colonnes code article et description, et si possible fabricant, référence du fabricant, conception interne) dans `BOM/` sous le dossier des extractions, ou la désigner par `--bom`. Les règles description → classe se saisissent dans l'onglet `Regles_composition` du classeur de paramètres. Un modèle local se branche par `--modele-url` (et un second, pour contrôler le premier, par `--controle-url`) ; une collecte de documents se branche en Python (notebook 07). Aucun code article interne ni aucune description ne sort du poste ; le nom de l'entreprise se déclare par `--fabricant-interne` pour qu'elle ne soit jamais recherchée comme fabricant. Avant de brancher une collecte, vérifier que la colonne « référence fabricant » de la nomenclature contient bien des références de fabricant.
 
+**Le modèle de langage tourne chez vous.** Les données étant privées, le modèle (Qwen ou un autre modèle à poids ouverts) est hébergé sur une machine qui vous appartient, de préférence celle qui détient les données. `python -m erc.modele --preparer` crée `parametres/modele_local.cfg` ; `python -m erc.modele --verifier` interroge le serveur et dit ce qui manque ; `python -m erc.modele --comparer modele-a modele-b` note plusieurs modèles sur vos pièces validées. Un modèle hébergé chez vous peut lire les descriptions internes ; un autre ne reçoit que des documents publics. Guide : `docs/Modele_local.md`.
+
 La chaîne produit `artefacts/composition/ERC_Composition_Revue.html`, une page de revue qui s'ouvre dans un navigateur sans connexion : la personne qui connaît les pièces y confirme ou corrige les classes proposées (file « à valider », puis sondage de pièces acceptées tirées au hasard), télécharge le fichier de validations et le dépose dans `Acquisition/`. Au passage suivant, ces validations sont la référence du cortex. Une recherche déjà payée pour une pièce n'est pas refaite.
 
 Fichiers de terrain facultatifs, à déposer dans le dossier des extractions :
@@ -101,6 +103,7 @@ python -m pytest tests
 | `test_information.py` | Valeur de l'information et valeur d'établir une classe ; les propositions du cadre formel sur des cas tirés au hasard |
 | `test_prevision.py` | Prévision du flux : méthodes, lois prédictives, évaluation sans fuite et sur les mêmes prévisions pour toutes les méthodes |
 | `test_composition.py` | Cortex et chaîne de composition : fusion des preuves, fiabilité par strates, budget par pièce, recherche jamais payée deux fois, pannes, rien d'interne ne sort |
+| `test_modele.py` | Modèle privé : serveurs acceptés ou refusés, descriptions jamais envoyées hors de chez vous, réponses contraintes, réglage, comparaison de modèles |
 | `test_composition_outil.py` | Page de revue : fidèle au cortex, autonome, et boucle fermée (décision dans la page → fichier → validation dans le cortex) |
 
 Les tests tournent sur Python 3.9 avec pandas 1.5 comme sur les versions récentes.

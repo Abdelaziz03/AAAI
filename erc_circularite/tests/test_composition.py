@@ -679,7 +679,8 @@ def test_demonstration_de_bout_en_bout(tmp_path):
     res, notes = t["Composition proposée"], t["Notes"]
     assert notes["fournisseurs_fictifs"] and notes["validations_importees"] == 6 and len(res) == notes["pieces"] > 15
     assert set(res["Statut"]) <= {"validée", "acceptée", "à valider", "inconnue"}
-    assert notes["appels_au_modele"] <= 6 and notes["pieces_sans_appel_payant"] >= len(res) - 3    # peu d'appels : la plupart des pièces n'en demandent aucun
+    assert int((res["Appels au modèle"] > 0).sum()) <= 3 and notes["pieces_sans_appel_payant"] >= len(res) - 3    # la plupart des pièces ne demandent aucun appel
+    assert notes["appels_au_modele"] <= 9 and notes["descriptions_lues_par_le_modele"] is True and notes["modele_heberge"] == "ce poste"
     assert notes["traitement_evite_dans_l_enjeu"] == "compté"
     vraies = res.set_index("PN")
     assert vraies.at["P-5001", "Classe retenue"] == "Carte C"                                         # la règle « board → Carte B » est corrigée par les autres sources

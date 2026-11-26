@@ -19,7 +19,10 @@ d'y brancher sa moyenne, de sorte que trois documents d'accord ne valent pas tro
 
 Règles qui tiennent le système honnête.
   1. Un modèle de langage est une source comme une autre, avec sa fiabilité apprise ; il n'est jamais la vérité.
-  2. Dix pages qui recopient la même fiche comptent pour une : une affirmation par (type de source, origine).
+  2. Dix pages qui recopient la même fiche comptent pour une : une affirmation par (type de source, origine). Et deux
+     lecteurs du même texte (une règle et un modèle qui lisent la même description) ne font pas deux preuves quand ils
+     sont d'accord : les affirmations qui partagent une même BASE et disent la même valeur comptent pour une seule, la
+     plus fiable. S'ils se contredisent, les deux comptent.
   3. Sans preuve, pas de valeur : le sujet est « inconnu ».
   4. Une valeur affirmée hors de la liste de référence va dans la case « hors référentiel » : elle n'est ni perdue ni
      prise pour une valeur de la liste.
@@ -63,14 +66,14 @@ A_PRIORI_SOURCES = {
 FIABILITE_PAR_DEFAUT = 0.60
 FORCE_A_PRIORI = 4.0
 HORS = "hors référentiel"
-VERSION = 2
+VERSION = 3
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS sujet(domaine TEXT, sujet TEXT, description TEXT, interne INTEGER DEFAULT 0, maj TEXT,
     PRIMARY KEY(domaine, sujet));
 CREATE TABLE IF NOT EXISTS affirmation(id INTEGER PRIMARY KEY, domaine TEXT, sujet TEXT, attribut TEXT, valeur TEXT,
     polarite INTEGER DEFAULT 1, type_source TEXT, origine TEXT, detail TEXT, cree_le TEXT, nature TEXT DEFAULT 'affirmation',
-    UNIQUE(domaine, sujet, attribut, type_source, origine));
+    base TEXT DEFAULT '', UNIQUE(domaine, sujet, attribut, type_source, origine));
 CREATE TABLE IF NOT EXISTS validation(id INTEGER PRIMARY KEY, domaine TEXT, sujet TEXT, attribut TEXT, valeur TEXT,
     validateur TEXT, commentaire TEXT, cree_le TEXT, motif TEXT DEFAULT '');
 CREATE TABLE IF NOT EXISTS journal(id INTEGER PRIMARY KEY, cree_le TEXT, domaine TEXT, sujet TEXT, action TEXT,
@@ -83,10 +86,10 @@ CREATE INDEX IF NOT EXISTS jou_sujet ON journal(domaine, sujet, action);
 """
 # Colonnes ajoutées depuis la première version : un fichier plus ancien les reçoit à l'ouverture.
 COLONNES_AJOUTEES = {"sujet": {"interne": "INTEGER DEFAULT 0"},
-                     "affirmation": {"polarite": "INTEGER DEFAULT 1", "nature": "TEXT DEFAULT 'affirmation'"},
+                     "affirmation": {"polarite": "INTEGER DEFAULT 1", "nature": "TEXT DEFAULT 'affirmation'", "base": "TEXT DEFAULT ''"},
                      "validation": {"motif": "TEXT DEFAULT ''"}}
 COLONNES_ATTENDUES = {"sujet": {"domaine", "sujet", "description", "interne", "maj"},
-                      "affirmation": {"id", "domaine", "sujet", "attribut", "valeur", "polarite", "type_source", "origine", "detail", "cree_le", "nature"},
+                      "affirmation": {"id", "domaine", "sujet", "attribut", "valeur", "polarite", "type_source", "origine", "detail", "cree_le", "nature", "base"},
                       "validation": {"id", "domaine", "sujet", "attribut", "valeur", "validateur", "commentaire", "cree_le", "motif"},
                       "journal": {"id", "cree_le", "domaine", "sujet", "action", "cout", "resultat"}}
 MOTIFS_STRATE = {"sondage": "acceptée", "file": "file", "choix": "exclue"}
@@ -184,20 +187,22 @@ class Cortex:
         self._valides.clear()
 
     def affirmer(self, domaine: str, sujet: str, attribut: str, valeur: str, type_source: str, origine: str,
-                 detail=None, polarite: int = 1, nature: str = "affirmation") -> None:
+                 detail=None, polarite: int = 1, nature: str = "affirmation", base: str = "") -> None:
         """Une source dit quelque chose du sujet.
 
         nature « affirmation » : la source nomme la valeur (polarite = 1) ou l'écarte (polarite = −1) ;
         nature « verdict »     : la source répond oui (polarite = 1) ou non (polarite = −1) à « est-ce cette valeur ? ».
+        base : le texte sur lequel la source s'appuie, quand d'autres sources lisent le même (par exemple « description »).
         Une même origine ne compte qu'une fois par type de source : sa dernière affirmation remplace la précédente."""
         if not texte(valeur).strip():
             return
         if nature not in ("affirmation", "verdict"):
             raise ValueError("nature : « affirmation » ou « verdict »")
-        self.base.execute("INSERT INTO affirmation(domaine, sujet, attribut, valeur, polarite, nature, type_source, origine, detail, cree_le) "
-                          "VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(domaine, sujet, attribut, type_source, origine) DO UPDATE SET "
-                          "valeur=excluded.valeur, polarite=excluded.polarite, nature=excluded.nature, detail=excluded.detail, cree_le=excluded.cree_le",
-                          (domaine, str(sujet), attribut, texte(valeur).strip(), 1 if polarite >= 0 else -1, nature, type_source, str(origine),
+        self.base.execute("INSERT INTO affirmation(domaine, sujet, attribut, valeur, polarite, nature, base, type_source, origine, detail, cree_le) "
+                          "VALUES(?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(domaine, sujet, attribut, type_source, origine) DO UPDATE SET "
+                          "valeur=excluded.valeur, polarite=excluded.polarite, nature=excluded.nature, base=excluded.base, detail=excluded.detail, "
+                          "cree_le=excluded.cree_le",
+                          (domaine, str(sujet), attribut, texte(valeur).strip(), 1 if polarite >= 0 else -1, nature, texte(base), type_source, str(origine),
                            json.dumps(detail, ensure_ascii=False) if detail is not None else None, _maintenant()))
 
     def retirer(self, domaine: str, sujet: str, attribut: str, type_source: str, origine: str | None = None) -> int:
@@ -336,18 +341,29 @@ class Cortex:
             return {"probabilites": {c: float(c == str(vraie)) for c in valeurs}, "retenue": str(vraie), "probabilite": 1.0,
                     "preuves": len(a), "validee": True, "sources": ["validation humaine"]}
         ignorees = {(str(t), str(o)) for t, o in (sans or [])}
-        preuves = [{"type_source": r["type_source"], "valeur": r["valeur"], "polarite": r["polarite"], "nature": r["nature"] or "affirmation"}
-                   for _, r in a.iterrows() if (str(r["type_source"]), str(r["origine"])) not in ignorees]
+        preuves = [{"type_source": r["type_source"], "valeur": r["valeur"], "polarite": r["polarite"], "nature": r["nature"] or "affirmation",
+                    "base": r["base"] or ""} for _, r in a.iterrows() if (str(r["type_source"]), str(r["origine"])) not in ignorees]
         n_stockees = len(preuves)
-        preuves += [dict({"polarite": 1, "nature": "affirmation"}, **e) for e in (en_plus or [])]
+        sources = sorted({e["type_source"] for e in preuves})
+        preuves += [dict({"polarite": 1, "nature": "affirmation", "base": ""}, **e) for e in (en_plus or [])]
         C = len(valeurs)
         p0 = np.array([float((a_priori or {}).get(c, 0.0)) for c in valeurs]) if a_priori else np.ones(C)
         p0 = p0 + 1e-12 if p0.sum() > 0 else np.ones(C)
         logp = np.log(p0 / p0.sum())
         f = fiabilites if fiabilites is not None else self.fiabilites(domaine, attribut)
         beta = {t: (float(x), float(y)) for t, x, y in zip(f["Type de source"], f["_a"], f["_b"])} if len(f) else {}
+        moyenne = lambda t: (lambda x: x[0] / (x[0] + x[1]))(beta.get(t, (A_PRIORI_SOURCES.get(t, FIABILITE_PAR_DEFAUT), 1 - A_PRIORI_SOURCES.get(t, FIABILITE_PAR_DEFAUT))))
+        # Deux lecteurs du même texte qui disent la même valeur comptent pour un : on garde le plus fiable.
+        retenues, vus = [], {}
+        for e in sorted(preuves, key=lambda e: (-moyenne(e["type_source"]), str(e["type_source"]))):
+            cle = (e["base"], str(e["valeur"])) if e["base"] and e["nature"] == "affirmation" and e["polarite"] >= 0 else None
+            if cle is not None and vus.get(cle, e["type_source"]) != e["type_source"]:
+                continue                                        # un autre lecteur du même texte, plus fiable, a déjà dit cette valeur
+            if cle is not None:
+                vus[cle] = e["type_source"]
+            retenues.append(e)
         par_type = {}
-        for e in preuves:
+        for e in retenues:
             par_type.setdefault(e["type_source"], []).append(e)
         for t, liste in par_type.items():
             m0 = A_PRIORI_SOURCES.get(t, FIABILITE_PAR_DEFAUT)
@@ -367,7 +383,7 @@ class Cortex:
         i = int(np.argmax(p))
         return {"probabilites": dict(zip(valeurs, map(float, p))), "retenue": valeurs[i] if preuves else None,
                 "probabilite": float(p[i]) if preuves else float("nan"), "preuves": n_stockees, "validee": False,
-                "sources": sorted({e["type_source"] for e in preuves[:n_stockees]})}
+                "sources": sources}
 
     def voisins(self, domaine: str, attribut: str, description: str, k: int = 3, seuil: float = 0.5, sauf: str | None = None) -> list:
         """Sujets VALIDÉS dont la description ressemble le plus : [(sujet, ressemblance, valeur validée)]."""
