@@ -93,6 +93,7 @@ COLONNES_ATTENDUES = {"sujet": {"domaine", "sujet", "description", "interne", "m
                       "validation": {"id", "domaine", "sujet", "attribut", "valeur", "validateur", "commentaire", "cree_le", "motif"},
                       "journal": {"id", "cree_le", "domaine", "sujet", "action", "cout", "resultat"}}
 MOTIFS_STRATE = {"sondage": "acceptée", "file": "file", "choix": "exclue"}
+STATUTS_FILE = ("à valider", "inconnue")     # conclusions des sujets que la chaîne envoie à une personne ; « laissée » n'en est pas
 
 
 def _maintenant() -> str:
@@ -281,16 +282,19 @@ class Cortex:
         écarte une valeur qui n'est pas la valeur validée.
 
         Les validations sans motif (faites indépendamment de ce que disent les sources) mettent à jour l'a priori :
-        Bêta(a priori × force + justes, (1 − a priori) × force + fausses). Les validations « sondage » et « file » ne
-        renseignent que leur strate (sujets acceptés, sujets non tranchés) ; la fiabilité retenue est la moyenne des deux
-        strates, pondérée par le nombre d'affirmations de ce type qui restent à juger dans chacune. Sans sujet restant,
-        toutes les validations sont réunies. Les validations « choix » ne sont pas comptées : ni tirées au hasard ni
-        exhaustives, elles ne disent rien de fiable sur les sources.
+        Bêta(a priori × force + justes, (1 − a priori) × force + fausses). Les autres ne renseignent que leur strate :
+          « file »     sujets que la chaîne envoie à une personne (conclusion « à valider ») : ce sont ceux où les sources
+                       se contredisent, on y trouve plus d'erreurs qu'ailleurs ;
+          « sondage »  sujets tirés au hasard parmi ceux que la chaîne ne montre à personne (acceptés, ou laissés faute
+                       d'enjeu, conclusion « laissée »).
+        La fiabilité retenue est la moyenne des deux strates, pondérée par le nombre d'affirmations de ce type qui restent
+        à juger dans chacune. Sans sujet restant, toutes les validations sont réunies. Les validations « choix » ne sont
+        pas comptées : ni tirées au hasard ni exhaustives, elles ne disent rien de fiable sur les sources.
         """
         v, motif = self.verites(domaine, attribut), self.motifs(domaine, attribut)
         a = self.affirmations(domaine, attribut)
         c = self.conclusions(domaine, attribut)
-        acceptes = set(c.loc[c["statut"].eq("acceptée"), "sujet"]) - set(v)
+        en_file = set(c.loc[c["statut"].isin(STATUTS_FILE), "sujet"]) - set(v)
         types = sorted(set(A_PRIORI_SOURCES) | set(a["type_source"]))
         lignes = []
         for t in types:
@@ -303,8 +307,8 @@ class Cortex:
             m0 = A_PRIORI_SOURCES.get(t, FIABILITE_PAR_DEFAUT)
             al, be = m0 * FORCE_A_PRIORI + k0, (1 - m0) * FORCE_A_PRIORI + (n0 - k0)
             reste = g[~g["sujet"].isin(list(v))]
-            n_acc = int(reste["sujet"].isin(list(acceptes)).sum())
-            n_file = len(reste) - n_acc
+            n_file = int(reste["sujet"].isin(list(en_file)).sum())
+            n_acc = len(reste) - n_file                         # acceptés, laissés, ou pas encore passés par la chaîne
             if n_acc + n_file:
                 m_acc, m_file = (al + ks) / (al + be + ns), (al + kf) / (al + be + nf)
                 r = (n_acc * m_acc + n_file * m_file) / (n_acc + n_file)

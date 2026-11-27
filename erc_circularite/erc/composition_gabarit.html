@@ -244,7 +244,7 @@ td.n, th.n { text-align: right; white-space: nowrap; }
         <p class="note" id="note-couts"></p>
       </div>
     </div>
-    <p class="note">Une mesure faite seulement sur les pièces douteuses sous-estime les sources, puisque ce sont justement les cas où elles se contredisent. Le contrôle par sondage des pièces acceptées corrige ce biais : c'est la raison d'être de la file « Sondage ».</p>
+    <p class="note">Une mesure faite seulement sur les pièces douteuses sous-estime les sources, puisque ce sont justement les cas où elles se contredisent. Le contrôle par sondage des pièces que la chaîne ne vous montre pas (acceptées, ou laissées faute d'enjeu) corrige ce biais : c'est la raison d'être de la file « Sondage ».</p>
   </section>
 </div>
 
@@ -260,8 +260,9 @@ function champCsv(v) {
 }
 
 // decisions : {PN: {classe, commentaire, motif}} ; une ligne par décision, triées par référence. Séparateur « ; ».
-// Le motif dit d'où vient la décision : « file » (pièce que la chaîne n'avait pas tranchée), « sondage » (pièce acceptée
-// tirée au hasard) ou « choix » (toute autre pièce). Il sert à mesurer la fiabilité des sources sans biais.
+// Le motif dit d'où vient la décision : « file » (pièce que la chaîne envoie en revue), « sondage » (pièce tirée au
+// hasard parmi celles qu'elle ne montre à personne) ou « choix » (toute autre pièce). Il sert à mesurer la fiabilité
+// des sources sans biais.
 function csvValidations(decisions, validateur) {
   var lignes = [EN_TETE_CSV.join(";")];
   Object.keys(decisions).sort().forEach(function (pn) {
@@ -276,8 +277,9 @@ function sansAccent(t) {
 }
 
 function motifDe(p, sondage) {
-  if (p.statut === "à valider" || p.statut === "inconnue") return "file";
-  return p.statut === "acceptée" && sondage.has(p.pn) ? "sondage" : "choix";
+  if (sondage.has(p.pn)) return "sondage";
+  var enRevue = (p.statut === "à valider" || p.statut === "inconnue") && String(p.suite || "").indexOf("revue humaine") === 0;
+  return enRevue ? "file" : "choix";
 }
 
 function dansFile(p, file, sondage, decisions) {
@@ -407,7 +409,7 @@ if (typeof module !== "undefined") module.exports = { champCsv: champCsv, csvVal
   // ---------------------------------------------------------------- files
   var FILES = [
     ["a-valider", "À valider", "Les pièces que la chaîne n'a pas su trancher, celles où trancher peut rapporter le plus en premier."],
-    ["sondage", "Sondage", "Des pièces acceptées tirées au hasard. Confirmez ou corrigez : c'est ce contrôle qui dit si la chaîne mérite sa confiance."],
+    ["sondage", "Sondage", "Des pièces tirées au hasard parmi celles que la chaîne ne vous montre pas : acceptées, ou laissées faute d'enjeu. Confirmez ou corrigez : c'est ce contrôle qui dit si la chaîne mérite sa confiance."],
     ["acceptees", "Acceptées", "Les pièces que la chaîne a résolues seule. Vous pouvez en corriger une."],
     ["validees", "Validées", "Les pièces déjà validées par une personne. Une nouvelle validation remplace l'ancienne."],
     ["decisions", "Mes décisions", "Ce que vous avez décidé dans cette page et qui n'est pas encore exporté."],
@@ -439,7 +441,7 @@ if (typeof module !== "undefined") module.exports = { champCsv: champCsv, csvVal
     if (o || p.fru) d.appendChild(el("div", { class: "origine-piece", text: [o, p.fru ? "FRU " + p.fru : null].filter(Boolean).join(" — ") }));
     var puces = el("div", { class: "ligne-puces" }, [puceStatut(p)]);
     if (p.interne) puces.appendChild(el("span", { class: "puce sans", text: "conception interne : aucune recherche extérieure" }));
-    if (SONDAGE.has(p.pn) && p.statut === "acceptée") puces.appendChild(el("span", { class: "puce sans", text: "tirée pour le sondage" }));
+    if (SONDAGE.has(p.pn)) puces.appendChild(el("span", { class: "puce sans", text: "tirée pour le sondage" }));
     d.appendChild(puces);
     return d;
   }
@@ -522,7 +524,7 @@ if (typeof module !== "undefined") module.exports = { champCsv: champCsv, csvVal
     var z = document.getElementById("pieces"), t = filtrer(PIECES, etat.file, etat.texte, SONDAGE, etat.decisions);
     z.textContent = "";
     if (!t.length) {
-      var vide = { "a-valider": "Rien à valider : la chaîne a tranché toutes les pièces. Passez au sondage.", sondage: "Aucune pièce acceptée à contrôler pour l'instant.",
+      var vide = { "a-valider": "Rien à valider : la chaîne a tranché toutes les pièces. Passez au sondage.", sondage: "Aucune pièce à contrôler par sondage pour l'instant.",
         decisions: "Aucune décision en attente d'export." }[etat.file] || "Aucune pièce ne correspond.";
       z.appendChild(el("li", { class: "vide", text: etat.texte ? "Aucune pièce ne correspond à « " + etat.texte + " » dans cette file." : vide }));
     }

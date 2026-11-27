@@ -19,7 +19,9 @@ INCLUS = ["README.md", "INSTALLATION.md", "requirements.txt", "Lancer.bat", "lan
 ECARTES = {"__pycache__", ".ipynb_checkpoints", ".pytest_cache"}
 JAMAIS = ("papier/site/", "papier/manuscrit_site.", "papier/Manuscrit_Overleaf_site.zip", "deploiement/volumes/")   # chiffres et résultats du site : ne quittent pas le poste
 JAMAIS_EXACT = {"deploiement/.env"}                          # chemin de vos données sur la machine
-REGENERABLES = ("papier/genere/", "papier/manuscrit.pdf", "papier/manuscrit.bbl", "papier/Manuscrit_Overleaf.zip")   # réécrits par python -m erc.papier --demo : hors empreintes
+REGENERABLES = ("papier/genere/", "papier/manuscrit.pdf", "papier/manuscrit.bbl", "papier/Manuscrit_Overleaf.zip", "papier/KDD_Overleaf.zip",
+                "papier/ICAPS_Overleaf.zip", "papier/kdd/kdd.pdf", "papier/kdd/kdd.bbl", "papier/icaps/icaps.pdf", "papier/icaps/icaps.bbl",
+                "papier/icaps/supplement.pdf", "papier/icaps/supplement.bbl")   # réécrits par python -m erc.papier --demo : hors empreintes
 SUFFIXES_LATEX = {".aux", ".log", ".out", ".blg", ".toc"}
 NOM_RACINE = "erc_circularite"
 FICHIER_EMPREINTES = "EMPREINTES.txt"
@@ -34,8 +36,11 @@ def fichiers(racine: Path = DOSSIER) -> list:
             out.append(Path(nom))
         elif p.is_dir():
             out += [f.relative_to(racine) for f in p.rglob("*") if f.is_file() and not (set(f.parts) & ECARTES) and f.suffix != ".pyc"]
-    garde = lambda f: ((f.as_posix() == "papier/manuscrit_site.tex" or not f.as_posix().startswith(JAMAIS)) and f.as_posix() not in JAMAIS_EXACT
-                       and f.suffix not in SUFFIXES_LATEX)
+    def garde(f) -> bool:
+        nom = f.as_posix()
+        if nom.startswith("papier/") and (nom.endswith("_site.pdf") or nom.endswith("_site.bbl") or nom.endswith("_Overleaf_site.zip")):
+            return False                                        # versions des papiers à vos chiffres
+        return (nom == "papier/manuscrit_site.tex" or not nom.startswith(JAMAIS)) and nom not in JAMAIS_EXACT and f.suffix not in SUFFIXES_LATEX
     return sorted([f for f in out if garde(f)], key=lambda f: f.as_posix())
 
 

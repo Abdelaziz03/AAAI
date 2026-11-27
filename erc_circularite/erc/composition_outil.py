@@ -11,7 +11,7 @@ vaut chaque type de source.
 
 Deux files de travail :
     à valider   les pièces que la chaîne n'a pas su trancher, par enjeu décroissant ;
-    sondage     des pièces ACCEPTÉES tirées au hasard. Sans ce sondage, la fiabilité des sources ne serait mesurée que
+    sondage     des pièces tirées au hasard parmi celles que la chaîne ne montre à personne (acceptées ou laissées). Sans ce sondage, la fiabilité des sources ne serait mesurée que
                 sur les pièces douteuses, donc sous-estimée ; c'est lui qui donne une mesure sans biais.
 
 La page contient des références et des descriptions internes : elle reste dans le dossier, comme les autres tables.
@@ -55,12 +55,22 @@ def _texte(v):
     return v.strip() if isinstance(v, str) and v.strip() else None
 
 
+def hors_file(resultat: pd.DataFrame) -> pd.Series:
+    """Pièces que la chaîne ne montre à personne : acceptées, ou ni acceptées ni envoyées en revue (laissées faute d'enjeu)."""
+    from .composition import REVUE
+    statut = resultat["Statut"]
+    if "Prochaine action" not in resultat:                     # sans la prochaine action, on ne sait pas ce qui part en revue : acceptées seules
+        return statut.eq("acceptée")
+    return statut.eq("acceptée") | (statut.eq("à valider") & ~resultat["Prochaine action"].astype(str).str.startswith(REVUE))
+
+
 def sondage(resultat: pd.DataFrame, n: int = TAILLE_SONDAGE, graine: int = 0) -> list:
-    """Pièces acceptées sans validation, tirées au hasard (tirage répétable) : la file du contrôle par sondage."""
-    acceptees = sorted(resultat.loc[resultat["Statut"].eq("acceptée"), "PN"].astype(str))
-    if len(acceptees) <= n:
-        return acceptees
-    return sorted(np.random.default_rng(graine).choice(acceptees, size=n, replace=False).tolist())
+    """Pièces tirées au hasard (tirage répétable) parmi celles que la chaîne ne montre à personne : la file du contrôle
+    par sondage. C'est ce tirage, et lui seul, qui mesure les sources sans biais là où personne ne regarde."""
+    candidates = sorted(resultat.loc[hors_file(resultat), "PN"].astype(str))
+    if len(candidates) <= n:
+        return candidates
+    return sorted(np.random.default_rng(graine).choice(candidates, size=n, replace=False).tolist())
 
 
 def donnees(cx, tables: dict, classes, prix: dict, bom: pd.DataFrame, reglages=None, croyances: dict | None = None,

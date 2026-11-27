@@ -27,3 +27,13 @@ __pycache__/
 # Machine virtuelle : ce que le dossier y écrit, et le chemin de vos données
 /deploiement/volumes/
 /deploiement/.env
+# Papiers de conférence : versions à vos chiffres, fichiers de travail, archives Overleaf
+/papier/*/*_site.pdf
+/papier/*/*_site.bbl
+/papier/*/*.aux
+/papier/*/*.log
+/papier/*/*.out
+/papier/*/*.blg
+/papier/*/*.toc
+/papier/*_Overleaf.zip
+/papier/*_Overleaf_site.zip

@@ -75,6 +75,11 @@ def petit(v, decimales: int = 4) -> str:
     return f"${m}\\times10^{{{int(e)}}}$"
 
 
+def signe(v, decimales: int = 3) -> str:
+    """Un écart avec son signe : « $+0.012$ », « $-0.045$ »."""
+    return f"${float(v):+.{decimales}f}$" if _fini(v) else "n/a"
+
+
 def _lignes(rangs) -> str:
     return "\n".join(" & ".join(map(str, r)) + r" \\" for r in rangs) + "\n"
 
@@ -272,9 +277,21 @@ def exp_chaine(graine: int = GRAINE, pieces: int = 300) -> dict:
             "seuil": g.seuil_acceptation}
 
 
-def experiences(graine: int = GRAINE) -> dict:
-    return {"prix": exp_prix(graine), "variabilite": exp_variabilite(graine), "fusion": exp_fusion(graine), "strates": exp_strates(graine),
-            "apprentissage": exp_apprentissage(), "chaine": exp_chaine(graine)}
+def experiences(graine: int = GRAINE, suivre=None) -> dict:
+    """Toutes les expériences synthétiques des trois papiers. `suivre(nom)` est appelée avant chacune (pour dire où l'on en est)."""
+    from . import bancs
+    plan = [("prix", lambda: exp_prix(graine)), ("variabilite", lambda: exp_variabilite(graine)), ("fusion", lambda: exp_fusion(graine)),
+            ("strates", lambda: exp_strates(graine)), ("apprentissage", exp_apprentissage), ("chaine", lambda: exp_chaine(graine)),
+            ("politiques", lambda: bancs.exp_politiques(graine)), ("fusion_ablation", lambda: bancs.exp_fusion_ablation(graine)),
+            ("boucle", lambda: bancs.exp_boucle(graine)), ("boucle_file", lambda: bancs.exp_boucle(graine, sondage=5, cout_revue=0.5)),
+            ("ancrage", lambda: bancs.exp_ancrage(graine)), ("exactitude", lambda: bancs.exp_exactitude(graine)), ("tampon", lambda: bancs.exp_tampon(graine)),
+            ("apprentissage_lp", lambda: bancs.exp_apprentissage_lp(graine)), ("confinement", lambda: bancs.exp_confinement(graine))]
+    e = {}
+    for nom, f in plan:
+        if suivre:
+            suivre(nom)
+        e[nom] = f()
+    return e
 
 
 # --------------------------------------------------------------------------- B. étude de cas
@@ -320,9 +337,16 @@ def etude_de_cas(cfg, echelle: float = 1.0) -> dict:
         (METHODES.get(x["Méthode"], x["Méthode"]), nombre(x["Prévisions"]), nombre(x["Écart quadratique relatif"], 3), nombre(x["Perte de quantile"], 3),
          pourcent(x["Couverture 80 %"])) for _, x in prev.sort_values("Perte de quantile").iterrows()]
     try:
-        n = composition.executer(ctx)["Notes"]
+        compo = composition.executer(ctx)
+        n = compo["Notes"]
     except Exception:                                          # composition non calculable : inconnue, pas nulle
-        n = {}
+        compo, n = {}, {}
+    from .bancs import AUTRES_SOURCES, SOURCES
+    noms_sources = dict(SOURCES, **AUTRES_SOURCES)
+    fiab = compo.get("Fiabilité des sources")
+    v["t_sources"] = [] if not isinstance(fiab, pd.DataFrame) else [
+        (noms_sources.get(x["Type de source"], x["Type de source"]), nombre(x["A priori (hypothèse)"], 2), nombre(x["Affirmations vérifiées"]), nombre(x["Justes"]),
+         nombre(x["Fiabilité"], 2)) for _, x in fiab.sort_values("Affirmations vérifiées", ascending=False).iterrows()]
     st = n.get("statuts") or {}
     v.update({"c_pieces": n.get("pieces"), "c_validees": st.get("validée", 0) if n.get("pieces") else None, "c_acceptees": st.get("acceptée", 0) if n.get("pieces") else None,
               "c_file": (st.get("à valider", 0) + st.get("inconnue", 0)) if n.get("pieces") else None, "c_appels": n.get("appels_au_modele"),
@@ -387,6 +411,31 @@ def figures(e: dict, dossier: Path) -> list:
     ax.annotate("Posterior sampling", (len(a[2]["courbe"]), a[2]["courbe"][-1]), textcoords="offset points", xytext=(-2, 6), ha="right", color="#333333")
     ax.set_xlabel("Copies processed"); ax.set_ylabel("Cumulative regret (monetary units)")
     _garder(fig, dossier / "fig_regret.pdf"); faits.append("fig_regret.pdf")
+    # tirage a posteriori sur le programme complet
+    fig, ax = _axes()
+    lp = e["apprentissage_lp"]["rangs"]
+    for i, r in enumerate(lp):
+        ax.plot(range(1, len(r["courbe"]) + 1), np.array(r["courbe"]) / 1e3, TRAITS[i], lw=1.5, color=COULEURS[i])
+        ax.annotate(["Prior mean", "Greedy", "Posterior sampling"][i], (len(r["courbe"]), r["courbe"][-1] / 1e3), textcoords="offset points",
+                    xytext=(-3, [5, -11, 5][i]), ha="right", color="#333333")
+    ax.set_xlabel("Period"); ax.set_ylabel("Cumulative regret (thousands)")
+    ax.set_ylim(bottom=0)
+    _garder(fig, dossier / "fig_regret_lp.pdf"); faits.append("fig_regret_lp.pdf")
+    # politiques d'acquisition : valeur nette, en part de l'oracle (la revue de toutes les pièces, très négative, est dite dans le texte)
+    fig, ax = _axes(3.4, 2.3)
+    pol = [r for r in e["politiques"]["rangs"] if r["part"] > -0.5][::-1]
+    noms = {"Review by prior stake, no automation": "Human review by prior stake", "Free evidence only": "Free evidence only",
+            "Chain without the budget screen": "Chain, no budget screen", "Chain with a stake-blind budget": "Chain, stake-blind budget",
+            "Budgeted chain (this paper)": "Budgeted chain (ours)"}
+    y = np.arange(len(pol))
+    ax.barh(y, [100 * r["part"] for r in pol], height=0.55, color=COULEURS[0], zorder=2)
+    ax.hlines(y, [100 * r["part_min"] for r in pol], [100 * r["part_max"] for r in pol], color="#333333", lw=0.9, zorder=3)
+    for k, r in enumerate(pol):
+        ax.annotate(f"{100 * r['part']:.0f}", (100 * r["part_max"], k), textcoords="offset points", xytext=(4, -3), color="#333333")
+    ax.set_yticks(y); ax.set_yticklabels([noms.get(r["politique"], r["politique"]) for r in pol])
+    ax.set_xlabel("Net value (% of the oracle)"); ax.set_xlim(0, 105)
+    ax.grid(True, axis="x"); ax.grid(False, axis="y")
+    _garder(fig, dossier / "fig_politiques.pdf"); faits.append("fig_politiques.pdf")
     _schema(dossier / "fig_architecture.pdf"); faits.append("fig_architecture.pdf")
     return faits
 
@@ -443,6 +492,90 @@ def _schema(chemin: Path) -> None:
 
 
 # --------------------------------------------------------------------------- D. écriture
+def environnement() -> dict:
+    """Machine et versions sur lesquelles les chiffres ont été calculés : à citer dans un papier, jamais à deviner."""
+    import platform
+    versions = {}
+    for nom in ("numpy", "pandas", "scipy", "matplotlib"):
+        try:
+            versions[nom] = __import__(nom).__version__
+        except ImportError:
+            versions[nom] = "not installed"
+    processeur = platform.processor() or platform.machine()
+    try:
+        for ligne in Path("/proc/cpuinfo").read_text(encoding="utf-8", errors="replace").splitlines():
+            if ligne.lower().startswith("model name"):
+                processeur = ligne.split(":", 1)[1].strip()
+                break
+    except OSError:
+        pass
+    import os
+    return {"python": platform.python_version(), "systeme": f"{platform.system()} {platform.release()}".strip(), "processeur": processeur,
+            "coeurs": os.cpu_count() or 0, **versions}
+
+
+def _latex(t) -> str:
+    """Texte libre rendu sûr pour LaTeX."""
+    return "".join({"_": r"\_", "%": r"\%", "&": r"\&", "#": r"\#", "$": r"\$", "{": r"\{", "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}",
+                    "\\": r"\textbackslash{}"}.get(c, c) for c in str(t))
+
+
+def _macros_des_bancs(e: dict) -> dict:
+    """Macros des bancs d'essai de `erc.bancs` (papiers KDD et ICAPS)."""
+    pol = {r["politique"]: r for r in e["politiques"]["rangs"]}
+    budget, sans, aveugle = pol["Budgeted chain (this paper)"], pol["Chain without the budget screen"], pol["Chain with a stake-blind budget"]
+    abl = e["fusion_ablation"]["rangs"]
+    apprises = [r for r in abl if r["methode"] == "Fusion, learned reliabilities"]
+    par = {r["methode"]: r for r in abl}
+    fusion, vote, sans_prov, declaree = apprises[-1], par["Majority vote"], par["Fusion, learned, provenance ignored"], par["Fusion, declared reliabilities"]
+    b, f, anc, ex, tp, lp, cf = e["boucle"], e["boucle_file"], e["ancrage"], e["exactitude"], e["tampon"], e["apprentissage_lp"], e["confinement"]
+    grand = ex["rangs"][-1]
+    rec = [r["stock"] for r in tp["rangs"]]
+    lpr = {r["politique"]: r for r in lp["rangs"]}
+    ecart = "0" if not ex["ecart"] > 0 else f"{ex['ecart']:.0e}".replace("e-0", r"\times 10^{-").replace("e-", r"\times 10^{-") + "}"
+    return {
+        "SynPolPieces": e["politiques"]["pieces"], "SynPolGraines": e["politiques"]["graines"],
+        "SynPolBudgetPart": pourcent(budget["part"]), "SynPolBudgetMin": pourcent(budget["part_min"]), "SynPolBudgetMax": pourcent(budget["part_max"]),
+        "SynPolSansBudgetPart": pourcent(sans["part"]), "SynPolAveuglePart": pourcent(aveugle["part"]),
+        "SynPolGratuitPart": pourcent(pol["Free evidence only"]["part"]), "SynPolRevuePart": pourcent(pol["Review by prior stake, no automation"]["part"]),
+        "SynPolToutPart": pourcent(pol["Review every component"]["part"]),
+        "SynPolBudgetAppels": nombre(budget["appels"]), "SynPolSansBudgetAppels": nombre(sans["appels"]),
+        "SynPolEconomieAppels": pourcent(1 - budget["appels"] / sans["appels"]) if sans["appels"] else "n/a",
+        "SynPolBudgetRevues": nombre(budget["revues"], 1), "SynPolBudgetJustesse": pourcent(budget["justesse"], 1),
+        "SynPolGratuitRevues": nombre(pol["Free evidence only"]["revues"], 1),
+        "SynAblEssai": e["fusion_ablation"]["essai"], "SynAblCopie": e["fusion_ablation"]["copie"], "SynAblValidations": fusion["validations"],
+        "SynAblFusionJustesse": pourcent(fusion["justesse"], 1), "SynAblVoteJustesse": pourcent(vote["justesse"], 1), "SynAblDeclareeJustesse": pourcent(declaree["justesse"], 1),
+        "SynAblTrenteJustesse": pourcent(apprises[0]["justesse"], 1), "SynAblTrente": apprises[0]["validations"],
+        "SynAblFusionAcc": pourcent(fusion["justesse_acceptees"], 1), "SynAblVoteAcc": pourcent(vote["justesse_acceptees"], 1),
+        "SynAblSansProvAcc": pourcent(sans_prov["justesse_acceptees"], 1), "SynAblFusionCouv": pourcent(fusion["couverture"]), "SynAblVoteCouv": pourcent(vote["couverture"]),
+        "SynAblSansProvCouv": pourcent(sans_prov["couverture"]), "SynAblFusionEce": nombre(fusion["ece"], 3), "SynAblSansProvEce": nombre(sans_prov["ece"], 3),
+        "SynAblVoteEce": nombre(vote["ece"], 3),
+        "SynBoucleGraines": b["graines"], "SynBouclePieces": b["pieces"], "SynBoucleTours": b["tours"], "SynBoucleSondage": b["sondage"],
+        "SynBoucleRevues": nombre(b["validations_file"], 1),
+        "SynBoucleErrDeclaree": nombre(b["erreur_declaree"], 3), "SynBoucleErrStrates": nombre(b["erreur_strates"], 3), "SynBoucleErrEnsemble": nombre(b["erreur_ensemble"], 3),
+        "SynBoucleBiaisStrates": signe(b["biais_strates"]), "SynBoucleBiaisEnsemble": signe(b["biais_ensemble"]),
+        "SynBoucleJustesseUn": pourcent(b["suivi"][0]["justesse"], 1), "SynBoucleJustesseDeux": pourcent(b["suivi"][1]["justesse"], 1),
+        "SynBoucleJustesseTrois": pourcent(b["suivi"][-1]["justesse"], 1), "SynBoucleAccepteesUn": nombre(b["suivi"][0]["acceptees"]),
+        "SynBoucleAccepteesDeux": nombre(b["suivi"][1]["acceptees"]), "SynBoucleAccepteesTrois": nombre(b["suivi"][-1]["acceptees"]),
+        "SynFileSondage": f["sondage"], "SynFileCoutRevue": f["cout_revue"], "SynFileRevues": nombre(f["validations_file"], 1),
+        "SynFileErrStrates": nombre(f["erreur_strates"], 3), "SynFileErrEnsemble": nombre(f["erreur_ensemble"], 3),
+        "SynFileBiaisStrates": signe(f["biais_strates"]), "SynFileBiaisEnsemble": signe(f["biais_ensemble"]),
+        "SynAncNotes": nombre(anc["notes"]), "SynAncLegitimes": nombre(anc["legitimes"]), "SynAncFaussesAlertes": nombre(anc["fausses_alertes"]),
+        "SynAncInventes": nombre(anc["inventes"]), "SynAncManques": nombre(anc["inventes"] - anc["inventes_signales"]),
+        "SynAncRappelInventes": pourcent(anc["rappel_inventes"], 1), "SynAncRappelRetouches": pourcent(anc["rappel_retouches"], 1),
+        "SynExactEcart": ecart, "SynExactInstances": ex["compares"], "SynExactGrandTypes": nombre(grand["types"]), "SynExactGrandComposants": nombre(grand["composants"]),
+        "SynExactGrandSecondes": nombre(grand["secondes"], 1),
+        "SynTamponSemaines": tp["semaines"], "SynTamponPart": tp["part"], "SynTamponBorne": nombre(tp["tampon_semaines"]),
+        "SynTamponMin": pourcent(min(rec)), "SynTamponMax": pourcent(max(rec)),
+        "SynLPPeriodes": lp["periodes"], "SynLPGraines": lp["graines"], "SynLPTypes": lp["types"], "SynLPPart": lp["part"],
+        "SynLPPrior": pourcent(lpr["Prior mean, never updated"]["part"], 1), "SynLPGlouton": pourcent(lpr["Greedy (posterior mean)"]["part"], 1),
+        "SynLPTS": pourcent(lpr["Posterior sampling (TS-LP)"]["part"], 1),
+        "SynConfEpisodes": nombre(cf["episodes"]), "SynConfTours": nombre(cf["tours"]), "SynConfHorsListe": nombre(cf["hors_liste"]),
+        "SynConfDansListe": nombre(cf["dans_liste"]), "SynConfExecutees": nombre(cf["hors_liste_executees"]), "SynConfExceptions": nombre(cf["exceptions"]),
+        "SynConfDepassements": nombre(cf["depassements"]), "SynConfReplis": nombre(cf["replis"]), "SynConfRefus": nombre(cf.get("refus", 0)),
+    }
+
+
 def _macros(e: dict, c: dict, demo: bool, echelle: float) -> str:
     p, s, a, ch = e["prix"], e["strates"], e["apprentissage"], e["chaine"]
     pire = max(r[part] for r in e["variabilite"]["rangs"] for part in e["variabilite"]["parts"])
@@ -470,6 +603,8 @@ def _macros(e: dict, c: dict, demo: bool, echelle: float) -> str:
         "SynChaineBasLaissees": pourcent(ch["cinquiemes"][-1]["laissees"]), "SynChaineBasCout": nombre(ch["cinquiemes"][-1]["cout"], 3),
         "CoutDescription": ch["couts"]["description"], "CoutCollecte": ch["couts"]["collecte"], "CoutExtraction": ch["couts"]["extraction"],
         "CoutControle": ch["couts"]["controle"], "CoutRevue": nombre(ch["couts"]["revue"]), "SeuilAcceptation": ch["seuil"],
+        **_macros_des_bancs(e),
+        **{"Env" + k.capitalize(): _latex(v) for k, v in environnement().items()},
         # étude de cas
         "CasTypes": nombre(c["types"]), "CasIncomplets": nombre(c["incomplets"]), "CasPartages": nombre(c["partages"]),
         "CasMarge": nombre(c["marge"]), "CasFixes": nombre(c["fixes"]), "CasResultat": nombre(c["resultat"]), "CasHeures": nombre(c["heures"]),
@@ -498,7 +633,23 @@ def _tableaux(e: dict, c: dict) -> dict:
                              pourcent(r["acceptees"]), pourcent(r["revue"]), pourcent(r["laissees"])) for r in e["chaine"]["cinquiemes"]),
         "t_apprentissage": _lignes((r["politique"], nombre(r["regret"], 2), pourcent(r["testees"]), nombre(r["q"], 2)) for r in e["apprentissage"]["rangs"]),
         "t_cas_heures": _lignes(c["t_heures"] or vide), "t_cas_rendements": _lignes(c["t_rendements"] or vide), "t_cas_previsions": _lignes(c["t_previsions"] or vide),
+        "t_cas_sources": _lignes(c.get("t_sources") or vide),
+        "t_politiques": _lignes((r["politique"], nombre(r["appels"]), nombre(r["cout"], 2), nombre(r["revues"], 1), nombre(r["acceptees"]),
+                                 pourcent(r["justesse"], 1) if _fini(r["justesse"]) else "---", pourcent(r["part"]), f"{pourcent(r['part_min'])} to {pourcent(r['part_max'])}")
+                                for r in e["politiques"]["rangs"]),
+        "t_fusion_ablation": _lignes((r["methode"], r["validations"] if "Fusion" in r["methode"] else "---", pourcent(r["justesse"], 1), nombre(r["brier"], 3), nombre(r["ece"], 3),
+                                      pourcent(r["couverture"]), pourcent(r["justesse_acceptees"], 1)) for r in e["fusion_ablation"]["rangs"]),
+        "t_boucle": _lignes((r["source"], nombre(r["pieces"]), nombre(r["vraie"], 3), nombre(r["declaree"], 2), nombre(r["strates"], 3), nombre(r["ensemble"], 3)) for r in e["boucle"]["rangs"]),
+        "t_boucle_file": _lignes((r["source"], nombre(r["pieces"]), nombre(r["vraie"], 3), nombre(r["declaree"], 2), nombre(r["strates"], 3), nombre(r["ensemble"], 3)) for r in e["boucle_file"]["rangs"]),
+        "t_boucle_suivi": _lignes((r["tour"], nombre(r["acceptees"]), pourcent(r["justesse"], 1), nombre(r["revues"], 1), nombre(r["validees"]), nombre(r["appels"])) for r in e["boucle"]["suivi"]),
+        "t_exactitude": _lignes((nombre(r["types"]), nombre(r["composants"]), nombre(r["secondes"], 2), r["partages"]) for r in e["exactitude"]["rangs"]),
+        "t_tampon": _lignes((r["loi"], pourcent(r["ecart"], 1), pourcent(r["stock"]), pourcent(r["stock_borne"])) for r in e["tampon"]["rangs"]),
+        "t_apprentissage_lp": _lignes((r["politique"], pourcent(r["part"], 1), nombre(r["testees"])) for r in e["apprentissage_lp"]["rangs"]),
     }
+
+
+# Les papiers : sous-dossier de papier/, nom du fichier maître, où il lit les chiffres depuis son dossier.
+PAPIERS = {"informs": ("", "manuscrit", ""), "kdd": ("kdd", "kdd", "../"), "icaps": ("icaps", "icaps", "../"), "icaps_supplement": ("icaps", "supplement", "../")}
 
 
 def racine_du_papier(dossier=None) -> Path:
@@ -510,29 +661,35 @@ def dossier_des_sorties(racine: Path, demo: bool) -> Path:
     return Path(racine) / ("genere" if demo else "site")
 
 
-def nom_du_manuscrit(demo: bool) -> str:
-    return "manuscrit" if demo else "manuscrit_site"
+def nom_du_manuscrit(demo: bool, papier: str = "informs") -> str:
+    return PAPIERS[papier][1] + ("" if demo else "_site")
 
 
-def ecrire(cfg, dossier=None, echelle: float = 1.0, graine: int = GRAINE) -> dict:
+def ecrire(cfg, dossier=None, echelle: float = 1.0, graine: int = GRAINE, suivre=None) -> dict:
     """Calcule tout et écrit les macros, les corps de tableaux et les figures : dans papier/genere pour la
-    démonstration, dans papier/site pour les données du site."""
+    démonstration, dans papier/site pour les données du site. Les trois papiers lisent le même dossier."""
     sortie = dossier_des_sorties(racine_du_papier(dossier), bool(cfg.demo))
     sortie.mkdir(parents=True, exist_ok=True)
-    e, c = experiences(graine), etude_de_cas(cfg, echelle)
+    e, c = experiences(graine, suivre), etude_de_cas(cfg, echelle)
     (sortie / "macros.tex").write_text(_macros(e, c, bool(cfg.demo), echelle), encoding="utf-8")
     for nom, corps in _tableaux(e, c).items():
         (sortie / f"{nom}.tex").write_text(corps, encoding="utf-8")
     return {"dossier": sortie, "figures": figures(e, sortie), "experiences": e, "cas": c, "demo": bool(cfg.demo)}
 
 
-def compiler(dossier=None, nom: str = "manuscrit") -> Path | None:
-    """Compile le manuscrit si pdflatex et bibtex sont installés ; rend le chemin du PDF, ou None."""
+def compiler(dossier=None, nom: str = "manuscrit", papier: str | None = None, demo: bool = True) -> Path | None:
+    """Compile un papier si pdflatex et bibtex sont installés ; rend le chemin du PDF, ou None.
+    `papier` (informs, kdd, icaps, icaps_supplement) choisit le sous-dossier et le fichier ; sinon `nom` dans `dossier`."""
     racine = racine_du_papier(dossier)
+    if papier is not None:
+        racine, nom = racine / PAPIERS[papier][0], nom_du_manuscrit(demo, papier)
     if not shutil.which("pdflatex") or not shutil.which("bibtex"):
         return None
     latex = ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", nom + ".tex"]
+    cite = "\\citation" in "".join(f.read_text(encoding="utf-8", errors="replace") for f in racine.glob(nom + ".aux"))
     for commande in (latex, ["bibtex", nom], latex, latex):
+        if commande[0] == "bibtex" and not (racine / (nom + ".aux")).is_file():
+            continue
         r = subprocess.run(commande, cwd=racine, capture_output=True, text=True, errors="replace")
         if r.returncode != 0 and commande[0] == "pdflatex":
             raise RuntimeError("La compilation a échoué :\n" + "\n".join(r.stdout.splitlines()[-25:]))
@@ -541,32 +698,53 @@ def compiler(dossier=None, nom: str = "manuscrit") -> Path | None:
     return racine / (nom + ".pdf")
 
 
-def archive_overleaf(dossier=None, demo: bool = True) -> Path:
+def pages_de(dossier, nom: str, etiquette: str = "fin:contenu") -> dict:
+    """Après une compilation gardant le .aux : page où finit le contenu (\\label{fin:contenu}) et nombre total de pages."""
+    import re
+    aux, log = Path(dossier) / (nom + ".aux"), Path(dossier) / (nom + ".log")
+    m = re.search(r"\\newlabel\{" + re.escape(etiquette) + r"\}\{\{[^{}]*\}\{(\d+)\}", aux.read_text(encoding="utf-8", errors="replace")) if aux.is_file() else None
+    t = re.search(r"Output written on .*?\((\d+) pages?", log.read_text(encoding="utf-8", errors="replace")) if log.is_file() else None
+    return {"contenu": int(m.group(1)) if m else None, "total": int(t.group(1)) if t else None}
+
+
+def archive_overleaf(dossier=None, demo: bool = True, papier: str = "informs") -> Path:
     """Fabrique l'archive à déposer sur Overleaf (New Project > Upload Project) : le texte, la bibliographie et les
     chiffres, tableaux et figures. Le document principal est document.tex ; il se compile tel quel.
 
-    demo=True  : chiffres de démonstration (papier/genere) -> Manuscrit_Overleaf.zip
-    demo=False : VOS chiffres (papier/site), rangés dans l'archive sous le nom genere/ -> Manuscrit_Overleaf_site.zip.
-                 Cette archive contient vos résultats : la déposer sur un service en ligne les lui confie.
+    demo=True  : chiffres de démonstration (papier/genere)
+    demo=False : VOS chiffres (papier/site), rangés dans l'archive sous le nom genere/. Cette archive contient vos
+                 résultats : la déposer sur un service en ligne les lui confie.
     """
     racine = racine_du_papier(dossier)
     sorties = dossier_des_sorties(racine, demo)
     if not (sorties / "macros.tex").is_file():
         raise FileNotFoundError(f"{sorties} est vide : lancer d'abord python -m erc.papier" + (" --demo" if demo else ""))
-    archive = racine / ("Manuscrit_Overleaf.zip" if demo else "Manuscrit_Overleaf_site.zip")
-    textes = [racine / "document.tex", racine / "references.bib", *sorted((racine / "sections").glob("*.tex"))]
+    sous, _, remonte = PAPIERS[papier]
+    source = racine / sous
+    nom = {"informs": "Manuscrit", "kdd": "KDD", "icaps": "ICAPS"}[papier]
+    archive = racine / (f"{nom}_Overleaf.zip" if demo else f"{nom}_Overleaf_site.zip")
+    textes = [f for f in sorted(source.rglob("*")) if f.is_file() and f.suffix in (".tex", ".bib", ".bst", ".sty", ".cls") and "genere" not in f.parts and "site" not in f.parts
+              and not f.stem.endswith("_site") and f.name not in ("manuscrit.tex", "kdd.tex", "icaps.tex", "supplement.tex", "commun.tex")
+              and (papier != "informs" or f.parent.name in ("papier", "sections") or f.parent == source)]
+    if papier == "informs":
+        textes = [f for f in textes if f.parent == source or f.parent == source / "sections"]
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
         for f in textes:
-            z.write(f, f.relative_to(racine).as_posix())
+            contenu = f.read_text(encoding="utf-8")
+            if remonte:                                         # dans l'archive, genere/ et commun.tex sont à côté du document
+                contenu = contenu.replace("{" + remonte + "genere}", "{genere}").replace("{" + remonte + "commun}", "{commun}")
+            z.writestr(f.relative_to(source).as_posix(), contenu)
+        if remonte:
+            z.writestr("commun.tex", (racine / "commun.tex").read_text(encoding="utf-8").replace("{" + remonte + "genere}", "{genere}"))
         for f in sorted(sorties.iterdir()):
             if f.suffix in (".tex", ".pdf"):
                 z.write(f, f"genere/{f.name}")
-        z.writestr("LISEZ-MOI.txt", "Projet Overleaf du manuscrit.\n\nDocument principal : document.tex (Menu > Main document).\n"
+        z.writestr("LISEZ-MOI.txt", "Projet Overleaf.\n\nDocument principal : document.tex (Menu > Main document).\n"
                    "Compilateur : pdfLaTeX. Bibliographie : references.bib, par BibTeX.\n"
                    "Le dossier genere/ contient les chiffres, les corps des tableaux et les figures : il est écrit par la commande\n"
                    "python -m erc.papier du dossier, ne pas le modifier à la main. Pour changer un chiffre, relancer la commande et\n"
                    "redéposer le dossier genere/.\n"
-                   "Le texte à écrire après le passage sur vos données est marqué en rouge : chercher \\apres{ dans sections/.\n"
+                   "Le texte à écrire après le passage sur vos données est marqué en rouge : chercher \\apres{ dans les fichiers .tex.\n"
                    + ("" if demo else "\nATTENTION : cette archive contient les chiffres de VOTRE site.\n"))
     return archive
 
@@ -581,17 +759,25 @@ def main(argv=None) -> int:
     a.add_argument("--echelle", type=float, default=1.0, help="facteur appliqué aux montants de l'étude de cas (non publié)")
     a.add_argument("--compiler", action="store_true", help="compile ensuite le manuscrit")
     a.add_argument("--overleaf", action="store_true", help="fabrique ensuite l'archive à déposer sur Overleaf")
+    a.add_argument("--papier", choices=["informs", "kdd", "icaps", "tous"], default="tous", help="papier à compiler ou à archiver (défaut : tous)")
     o = a.parse_args(argv)
     cfg = charger(dossier=o.dossier, demo=True if o.demo else None)
-    r = ecrire(cfg, echelle=o.echelle)
+    print("Expériences synthétiques (quelques minutes) :", end=" ", flush=True)
+    r = ecrire(cfg, echelle=o.echelle, suivre=lambda nom: print(nom, end=" ", flush=True))
+    print()
     print(f"Écrit : {r['dossier']} (macros, {len(r['figures'])} figures). Données de l'étude de cas : " + ("DÉMONSTRATION (fictives)" if r["demo"] else "réelles") + ".")
+    choisis = ["informs", "kdd", "icaps"] if o.papier == "tous" else [o.papier]
+    racine = racine_du_papier()
+    presents = [p_ for p_ in choisis if (racine / PAPIERS[p_][0] / "document.tex").is_file()]
     if o.compiler:
-        pdf = compiler(nom=nom_du_manuscrit(r["demo"]))
-        print("PDF : " + str(pdf) if pdf else "pdflatex ou bibtex absent : le manuscrit n'a pas été compilé (voir papier/LISEZ-MOI.md).")
+        for p_ in presents + (["icaps_supplement"] if "icaps" in presents and (racine / "icaps" / "supplement_document.tex").is_file() else []):
+            pdf = compiler(papier=p_, demo=r["demo"])
+            print(f"PDF ({p_}) : " + str(pdf) if pdf else "pdflatex ou bibtex absent : rien n'a été compilé (voir papier/LISEZ-MOI.md).")
     if o.overleaf:
-        print("Archive pour Overleaf : " + str(archive_overleaf(demo=r["demo"])))
+        for p_ in presents:
+            print(f"Archive pour Overleaf ({p_}) : " + str(archive_overleaf(demo=r["demo"], papier=p_)))
         if not r["demo"]:
-            print("ATTENTION : cette archive contient les chiffres de votre site. La déposer sur Overleaf les confie à ce service.")
+            print("ATTENTION : ces archives contiennent les chiffres de votre site. Les déposer sur Overleaf les confie à ce service.")
     return 0
 
 

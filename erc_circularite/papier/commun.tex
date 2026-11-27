@@ -1,0 +1,13 @@
+% Shared by the conference papers (kdd/, icaps/). Where the generated numbers are, how a table body is read, and the
+% marks for text that can only be written once the system has run on site data.
+% Nothing under genere/ or site/ is typed by hand: both are written by  python -m erc.papier  (see LISEZ-MOI.md).
+\providecommand{\genere}{../genere}
+\input{\genere/macros}
+\makeatletter
+\newcommand{\corps}[1]{\@@input \genere/#1.tex }
+\makeatother
+% Text that awaits site data: shown in dark red, never to be left in a submitted version.
+\newcommand{\apres}[1]{\textcolor{red!60!black}{\textbf{[To write after the run on site data:} #1\textbf{]}}}
+% Flag appended to the caption of every table or figure that shows case-study values.
+\newcommand{\demo}{\ifnum\DonneesDemo=1\relax \textbf{Demonstration data, not results.}\fi}
+\newcommand{\noteechelle}{\ifnum\EchelleMasquee=1\relax Monetary amounts of the case study are multiplied by an undisclosed constant. \fi}

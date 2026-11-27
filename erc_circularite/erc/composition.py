@@ -89,6 +89,8 @@ COLONNES_BOM = {
 # Seules ces valeurs de la colonne « interne » disent qu'une pièce est achetée ; toute autre valeur saisie dit « interne ».
 NON_INTERNE = {"non", "n", "no", "false", "faux", "0", "0.0", "buy", "achat", "achete", "achetee", "externe", "purchased"}
 FORME_REFERENCE = re.compile(r"[A-Za-z0-9][A-Za-z0-9 ._/+#-]{2,39}")       # forme admise d'une référence de fabricant
+REVUE = "revue humaine"                 # début de la « prochaine action » d'une pièce envoyée à une personne
+LAISSEE = "laissée"                     # conclusion, dans le cortex, d'une pièce ni acceptée ni envoyée en revue
 SANS_MODELE = ", sans modèle"           # marque, au journal, une collecte faite sans modèle pour lire les documents
 A_REPRENDRE = ", à reprendre"           # marque une collecte dont une lecture a échoué (panne du modèle) : à refaire
 TOLERANCE_SANS_PRIX = 0.01              # probabilité totale tolérée pour des classes de la liste dont le prix manque
@@ -314,7 +316,10 @@ def resoudre(cx: mod_cortex.Cortex, piece: dict, classes, prix: dict, regles: pd
         return bool(np.isfinite(e) and e >= deja_depense + cout + c)
 
     def bilan(b, statut, suite):
-        cx.conclure(DOMAINE, pn, ATTRIBUT, b["retenue"], b["probabilite"], statut)
+        # Dans le cortex, une pièce qui n'ira devant personne est « laissée » : pour mesurer les sources, elle est du côté
+        # des pièces tirées au sondage, pas de la file de revue (cortex.fiabilites).
+        montree = statut in ("validée", "acceptée") or suite.startswith(REVUE)
+        cx.conclure(DOMAINE, pn, ATTRIBUT, b["retenue"], b["probabilite"], statut if montree else LAISSEE)
         cx.base.commit()
         return {"PN": pn, "Description": desc, "Classe retenue": b["retenue"], "Probabilité": b["probabilite"], "Statut": statut,
                 "Sources": ", ".join(b["sources"]), "Preuves": b["preuves"], "Enjeu (€/an, borne)": mise(b) if not b["validee"] else 0.0,
@@ -453,7 +458,8 @@ def fichiers_validations(projet) -> list:
 
 def importer_validations(cx: mod_cortex.Cortex, table: pd.DataFrame) -> int:
     """Validations humaines : colonnes « PN », « Classe validée » et, facultatives, « Validateur », « Commentaire »,
-    « Motif » (« sondage » : pièce acceptée tirée au hasard ; « file » : pièce que la chaîne n'avait pas tranchée)."""
+    « Motif » (« sondage » : pièce tirée au hasard parmi celles que la chaîne ne montre à personne ; « file » : pièce
+    que la chaîne envoie en revue)."""
     n = 0
     for _, r in table.iterrows():
         pn, c = ref(r.get("PN")), texte(r.get("Classe validée")).strip()

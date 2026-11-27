@@ -59,7 +59,8 @@ def test_page_deposee_et_fidele_aux_tables(passage):
             assert abs(max(p["probabilites"].values()) - r["Probabilité"]) < 1e-9
             assert max(p["probabilites"], key=p["probabilites"].get) == p["classe"]
     assert d["demo"] is True and d["fournisseurs_fictifs"] is True
-    assert set(d["sondage"]) <= {p["pn"] for p in d["pieces"] if p["statut"] == "acceptée"}
+    montrees = {p["pn"] for p in d["pieces"] if p["statut"] in ("validée", "inconnue") or (p["statut"] == "à valider" and p["suite"].startswith("revue humaine"))}
+    assert d["sondage"] and not set(d["sondage"]) & montrees   # le sondage tire parmi ce que la chaîne ne montre à personne
     assert {f["type"] for f in d["fiabilites"]} >= set(K.A_PRIORI_SOURCES)
     assert ("composition", "Page de revue", "outil") in ctx.depot._entrees      # inscrite au manifeste du dossier
 
@@ -88,6 +89,10 @@ def test_sondage_repetable_et_borne():
     assert a == b and len(a) == 20 and set(a) <= set(res["PN"][:60])
     assert P.sondage(res, n=20, graine=4) != a
     assert P.sondage(res.iloc[:5], n=20) == sorted(res["PN"][:5])
+    # avec la prochaine action : les pièces laissées faute d'enjeu sont tirées aussi, celles envoyées en revue jamais
+    res["Prochaine action"] = ["aucune : contrôle par sondage"] * 60 + ["revue humaine"] * 20 + ["aucune : établir la classe rapporterait moins que le coût d'une revue"] * 20
+    tirage = P.sondage(res, n=100)
+    assert set(tirage) == set(res["PN"][:60]) | set(res["PN"][80:]) and P.hors_file(res).sum() == 80
 
 
 # ------------------------------------------------------------------ logique de la page (node)
@@ -127,7 +132,11 @@ def test_boucle_fermee_decisions_vers_cortex(passage, tmp_path):
     autre = next(c for c in d["classes"] if c != acceptee["classe"])
     # le motif de chaque décision : pièce de la file, pièce acceptée tirée au sondage, ou autre
     motifs = logique({"pieces": d["pieces"], "sondage": d["sondage"], "decisions": {}, "validateur": ""})["motifs"]
-    assert motifs[a_valider[0]["pn"]] == "file" and motifs[acceptee["pn"]] == ("sondage" if acceptee["pn"] in d["sondage"] else "choix")
+    en_revue = next(p for p in a_valider if p["suite"].startswith("revue humaine"))
+    assert motifs[en_revue["pn"]] == "file" and motifs[acceptee["pn"]] == ("sondage" if acceptee["pn"] in d["sondage"] else "choix")
+    for p in a_valider:                                        # une pièce laissée faute d'enjeu n'est pas « de la file » : sondage si tirée, choix sinon
+        if not p["suite"].startswith("revue humaine"):
+            assert motifs[p["pn"]] == ("sondage" if p["pn"] in d["sondage"] else "choix")
     assert all(m == "choix" for pn, m in motifs.items() if next(p for p in d["pieces"] if p["pn"] == pn)["statut"] == "validée")
     decisions = {a_valider[0]["pn"]: {"classe": a_valider[0]["classe"], "commentaire": 'vu sur pièce ; marquage "inox"\nà revoir', "motif": "file"},
                  acceptee["pn"]: {"classe": autre, "commentaire": "", "motif": motifs[acceptee["pn"]]}}

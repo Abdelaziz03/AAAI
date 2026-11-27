@@ -188,6 +188,34 @@ def test_fiabilite_par_strates_validations_de_la_file_et_du_sondage():
         assert cx.verite(D, "acc9", A) == "Câble"
 
 
+def test_piece_laissee_faute_d_enjeu_n_est_pas_dans_la_strate_de_la_file():
+    """Seules les pièces envoyées à une personne forment la strate « file ». Une pièce ni acceptée ni envoyée en revue
+    est conclue « laissée » dans le cortex : elle pèse du côté du sondage, sinon les erreurs trouvées dans la file,
+    où les sources se contredisent, seraient prêtées à toutes les pièces que personne ne regarde."""
+    m0 = K.A_PRIORI_SOURCES["règle"]
+    a0, b0 = m0 * F0, (1 - m0) * F0
+    with K.Cortex(":memory:") as cx:
+        for i in range(6):
+            cx.affirmer(D, f"file{i}", A, "Carte", "règle", "règle")
+            cx.conclure(D, f"file{i}", A, "Carte", 0.6, "à valider")
+        for i in range(30):
+            cx.affirmer(D, f"reste{i}", A, "Carte", "règle", "règle")
+            cx.conclure(D, f"reste{i}", A, "Carte", 0.6, C.LAISSEE)
+        for i in range(4):                                    # quatre pièces de la file revues : la règle avait tort
+            cx.valider(D, f"file{i}", A, "Câble", "expert", motif="file")
+        r = cx.fiabilites(D, A).set_index("Type de source").at["règle", "Fiabilité"]
+        m_file = a0 / (a0 + b0 + 4)
+        assert math.isclose(r, (30 * m0 + 2 * m_file) / 32)   # les 30 pièces laissées gardent l'a priori ; 2 restent dans la file
+    # la chaîne elle-même : pièce légère sans preuve décisive → « à valider » dans le tableau, « laissée » dans le cortex
+    with K.Cortex(":memory:") as cx:
+        r = C.resoudre(cx, piece("L1", "Carte de test"), CLASSES, PRIX, REGLES, masse_annuelle_kg=0.01)
+        assert r["Statut"] == "à valider" and r["Prochaine action"].startswith("aucune")
+        assert cx.conclusions(D, A).set_index("sujet").at["L1", "statut"] == C.LAISSEE
+        r = C.resoudre(cx, piece("L2", "Carte de test"), CLASSES, PRIX, REGLES, masse_annuelle_kg=500.0)
+        assert r["Statut"] == "à valider" and r["Prochaine action"].startswith("revue humaine")
+        assert cx.conclusions(D, A).set_index("sujet").at["L2", "statut"] == "à valider"
+
+
 def test_voisins_valides_seulement_et_descriptions_absentes():
     with K.Cortex(":memory:") as cx:
         cx.declarer(D, "a", "Gate driver board rev B")
