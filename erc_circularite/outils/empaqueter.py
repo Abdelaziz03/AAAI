@@ -14,11 +14,12 @@ import zipfile
 from pathlib import Path
 
 DOSSIER = Path(__file__).resolve().parent.parent
-INCLUS = ["README.md", "INSTALLATION.md", "requirements.txt", "Lancer.bat", "lancer.sh", "erc", "notebooks", "docs", "outils", "tests", "papier",
+INCLUS = ["README.md", "INSTALLATION.md", "requirements.txt", "Lancer.bat", "lancer.sh", ".dockerignore", "erc", "notebooks", "docs", "outils", "tests", "papier",
           "deploiement", "parametres/.gitkeep"]
 ECARTES = {"__pycache__", ".ipynb_checkpoints", ".pytest_cache"}
-JAMAIS = ("papier/site/", "papier/manuscrit_site.")          # chiffres du site : ne quittent pas le poste ; le fichier .tex, lui, part
-REGENERABLES = ("papier/genere/", "papier/manuscrit.pdf", "papier/manuscrit.bbl")   # réécrits par python -m erc.papier --demo : hors empreintes
+JAMAIS = ("papier/site/", "papier/manuscrit_site.", "papier/Manuscrit_Overleaf_site.zip", "deploiement/volumes/")   # chiffres et résultats du site : ne quittent pas le poste
+JAMAIS_EXACT = {"deploiement/.env"}                          # chemin de vos données sur la machine
+REGENERABLES = ("papier/genere/", "papier/manuscrit.pdf", "papier/manuscrit.bbl", "papier/Manuscrit_Overleaf.zip")   # réécrits par python -m erc.papier --demo : hors empreintes
 SUFFIXES_LATEX = {".aux", ".log", ".out", ".blg", ".toc"}
 NOM_RACINE = "erc_circularite"
 FICHIER_EMPREINTES = "EMPREINTES.txt"
@@ -33,7 +34,8 @@ def fichiers(racine: Path = DOSSIER) -> list:
             out.append(Path(nom))
         elif p.is_dir():
             out += [f.relative_to(racine) for f in p.rglob("*") if f.is_file() and not (set(f.parts) & ECARTES) and f.suffix != ".pyc"]
-    garde = lambda f: (f.as_posix() == "papier/manuscrit_site.tex" or not f.as_posix().startswith(JAMAIS)) and f.suffix not in SUFFIXES_LATEX
+    garde = lambda f: ((f.as_posix() == "papier/manuscrit_site.tex" or not f.as_posix().startswith(JAMAIS)) and f.as_posix() not in JAMAIS_EXACT
+                       and f.suffix not in SUFFIXES_LATEX)
     return sorted([f for f in out if garde(f)], key=lambda f: f.as_posix())
 
 

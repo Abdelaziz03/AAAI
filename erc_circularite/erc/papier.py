@@ -3,6 +3,7 @@
     python -m erc.papier               vos données : écrit papier/site/ (jamais versionné, jamais dans l'archive)
     python -m erc.papier --demo        données de démonstration : écrit papier/genere/
     python -m erc.papier --compiler    compile ensuite le manuscrit (manuscrit_site.pdf, ou manuscrit.pdf en démonstration)
+    python -m erc.papier --demo --overleaf   fabrique en plus l'archive à déposer sur Overleaf pour modifier le texte
     python -m erc.papier --echelle 0.4 multiplie tous les montants de l'étude de cas par un facteur que vous ne publiez pas
 
 Deux familles de chiffres, que le manuscrit ne mélange jamais :
@@ -21,6 +22,7 @@ import math
 import shutil
 import subprocess
 import time
+import zipfile
 from pathlib import Path
 
 import numpy as np
@@ -539,6 +541,36 @@ def compiler(dossier=None, nom: str = "manuscrit") -> Path | None:
     return racine / (nom + ".pdf")
 
 
+def archive_overleaf(dossier=None, demo: bool = True) -> Path:
+    """Fabrique l'archive à déposer sur Overleaf (New Project > Upload Project) : le texte, la bibliographie et les
+    chiffres, tableaux et figures. Le document principal est document.tex ; il se compile tel quel.
+
+    demo=True  : chiffres de démonstration (papier/genere) -> Manuscrit_Overleaf.zip
+    demo=False : VOS chiffres (papier/site), rangés dans l'archive sous le nom genere/ -> Manuscrit_Overleaf_site.zip.
+                 Cette archive contient vos résultats : la déposer sur un service en ligne les lui confie.
+    """
+    racine = racine_du_papier(dossier)
+    sorties = dossier_des_sorties(racine, demo)
+    if not (sorties / "macros.tex").is_file():
+        raise FileNotFoundError(f"{sorties} est vide : lancer d'abord python -m erc.papier" + (" --demo" if demo else ""))
+    archive = racine / ("Manuscrit_Overleaf.zip" if demo else "Manuscrit_Overleaf_site.zip")
+    textes = [racine / "document.tex", racine / "references.bib", *sorted((racine / "sections").glob("*.tex"))]
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in textes:
+            z.write(f, f.relative_to(racine).as_posix())
+        for f in sorted(sorties.iterdir()):
+            if f.suffix in (".tex", ".pdf"):
+                z.write(f, f"genere/{f.name}")
+        z.writestr("LISEZ-MOI.txt", "Projet Overleaf du manuscrit.\n\nDocument principal : document.tex (Menu > Main document).\n"
+                   "Compilateur : pdfLaTeX. Bibliographie : references.bib, par BibTeX.\n"
+                   "Le dossier genere/ contient les chiffres, les corps des tableaux et les figures : il est écrit par la commande\n"
+                   "python -m erc.papier du dossier, ne pas le modifier à la main. Pour changer un chiffre, relancer la commande et\n"
+                   "redéposer le dossier genere/.\n"
+                   "Le texte à écrire après le passage sur vos données est marqué en rouge : chercher \\apres{ dans sections/.\n"
+                   + ("" if demo else "\nATTENTION : cette archive contient les chiffres de VOTRE site.\n"))
+    return archive
+
+
 def main(argv=None) -> int:
     import argparse
 
@@ -547,7 +579,8 @@ def main(argv=None) -> int:
     a.add_argument("--dossier")
     a.add_argument("--demo", action="store_true")
     a.add_argument("--echelle", type=float, default=1.0, help="facteur appliqué aux montants de l'étude de cas (non publié)")
-    a.add_argument("--compiler", action="store_true", help="compile ensuite papier/manuscrit.tex")
+    a.add_argument("--compiler", action="store_true", help="compile ensuite le manuscrit")
+    a.add_argument("--overleaf", action="store_true", help="fabrique ensuite l'archive à déposer sur Overleaf")
     o = a.parse_args(argv)
     cfg = charger(dossier=o.dossier, demo=True if o.demo else None)
     r = ecrire(cfg, echelle=o.echelle)
@@ -555,6 +588,10 @@ def main(argv=None) -> int:
     if o.compiler:
         pdf = compiler(nom=nom_du_manuscrit(r["demo"]))
         print("PDF : " + str(pdf) if pdf else "pdflatex ou bibtex absent : le manuscrit n'a pas été compilé (voir papier/LISEZ-MOI.md).")
+    if o.overleaf:
+        print("Archive pour Overleaf : " + str(archive_overleaf(demo=r["demo"])))
+        if not r["demo"]:
+            print("ATTENTION : cette archive contient les chiffres de votre site. La déposer sur Overleaf les confie à ce service.")
     return 0
 
 

@@ -119,12 +119,17 @@ def test_archive_complete_sans_donnees_et_empreintes(tmp_path):
         z.extractall(tmp_path / "poste")
     assert all(n.startswith("erc_circularite/") for n in noms)
     for attendu in ("README.md", "INSTALLATION.md", "requirements.txt", "EMPREINTES.txt", "erc/ligne.py", "erc/gepa.py", "erc/outil_gabarit.html",
-                    "docs/Modele_local.md", "notebooks/07_Composition_des_pieces.ipynb", "tests/test_ligne.py", "parametres/.gitkeep"):
+                    "docs/Modele_local.md", "notebooks/07_Composition_des_pieces.ipynb", "tests/test_ligne.py", "parametres/.gitkeep",
+                    "Lancer.bat", "lancer.sh", "erc/agent.py", "erc/papier.py", "papier/manuscrit.pdf", "papier/document.tex", "papier/manuscrit_site.tex",
+                    "papier/genere/macros.tex", "deploiement/compose.yaml", "deploiement/Dockerfile", "deploiement/.env.exemple", ".dockerignore"):
         assert f"erc_circularite/{attendu}" in noms, attendu
     interdits = ("/artefacts/", "/cortex/", "/demo/", "__pycache__", ".pyc", "chemins.json", "modele_local.cfg", "consignes_modele.json", "ERC_Parametres.xlsx")
     assert not [n for n in noms if any(i in n for i in interdits)]                                            # ni résultats, ni paramètres saisis, ni démonstration générée
     poste = tmp_path / "poste" / "erc_circularite"
     assert DG.verifier_empreintes(poste)["etat"] == "intact"
+    (poste / "papier" / "genere" / "macros.tex").write_text("réécrit par python -m erc.papier --demo", encoding="utf-8")
+    (poste / "papier" / "manuscrit.pdf").write_bytes(b"recompile")
+    assert DG.verifier_empreintes(poste)["etat"] == "intact"                                                   # sorties régénérables : hors empreintes
     (poste / "erc" / "ligne.py").write_text("modifié", encoding="utf-8")
     (poste / "README.md").unlink()
     v = DG.verifier_empreintes(poste)

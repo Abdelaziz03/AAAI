@@ -1,0 +1,50 @@
+# Le dossier et son modèle de langage, sur une machine virtuelle ou un serveur à vous.
+#   docker compose -f deploiement/compose.yaml run --rm erc                 tout enchaîner et écrire la note
+#   docker compose -f deploiement/compose.yaml run --rm erc erc.diagnostic  n'importe quelle commande du dossier
+# Voir deploiement/LISEZ-MOI.md. Le réseau « interne » n'a pas de sortie : ni le dossier ni le modèle ne peuvent
+# joindre l'extérieur, et aucun port n'est publié.
+services:
+  erc:
+    build:
+      context: ..
+      dockerfile: deploiement/Dockerfile
+    image: erc-circularite
+    depends_on:
+      - modele
+    volumes:
+      # vos extractions, en lecture seule ; le chemin se donne dans le fichier .env (ERC_DONNEES=...)
+      - ${ERC_DONNEES:?indiquer le dossier des extractions dans deploiement/.env}:/donnees:ro
+      # ce que le dossier écrit reste sur la machine, hors de l'image
+      - ./volumes/parametres:/opt/erc_circularite/parametres
+      - ./volumes/artefacts:/opt/erc_circularite/artefacts
+      - ./volumes/cortex:/opt/erc_circularite/cortex
+      - ./volumes/papier_site:/opt/erc_circularite/papier/site
+    networks:
+      - interne
+
+  modele:
+    # Serveur de modèle à interface « chat completions ». Image et variables à vérifier sur la documentation du
+    # serveur choisi : cette partie n'a pas été essayée (voir LISEZ-MOI.md).
+    image: ollama/ollama
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_CONTEXT_LENGTH: "8192"
+    volumes:
+      - modeles:/root/.ollama
+    networks:
+      - interne
+    # Carte graphique NVIDIA : décommenter (demande le NVIDIA Container Toolkit sur la machine).
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+networks:
+  interne:
+    internal: true
+
+volumes:
+  modeles:

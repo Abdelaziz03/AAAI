@@ -3,6 +3,20 @@
 `manuscrit.pdf` est la version compilée, lisible tout de suite. Elle porte un bandeau « Demonstration data » tant que
 les chiffres de l'étude de cas viennent des données fictives du dossier.
 
+## Modifier le texte sur Overleaf
+
+```bash
+python -m erc.papier --demo --overleaf
+```
+
+écrit `Manuscrit_Overleaf.zip` : le texte, la bibliographie, les figures et les chiffres de démonstration. Sur
+Overleaf : *New Project* > *Upload Project*, déposer l'archive. Le document principal est `document.tex`, le
+compilateur pdfLaTeX. Le texte se modifie dans `sections/` ; le dossier `genere/` ne se modifie pas à la main.
+
+La même commande sans `--demo` fabrique `Manuscrit_Overleaf_site.zip`, avec **vos** chiffres : la déposer sur
+Overleaf les confie à un service en ligne. Tant que les chiffres ne sont pas publiables, travailler le texte sur la
+version de démonstration, et compiler la version à vos chiffres sur votre poste.
+
 ## Mettre vos chiffres dans le papier
 
 Sur le poste qui a vos données, depuis le dossier `erc_circularite` :

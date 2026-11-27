@@ -11,6 +11,8 @@ tourner ; les données réelles sont lues là où elles se trouvent et leurs ré
 
 **Le papier** : `papier/manuscrit.pdf` est le manuscrit complet (modèle, propositions et lemmes démontrés, agents, essais synthétiques, étude de cas). `python -m erc.papier --compiler` y met vos chiffres, dans un PDF à part qui ne quitte pas le poste. Voir `papier/LISEZ-MOI.md`.
 
+**Trois échelles** : preuve de concept sur un poste sans carte graphique, passage à l'échelle sur un poste puissant, puis, plus tard, machine virtuelle (recette prête, facultative). Voir `deploiement/LISEZ-MOI.md`, qui dit aussi ce qui a été essayé et ce qui ne l'a pas été.
+
 **Poste verrouillé, sans échange avec l'extérieur** : voir `INSTALLATION.md`. Une commande dit ce qui est prêt, ce qui manque et quoi faire : `python -m erc.diagnostic`. L'archive à déposer sur le poste se fabrique par `python outils/empaqueter.py`.
 
 ## Ce que contient le dossier
@@ -24,6 +26,7 @@ tourner ; les données réelles sont lues là où elles se trouvent et leurs ré
 | `demo/` | Le même dossier pour les données fictives : `demo/artefacts/` montre à quoi ressemble le résultat |
 | `cortex/` | La base de connaissance (classes matière, preuves, validations), non versionnée |
 | `docs/` | La modélisation mathématique : `Modele_mathematique.md` pour l'équipe, `Formal_framework.md` (en anglais) pour une revue |
+| `deploiement/` | Le passage à l'échelle : guide en trois étapes, image et composition de conteneurs pour une machine virtuelle |
 | `papier/` | Le manuscrit en LaTeX, sa bibliographie, et les chiffres, tableaux et figures que `python -m erc.papier` y écrit |
 | `tests/` | Les tests |
 
@@ -114,6 +117,7 @@ python -m pytest tests
 | `test_gepa.py` | Amélioration des consignes en local : sélection de Pareto, budget tenu, consignes refusées si elles recopient un code article ou une désignation, gain mesuré sur des pièces jamais vues |
 | `test_agent.py` | Agents : outils fermés, nombres de la note vérifiés contre les résultats, repli sur le plan fixe quand le modèle fait défaut |
 | `test_papier.py` | Manuscrit : bornes contre simulation (fusion, strates, budget), rien de nominatif dans les sorties, macros et références toutes définies, compilation |
+| `test_deploiement.py` | Machine virtuelle : rien des données dans l'image, aucun port publié, réseau sans sortie, serveur de modèle accepté seulement s'il est déclaré |
 | `test_diagnostic.py` | Diagnostic du poste (carte graphique, serveur de modèle, modèle qui tient dans la carte, réglage écrit une fois) et archive sans données, avec ses empreintes |
 | `test_composition_outil.py` | Page de revue : fidèle au cortex, autonome, et boucle fermée (décision dans la page → fichier → validation dans le cortex) |
 

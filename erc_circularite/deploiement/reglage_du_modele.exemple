@@ -1,0 +1,21 @@
+# Réglage du modèle pour la machine virtuelle : à copier dans deploiement/volumes/parametres/modele_local.cfg
+# Le serveur de modèle n'est pas « ce poste » vu du conteneur du dossier : il s'appelle « modele » sur le réseau
+# interne, et il faut le déclarer comme serveur de confiance pour qu'il puisse lire les descriptions internes.
+
+[modele]
+url = http://modele:11434/v1
+# Nom du modèle tel que le serveur le connaît :  docker compose -f deploiement/compose.yaml run --rm erc erc.modele --verifier
+nom =
+cle_env = ERC_MODELE_CLE
+serveurs_de_confiance = modele
+certificat =
+lire_les_descriptions = oui
+delai_s = 120
+corps_supplementaire =
+
+[controle]
+url =
+nom =
+
+[collecte]
+fabricants_internes =

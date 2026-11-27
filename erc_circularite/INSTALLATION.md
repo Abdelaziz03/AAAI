@@ -29,6 +29,7 @@ La commande vérifie Python et les paquets, compare les fichiers à la liste d'e
 | écrire le réglage du modèle d'après ce qui tourne sur le poste | `python -m erc.diagnostic --regler` |
 | vérifier le modèle | `python -m erc.modele --verifier` |
 | améliorer les conseils du modèle avec vos validations | `python -m erc.modele --optimiser` |
+| mettre vos chiffres dans le manuscrit (PDF à part, qui ne quitte pas le poste) | `python -m erc.papier --compiler` |
 
 Les résultats sont dans `artefacts/` (en démonstration : `demo/artefacts/`) : tables, classeurs Excel, et deux pages qui s'ouvrent dans un navigateur sans connexion (`outil/ERC_Outil_Decision.html`, `composition/ERC_Composition_Revue.html`).
 
@@ -69,4 +70,4 @@ pip install --no-index --find-links paquets -r requirements.txt
 
 Un seul fichier suffit pour demander de l'aide : le rapport `Diagnostic.txt`. Il ne contient ni données du dossier, ni nom de machine, ni chemin complet.
 
-Guide du modèle hébergé chez vous : `docs/Modele_local.md`.
+Guide du modèle hébergé chez vous : `docs/Modele_local.md`. Du poste de travail au poste puissant puis à la machine virtuelle : `deploiement/LISEZ-MOI.md`. Le manuscrit : `papier/LISEZ-MOI.md`.

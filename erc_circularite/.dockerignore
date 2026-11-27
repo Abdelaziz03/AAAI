@@ -1,0 +1,17 @@
+# Rien des données ni des résultats réels n'entre dans l'image.
+artefacts/
+parametres/*
+!parametres/.gitkeep
+cortex/
+demo/cortex/
+demo/sources/
+demo/parametres/
+papier/site/
+papier/manuscrit_site.pdf
+papier/manuscrit_site.bbl
+papier/Manuscrit_Overleaf_site.zip
+deploiement/volumes/
+**/__pycache__/
+**/.pytest_cache/
+**/.ipynb_checkpoints/
+**/*.pyc

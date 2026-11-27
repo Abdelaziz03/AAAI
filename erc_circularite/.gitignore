@@ -15,9 +15,15 @@ __pycache__/
 /papier/site/
 /papier/manuscrit_site.pdf
 /papier/manuscrit_site.bbl
+/papier/Manuscrit_Overleaf_site.zip
+# Archive pour Overleaf : se refait par python -m erc.papier --demo --overleaf
+/papier/Manuscrit_Overleaf.zip
 # Fichiers de travail de LaTeX
 /papier/*.aux
 /papier/*.log
 /papier/*.out
 /papier/*.blg
 /papier/*.toc
+# Machine virtuelle : ce que le dossier y écrit, et le chemin de vos données
+/deploiement/volumes/
+/deploiement/.env

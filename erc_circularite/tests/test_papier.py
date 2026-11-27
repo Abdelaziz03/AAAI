@@ -3,7 +3,9 @@ ne sort du dossier, et toute macro employée par le manuscrit est bien écrite p
 import math
 import re
 import shutil
+import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 import numpy as np
@@ -186,3 +188,34 @@ def test_le_manuscrit_compile(tmp_path, ecrit):
     pdf = P.compiler(d)
     assert pdf is not None and pdf.is_file() and pdf.stat().st_size > 100_000
     assert not (d / "manuscrit.aux").exists()
+
+
+def test_archive_overleaf_se_compile_seule(tmp_path, ecrit):
+    """L'archive pour Overleaf contient le texte et les chiffres, rien d'autre, et document.tex s'y compile tel quel."""
+    d = tmp_path / "papier"
+    shutil.copytree(PAPIER, d, ignore=shutil.ignore_patterns("*.pdf", "*.zip", "genere", "site"))
+    shutil.copytree(ecrit["dossier"], d / "genere")
+    archive = P.archive_overleaf(d, demo=True)
+    assert archive.name == "Manuscrit_Overleaf.zip"
+    with zipfile.ZipFile(archive) as z:
+        noms = set(z.namelist())
+        z.extractall(tmp_path / "overleaf")
+    assert {"document.tex", "references.bib", "genere/macros.tex", "genere/fig_architecture.pdf", "sections/A_proofs.tex", "LISEZ-MOI.txt"} <= noms
+    assert not [n for n in noms if n.startswith("site/") or "manuscrit" in n]          # ni chiffres du site, ni enveloppes, ni PDF
+    with pytest.raises(FileNotFoundError):
+        P.archive_overleaf(d, demo=False)                       # pas de chiffres du site : rien à empaqueter, et c'est dit
+    (d / "site").mkdir()
+    for f in (d / "genere").iterdir():
+        shutil.copy(f, d / "site" / f.name)
+    site = P.archive_overleaf(d, demo=False)
+    with zipfile.ZipFile(site) as z:
+        assert site.name == "Manuscrit_Overleaf_site.zip" and "genere/macros.tex" in z.namelist() and "ATTENTION" in z.read("LISEZ-MOI.txt").decode("utf-8")
+    assert "/papier/Manuscrit_Overleaf_site.zip" in (PAPIER.parent / ".gitignore").read_text(encoding="utf-8")
+    if not (shutil.which("pdflatex") and shutil.which("bibtex")):
+        pytest.skip("pdflatex ou bibtex absent : compilation de l'archive non essayée")
+    o = tmp_path / "overleaf"
+    for commande in (["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "document.tex"], ["bibtex", "document"],
+                     ["pdflatex", "-interaction=nonstopmode", "-halt-on-error", "document.tex"]):
+        r = subprocess.run(commande, cwd=o, capture_output=True, text=True, errors="replace")
+        assert r.returncode == 0, r.stdout[-1500:]
+    assert (o / "document.pdf").stat().st_size > 100_000
