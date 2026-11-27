@@ -14,7 +14,8 @@ import zipfile
 from pathlib import Path
 
 DOSSIER = Path(__file__).resolve().parent.parent
-INCLUS = ["README.md", "INSTALLATION.md", "requirements.txt", "erc", "notebooks", "docs", "outils", "tests", "parametres/.gitkeep"]
+INCLUS = ["README.md", "INSTALLATION.md", "requirements.txt", "Lancer.bat", "lancer.sh", "erc", "notebooks", "docs", "outils", "tests", "papier",
+          "deploiement", "parametres/.gitkeep"]
 ECARTES = {"__pycache__", ".ipynb_checkpoints", ".pytest_cache"}
 NOM_RACINE = "erc_circularite"
 FICHIER_EMPREINTES = "EMPREINTES.txt"

@@ -2,7 +2,11 @@
 
 Cette archive contient tout le dossier. Une fois déposée, elle ne demande aucun échange avec l'extérieur : elle se diagnostique elle-même et dit quoi faire. Rien n'est envoyé hors du poste.
 
-## En trois gestes
+## En un geste
+
+Décompresser l'archive dans un dossier où vous avez le droit d'écrire, puis **double-cliquer sur `Lancer.bat`** (Windows) ou lancer `./lancer.sh`. Le poste est diagnostiqué, les calculs sont faits, la composition des pièces est lancée et une note de décision est écrite dans `artefacts/agent/`. Avec un modèle de langage hébergé sur le poste, ce sont des agents qui pilotent et rédigent ; sans modèle, un plan fixe fait le même enchaînement.
+
+## Ou pas à pas, en trois gestes
 
 1. **Décompresser** l'archive dans un dossier où vous avez le droit d'écrire (Documents, par exemple). Aucun droit d'administrateur n'est nécessaire.
 2. Ouvrir une invite de commandes **dans le dossier `erc_circularite`** et lancer :
@@ -19,6 +23,7 @@ La commande vérifie Python et les paquets, compare les fichiers à la liste d'e
 
 | Pour | Commande |
 |---|---|
+| tout enchaîner et écrire la note de décision (agents, ou plan fixe sans modèle) | `python -m erc.agent` |
 | lancer tout le dossier | `python -m erc` |
 | la composition des pièces | `python -m erc.composition` |
 | écrire le réglage du modèle d'après ce qui tourne sur le poste | `python -m erc.diagnostic --regler` |

@@ -7,6 +7,8 @@ Ce dossier va des données brutes à la décision.
 Le dépôt ne contient **aucune donnée réelle**. Un jeu de démonstration entièrement fictif permet de tout faire
 tourner ; les données réelles sont lues là où elles se trouvent et leurs résultats ne quittent pas le poste.
 
+**Tout d'un geste** : `Lancer.bat` (ou `./lancer.sh`, ou `python -m erc.agent`) diagnostique le poste, fait les calculs, lance la composition des pièces et écrit une note de décision. Avec un modèle ouvert hébergé chez vous, des agents pilotent et rédigent par une liste fermée d'outils, et chaque nombre de la note est vérifié contre les résultats ; sans modèle, un plan fixe fait le même enchaînement.
+
 **Poste verrouillé, sans échange avec l'extérieur** : voir `INSTALLATION.md`. Une commande dit ce qui est prêt, ce qui manque et quoi faire : `python -m erc.diagnostic`. L'archive à déposer sur le poste se fabrique par `python outils/empaqueter.py`.
 
 ## Ce que contient le dossier
@@ -107,6 +109,7 @@ python -m pytest tests
 | `test_composition.py` | Cortex et chaîne de composition : fusion des preuves, fiabilité par strates, budget par pièce, recherche jamais payée deux fois, pannes, rien d'interne ne sort |
 | `test_modele.py` | Modèle privé : serveurs acceptés ou refusés, descriptions jamais envoyées hors de chez vous, réponses contraintes, réglage, comparaison de modèles |
 | `test_gepa.py` | Amélioration des consignes en local : sélection de Pareto, budget tenu, consignes refusées si elles recopient un code article ou une désignation, gain mesuré sur des pièces jamais vues |
+| `test_agent.py` | Agents : outils fermés, nombres de la note vérifiés contre les résultats, repli sur le plan fixe quand le modèle fait défaut |
 | `test_diagnostic.py` | Diagnostic du poste (carte graphique, serveur de modèle, modèle qui tient dans la carte, réglage écrit une fois) et archive sans données, avec ses empreintes |
 | `test_composition_outil.py` | Page de revue : fidèle au cortex, autonome, et boucle fermée (décision dans la page → fichier → validation dans le cortex) |
 

@@ -197,9 +197,10 @@ class ModeleLocal:
         with urllib.request.urlopen(r, timeout=self.delai, context=self._tls) as rep:
             return json.loads(rep.read().decode("utf-8"))
 
-    def _message(self, consigne: str, contenu: str, schema: dict | None = None, corps: dict | None = None) -> dict:
-        """Envoie une question et rend le message de réponse tel que le serveur le donne."""
-        envoi = {"model": self.modele, "temperature": 0, "messages": [{"role": "system", "content": consigne}, {"role": "user", "content": contenu}],
+    def _message(self, consigne: str, contenu: str, schema: dict | None = None, corps: dict | None = None, messages: list | None = None) -> dict:
+        """Envoie une question (ou une conversation entière, `messages`) et rend le message de réponse tel que le serveur le donne."""
+        envoi = {"model": self.modele, "temperature": 0,
+                 "messages": messages if messages is not None else [{"role": "system", "content": consigne}, {"role": "user", "content": contenu}],
                  **(self.corps if corps is None else corps)}
         if schema and self._structure:
             try:
@@ -232,6 +233,20 @@ class ModeleLocal:
         debut = time.monotonic()
         try:
             reponse, a_reflechi = self._reponse(self._message(consigne, contenu, schema))
+            self.raisonnement_vu = self.raisonnement_vu or a_reflechi
+            return reponse
+        except Exception as e:
+            raise Indisponible(type(e).__name__) from e
+        finally:
+            self.derniere_duree = time.monotonic() - debut
+
+    def converser(self, messages: list, schema: dict | None = None) -> str:
+        """Suite d'une conversation : `messages` est la liste des tours ({"role": "system" | "user" | "assistant", "content": ...}).
+        Sert aux agents (erc/agent.py), qui enchaînent décisions et résultats d'outils."""
+        self.appels += 1
+        debut = time.monotonic()
+        try:
+            reponse, a_reflechi = self._reponse(self._message("", "", schema, messages=list(messages)))
             self.raisonnement_vu = self.raisonnement_vu or a_reflechi
             return reponse
         except Exception as e:
