@@ -17,6 +17,9 @@ DOSSIER = Path(__file__).resolve().parent.parent
 INCLUS = ["README.md", "INSTALLATION.md", "requirements.txt", "Lancer.bat", "lancer.sh", "erc", "notebooks", "docs", "outils", "tests", "papier",
           "deploiement", "parametres/.gitkeep"]
 ECARTES = {"__pycache__", ".ipynb_checkpoints", ".pytest_cache"}
+JAMAIS = ("papier/site/", "papier/manuscrit_site.")          # chiffres du site : ne quittent pas le poste ; le fichier .tex, lui, part
+REGENERABLES = ("papier/genere/", "papier/manuscrit.pdf", "papier/manuscrit.bbl")   # réécrits par python -m erc.papier --demo : hors empreintes
+SUFFIXES_LATEX = {".aux", ".log", ".out", ".blg", ".toc"}
 NOM_RACINE = "erc_circularite"
 FICHIER_EMPREINTES = "EMPREINTES.txt"
 
@@ -30,7 +33,8 @@ def fichiers(racine: Path = DOSSIER) -> list:
             out.append(Path(nom))
         elif p.is_dir():
             out += [f.relative_to(racine) for f in p.rglob("*") if f.is_file() and not (set(f.parts) & ECARTES) and f.suffix != ".pyc"]
-    return sorted(out, key=lambda f: f.as_posix())
+    garde = lambda f: (f.as_posix() == "papier/manuscrit_site.tex" or not f.as_posix().startswith(JAMAIS)) and f.suffix not in SUFFIXES_LATEX
+    return sorted([f for f in out if garde(f)], key=lambda f: f.as_posix())
 
 
 def empaqueter(sortie, racine: Path = DOSSIER) -> Path:
@@ -40,7 +44,8 @@ def empaqueter(sortie, racine: Path = DOSSIER) -> Path:
     sortie.mkdir(parents=True, exist_ok=True)
     archive = sortie / f"ERC_circularite_{erc.__version__}.zip"
     liste = fichiers(racine)
-    empreintes = "".join(f"{hashlib.sha256((racine / f).read_bytes()).hexdigest()}  {f.as_posix()}\n" for f in liste)
+    empreintes = "".join(f"{hashlib.sha256((racine / f).read_bytes()).hexdigest()}  {f.as_posix()}\n" for f in liste
+                         if not f.as_posix().startswith(REGENERABLES))
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
         for f in liste:
             z.write(racine / f, f"{NOM_RACINE}/{f.as_posix()}")

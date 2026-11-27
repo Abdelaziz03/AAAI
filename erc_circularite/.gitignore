@@ -11,3 +11,13 @@ __pycache__/
 .ipynb_checkpoints/
 .pytest_cache/
 *.pyc
+# Manuscrit sur les données du site : jamais dans le dépôt
+/papier/site/
+/papier/manuscrit_site.pdf
+/papier/manuscrit_site.bbl
+# Fichiers de travail de LaTeX
+/papier/*.aux
+/papier/*.log
+/papier/*.out
+/papier/*.blg
+/papier/*.toc

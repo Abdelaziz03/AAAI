@@ -1,0 +1,117 @@
+\section{The system: agents on a self-hosted open model}\label{sec:system}
+
+\subsection{Architecture}
+
+Figure~\ref{fig:architecture} shows the system. Operational records and a parameter workbook feed the decision
+models of Sections~\ref{sec:model} to~\ref{sec:learning}. The workbook holds every parameter as a range with its
+provenance; it is never rewritten by the software, and an unknown value stays unknown through every computation.
+The value-of-information layer turns the disposition model into a stake for each component; the acquisition chain
+spends within that stake and writes to a knowledge base; a review page presents the queue and an audit sample to a
+human, whose decisions return as validations. All of this runs as a pipeline of seven steps whose outputs are
+stored with a manifest. On top of it, three agents drive the pipeline and write the decision note.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{\genere/fig_architecture.pdf}
+\caption{Architecture. The disposition model prices labour and, through the value of information, gives each
+component a stake; the acquisition chain spends within it, on the components of the bill of materials; human
+validations feed the reliability of sources and the search for a better reading instruction, which the chain then
+uses. Agents call these modules through a closed list of tools.}\label{fig:architecture}
+\end{figure}
+
+\paragraph{The knowledge base.} Claims are stored with their source type, origin, sign, kind (assertion or
+verdict) and the text they rest on; validations with their author and reason; and every acquisition with its cost
+and outcome. The store is domain-neutral: it takes any subject and attribute, and only the acquisition chain is
+specific to material composition. Because the journal records what was paid for, a search or a reading is never paid
+twice, and a run interrupted by a failure resumes where it stopped.
+
+\subsection{A private model, by construction}
+
+The language model is an open-weight model served on hardware the data owner controls, through the
+chat-completions interface that the common local servers share. The software classifies the server before using
+it: \emph{this machine}; \emph{a declared trusted server} on the owner's network, named in a settings file;
+\emph{any other server}, which is refused unless explicitly accepted and then never receives internal text. Only a
+model of the first two kinds is \emph{private}. Reading internal descriptions, running the agents and optimising
+instructions all require a private model and raise an error otherwise. The model is asked for structured output
+against a schema; answers are parsed defensively, an answer outside the list of classes is discarded, and a failure
+of the server is recorded and never charged. An offline diagnostic reports the packages, the graphics memory, the
+local servers that answer and a model size that fits, and checks the integrity of the installed files against a
+manifest of hashes; it is the first thing the launcher runs, so that a locked-down workstation needs no
+back-and-forth to set up.
+
+\subsection{Three agents and a closed list of tools}
+
+The agents follow the pattern of a tool-using assistant, with the hosted model replaced by the private one. The
+model computes nothing itself: it chooses tools, reads their results, decides what to do next, then writes.
+\begin{itemize}
+\item The \emph{pilot} receives the list of tools and answers, at each turn, with one JSON object naming a tool and
+  its arguments. The tools are functions of the system: run the diagnostic; run the pipeline up to a step; read a
+  result table; read the decision indicators; read the limits and the missing data; run the acquisition chain; read
+  the review queue. The number of turns is bounded and each turn is logged.
+\item The \emph{writer} receives the pilot's findings and the evidence (the text returned by the tools) and writes
+  the decision note for the manager.
+\item The \emph{reviewer} reads the note against the evidence and records its reservations, which are appended to
+  the note.
+\end{itemize}
+Two properties do not depend on the model behaving well.
+
+\begin{lemma}[Containment and grounding]\label{lem:grounding}
+Whatever the model outputs: (i) the effects of an agent run are those of the listed tools, since any other request
+is answered by an error message and executes nothing; (ii) every numeral of the issued note that has decimals or is
+at least ten either matches a numeral of the evidence (exactly, at the note's rounding, or as the percentage of a
+proportion) or is listed in a warning placed at the head of the note; (iii) if the model fails at any point, the
+run terminates with a fixed plan and a template note computed from the same results.
+\end{lemma}
+
+The check in (ii) is a program, run after the last model call; a note whose first version fails it is rewritten
+once with the list of offending numbers, and what still fails is flagged, never silently passed. The lemma
+guarantees that a number in the note \emph{exists} in the results. It does not guarantee that the sentence around
+it describes the right quantity; that is what the reviewer and, finally, the reader are for. Without a model the
+fixed plan runs the same tools in a set order: the proof of concept runs on any workstation, and gains in
+readability, not in correctness, when a model is connected.
+
+\subsection{Improving the reading instruction from validations}
+
+The instruction given to the private model for reading descriptions is learned from the human validations by
+reflective prompt evolution \citep{agrawal2025gepa}. Candidate instructions are scored per example; a candidate is
+drawn among those that are best on at least one example of a selection set; a reflection model reads its errors on
+a small batch and proposes a rewrite; the rewrite is kept only if it does better than its parent on that batch.
+An abstention is scored one half, so that the model gains by answering only when it is more likely right than
+wrong. Our implementation is local and independent of the reference implementation, and omits its merge step. It
+adds three guards. A rewrite that contains a part number or copies a description is rejected, so that the
+instruction cannot memorise the validated parts. The search has a hard budget $B$ of reading calls and caches every
+(instruction, example) pair. And the validated parts are split at random into a batch set, a selection set and a
+test set that the search never sees.
+
+\begin{lemma}[Held-out adoption]\label{lem:heldout}
+Suppose the validated parts are independent draws from a population of parts, and let the test set contain $n_T$ of
+them that the search never sees, with scores in $[0,1]$. Let $\hat\Delta$ be the difference between the mean test
+scores of the returned instruction and of the starting one, and $\Delta$ the difference of their expected scores on
+a part of that population. Then $\Pr(\hat\Delta-\Delta\ge\epsilon)\le\exp(-n_T\epsilon^2/2)$ for every
+$\epsilon>0$. In particular the rule ``adopt if $\hat\Delta\ge0$'' adopts an instruction that is worse than the
+starting one by more than $\epsilon$ with probability at most $\exp(-n_T\epsilon^2/2)$. The search makes at most
+$B$ reading calls and the test at most $2n_T$.
+\end{lemma}
+
+The guarantee holds for one search on one test set, and with a few dozen validated parts it is weak; the system
+therefore also reports an exact paired test and states when the measured difference is compatible with chance. The
+population is that of validated parts, which over-represents contested and high-stake components: the gain on the
+whole bill of materials can differ from the gain measured.
+No weight is changed and no record leaves the owner's machine.
+
+\subsection{From one workstation to a virtual machine}\label{sec:deployment}
+
+The same package runs at three scales, and what changes between them is one settings file.
+\begin{enumerate}\setlength{\itemsep}{0pt}
+\item \emph{Proof of concept.} Any workstation with a Python interpreter, without a graphics card and without a
+  model: the fixed plan computes every result and writes the template note. With a small open model served
+  locally, the agents take over.
+\item \emph{Scale-up.} A workstation with a graphics card serves a larger model, on the same machine or declared
+  as a trusted server for other workstations of the site. Reading the descriptions of a whole bill of materials
+  runs several requests in parallel; the budget of Lemma~\ref{lem:budget} bounds their number.
+\item \emph{Virtual machine.} The package, its settings and a model server run in a container on a virtual machine
+  of the owner's infrastructure; the knowledge base is one file, and the manifest of each run makes results
+  comparable across machines.
+\end{enumerate}
+\apres{the hardware and the model actually used at each scale, with the model's name, version, quantisation and
+licence, and the measured throughput.}

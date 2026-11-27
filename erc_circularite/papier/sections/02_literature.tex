@@ -1,0 +1,67 @@
+\section{Related literature}\label{sec:literature}
+
+\paragraph{Product recovery and disposition.} Recovery options (reuse, repair, remanufacturing, cannibalisation,
+recycling) are classified by \citet{thierry1995}; quantitative models are reviewed by \citet{fleischmann1997} and
+\citet{guide2009}. Choosing how far to disassemble a product and which option to apply to each sub-assembly is the
+recovery-strategy problem of \citet{krikke1998}, extended to several disassembly processes and to partial
+disassembly by \citet{teunter2006}. \citet{meacham1999} optimise the disassembly configuration of one product and
+then, by column generation, how many units of each product follow each configuration; that programme has the form
+of ours. Random yields of good parts from disassembled cores are treated by \citet{inderfurth2006}; grading of
+returns by condition by \citet{ferguson2009}; the choice between remanufacturing a return and dismantling it for
+spare parts by \citet{ferguson2011}, in the setting described by \citet{fleischmann2003} of returned equipment as a
+source of service parts, which is the closest to a repair centre. Our disposition model belongs to this family. What
+we add to it is structural: the pricing of a unit by access level under a single labour price, the threshold rule
+that follows, and the reading of the variability gap as a certificate. We describe these papers from their abstracts
+and bibliographic records; see the note at the end of this section.
+
+\paragraph{Knapsack structure and Lagrangian pricing.} The disposition programme is the linear multiple-choice
+knapsack problem, whose solution structure (one fractional class, items on the upper hull) is classical
+\citep{sinha1979,zemel1980}. Pricing the budget and solving the separable remainder is the generalised Lagrange
+multiplier method of \citet{everett1963}. Proposition~\ref{prop:split} restates this structure for several coupling
+constraints; we claim no novelty for it.
+
+\paragraph{Learning yields while deciding.} \citet{reveliotis2007} proposes learning-based disassembly planning
+under uncertain part quality. Our yield learning is posterior sampling \citep{thompson1933,russo2014} applied to a
+linear programme, a scheme used by \citet{ferreira2018} for network revenue management; the problem is a
+combinatorial semi-bandit, for which \citet{wang2018} analyse Thompson sampling. In bandits with knapsacks
+\citep{badanidiyuru2018bandits} the budget is consumed over the horizon, whereas our labour budget is renewed each period.
+We do not claim a regret bound: we have not verified that the assumptions of these analyses cover our observation
+structure, in which a component is observed only when it is reused. A knowledge-gradient policy
+\citep{frazier2008} is a natural alternative that we have not implemented.
+
+\paragraph{Fluid bounds.} The comparison of a stochastic system with its deterministic counterpart on average data
+is the upper bound of revenue management \citep{gallego1994} and rests on the Jensen inequalities of stochastic
+linear programming \citep{madansky1960}. Proposition~\ref{prop:fluid} applies the argument to disposition under a
+renewed budget and reads the resulting gap as a decision rule about modelling effort.
+
+\paragraph{Value of information.} Information value theory goes back to \citet{howard1966}. In closed-loop supply
+chains, the value of knowing yields before deciding is studied by \citet{ferrer2004} and \citet{ketzenberg2006}.
+We compute the value of a fact through the operational model that will use the answer, and we distinguish a
+parameter that can be acted on at its mean (a yield, a price) from a fact without which an option does not exist
+(the class of a component), for which no ``decision at the mean'' is available.
+
+\paragraph{Combining fallible sources.} Estimating the truth and the error rates of several observers jointly is
+the problem of \citet{dawid1979}. Our fusion rule is their model with one accuracy parameter per source type and
+uniform errors, with two differences: accuracies are shared by source type and learned from human-validated cases
+rather than by expectation--maximisation, and they are integrated out, so that several statements from one type of
+source are worth less than their product. The stratified estimation of accuracies is survey sampling
+\citep{horvitz1952} applied to validations that are not a random sample.
+
+\paragraph{Language models as components of a decision system.} We use a language model for three tasks: reading a
+part description, reading a document, and driving the system's tools. In none of them is its output trusted. The
+instruction used for reading is optimised by reflective prompt evolution \citep{agrawal2025gepa}, which searches
+over instructions with a language model as the mutation operator and keeps a Pareto front over examples; we
+implement it locally, with a call budget and a held-out test. The concentration bound we use for the held-out
+comparison is that of \citet{hoeffding1963}.
+
+\paragraph{Forecasting intermittent arrivals.} Weekly counts of scrapped units are intermittent series, for which
+the standard methods are those of \citet{croston1972}, \citet{syntetos2005} and \citet{teunter2011}. Zero-shot
+time-series foundation models \citep{ansari2024chronos,das2024timesfm,woo2024,cohen2024toto,cohen2025time,mistral2026timestral}
+are candidate competitors that need no training on the site's data. Forecast quality matters here through the
+decision it supports, in the sense of \citet{elmachtoub2022}; Proposition~\ref{prop:fluid} bounds what a perfect
+forecast could add.
+
+\paragraph{Note on sources.} The descriptions above rest on the abstracts and bibliographic records of the cited
+papers. Entries marked in the bibliography file as ``to verify'' were cited from memory. The claim that the
+elements listed as contributions do not appear in this literature rests on these abstracts and on a limited number
+of targeted searches; it is absence of evidence and must be confirmed on the full texts before submission.

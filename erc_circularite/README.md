@@ -9,6 +9,8 @@ tourner ; les données réelles sont lues là où elles se trouvent et leurs ré
 
 **Tout d'un geste** : `Lancer.bat` (ou `./lancer.sh`, ou `python -m erc.agent`) diagnostique le poste, fait les calculs, lance la composition des pièces et écrit une note de décision. Avec un modèle ouvert hébergé chez vous, des agents pilotent et rédigent par une liste fermée d'outils, et chaque nombre de la note est vérifié contre les résultats ; sans modèle, un plan fixe fait le même enchaînement.
 
+**Le papier** : `papier/manuscrit.pdf` est le manuscrit complet (modèle, propositions et lemmes démontrés, agents, essais synthétiques, étude de cas). `python -m erc.papier --compiler` y met vos chiffres, dans un PDF à part qui ne quitte pas le poste. Voir `papier/LISEZ-MOI.md`.
+
 **Poste verrouillé, sans échange avec l'extérieur** : voir `INSTALLATION.md`. Une commande dit ce qui est prêt, ce qui manque et quoi faire : `python -m erc.diagnostic`. L'archive à déposer sur le poste se fabrique par `python outils/empaqueter.py`.
 
 ## Ce que contient le dossier
@@ -22,6 +24,7 @@ tourner ; les données réelles sont lues là où elles se trouvent et leurs ré
 | `demo/` | Le même dossier pour les données fictives : `demo/artefacts/` montre à quoi ressemble le résultat |
 | `cortex/` | La base de connaissance (classes matière, preuves, validations), non versionnée |
 | `docs/` | La modélisation mathématique : `Modele_mathematique.md` pour l'équipe, `Formal_framework.md` (en anglais) pour une revue |
+| `papier/` | Le manuscrit en LaTeX, sa bibliographie, et les chiffres, tableaux et figures que `python -m erc.papier` y écrit |
 | `tests/` | Les tests |
 
 Un artefact est une table (CSV lisible dans Excel, et un classeur par étape), une figure (PNG) ou un fichier JSON.
@@ -110,6 +113,7 @@ python -m pytest tests
 | `test_modele.py` | Modèle privé : serveurs acceptés ou refusés, descriptions jamais envoyées hors de chez vous, réponses contraintes, réglage, comparaison de modèles |
 | `test_gepa.py` | Amélioration des consignes en local : sélection de Pareto, budget tenu, consignes refusées si elles recopient un code article ou une désignation, gain mesuré sur des pièces jamais vues |
 | `test_agent.py` | Agents : outils fermés, nombres de la note vérifiés contre les résultats, repli sur le plan fixe quand le modèle fait défaut |
+| `test_papier.py` | Manuscrit : bornes contre simulation (fusion, strates, budget), rien de nominatif dans les sorties, macros et références toutes définies, compilation |
 | `test_diagnostic.py` | Diagnostic du poste (carte graphique, serveur de modèle, modèle qui tient dans la carte, réglage écrit une fois) et archive sans données, avec ses empreintes |
 | `test_composition_outil.py` | Page de revue : fidèle au cortex, autonome, et boucle fermée (décision dans la page → fichier → validation dans le cortex) |
 

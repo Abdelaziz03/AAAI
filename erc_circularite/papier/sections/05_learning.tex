@@ -1,0 +1,109 @@
+\section{Unknown yields and irregular arrivals}\label{sec:learning}
+
+\subsection{A prior from repair records, corrected by teardown}
+
+The yield $q_{ij}$ is unknown before any unit has been torn down. Repair records give a starting point. Let $\nu_i$
+be the number of repairs of type $i$ on record, $\mathrm{cons}_{ij}$ the copies of $j$ consumed in them, and
+$\eta_j$ the share of replacements made as a precaution. The probability that a copy is defective in a
+\emph{repaired} unit is estimated by $\hat\delta_{ij}=(1-\eta_j)\,\mathrm{cons}_{ij}/(\nu_in_{ij})$, and the prior
+mean of the yield is
+\begin{equation}\label{eq:prior}
+q^0_{ij}=\big[1-\gamma_i\,\hat\delta_{ij}\big]_{[0,1]}\,(1-\chi_j)\,\vartheta_j,
+\end{equation}
+with $\gamma_i\ge1$ a factor for scrapped units being in worse condition than repaired ones, $\chi_j$ the breakage
+at extraction and $\vartheta_j$ the share of sound copies that pass the test. Teardown audits and routine tests then
+give binomial observations: of $z$ copies tested, $y$ are good. With prior
+$\mathrm{Beta}(q^0\varpi,(1-q^0)\varpi)$, where $\varpi$ is the weight of the prior in equivalent tested copies, the
+posterior is $\mathrm{Beta}(q^0\varpi+y,\ (1-q^0)\varpi+z-y)$.
+
+The prior is a modelling assumption with three weaknesses, each of which biases it in a known direction: preventive
+replacement inflates $\hat\delta$; $\gamma_i$ is not identified without teardown data; and repairs that consumed
+nothing are missing from $\nu_i$. The prior is there to start; the audit is there to correct it.
+
+\subsection{Why a greedy rule fails, and posterior sampling}
+
+The state of a copy is observed only if it is extracted and tested. A rule that follows the posterior mean never
+tests a component whose prior mean is below the threshold of Proposition~\ref{prop:threshold}, and therefore never
+corrects a pessimistic prior: the error is permanent because the data that would reveal it are never produced. The
+problem is a combinatorial semi-bandit: each period the decision is a feasible point of \eqref{eq:P}, whose labour
+budget is renewed, the reward is affine in the unknown yields, and the outcome of each tested copy is observed.
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{\textbf{Algorithm TS-LP.} In each period $k$:
+(1) draw $\tilde q_{ij}$ from the current posterior of every pair $(i,j)$;
+(2) solve \eqref{eq:P} with $\tilde q$ and the arrivals of the period, by Propositions~\ref{prop:pricing}
+to~\ref{prop:split};
+(3) process the units accordingly;
+(4) update the posteriors with the test outcomes.}}
+\end{center}
+
+With $x_k$ the plan of period $k$ and $N_k$ its arrivals, regret is
+$\sum_{k\le T}\big(V(N_k,H;q)-\E[g(q)^\top x_k]\big)$. We evaluate it numerically
+(Section~\ref{sec:experiments}) and claim no bound, for the reason given in Section~\ref{sec:literature}.
+
+\paragraph{Scoring the estimate.} The posterior is scored prequentially: each audit batch is predicted from what
+was known before it and only then used for updating. We report the Brier score and the logarithmic loss for grouped
+binomial outcomes, the absolute error on the batch rate, and the coverage of the 90\% predictive interval. Two
+references must be beaten: the prior alone, and the raw observed frequency.
+
+\paragraph{Reused parts must also last.} A reusable part must survive once installed. The field file available
+records only early failures within a window of $W$ days after installation, in whole days, with no survivors. From
+such data the Weibull shape is estimable by a right-truncated discrete likelihood, in which the probability of a
+failure on day $\iota$ is $[F(\iota+1)-F(\iota)]/F(W+1)$, while the scale is not identifiable; early-failure rates
+of repaired or harvested parts relative to new ones are estimable when the number installed is known. The expected
+cost of an early failure enters the model through the value $v_j$.
+
+\subsection{What buffering, forecasting or reinforcement learning can gain}
+
+Let $A_k=(A_{ik})_i$ be the arrivals of period $k$, with finite means and
+$\bar A=\lim_T\frac1T\sum_{k\le T}\E A_k$, and let $H$ hours be available in every period. A \emph{policy} chooses in
+each period, from the history, how many units of each type to process with each plan among the units on hand,
+within $H$ hours; units not processed can be kept, within any storage limit, or released to the status quo. The
+\emph{myopic} policy keeps no stock and solves \eqref{eq:P} on each period's arrivals.
+
+\begin{proposition}[Fluid bound and variability gap]\label{prop:fluid}
+Assume the initial stock is empty, the margins $g$ are known and $\bar A$ exists. For every policy, with $x_k$ the
+plan it applies in period $k$,
+\begin{equation}\label{eq:fluid}
+\limsup_{T\to\infty}\frac1T\,\E\Big[\sum_{k=1}^{T}g^\top x_k\Big]\;\le\;V(\bar A,H),
+\end{equation}
+and the myopic policy satisfies $\frac1T\sum_{k\le T}\E\,V(A_k,H)\le V\big(\frac1T\sum_{k\le T}\E A_k,\,H\big)$.
+Hence
+\begin{equation}\label{eq:gamma}
+\Gamma\;=\;V(\bar A,H)-\liminf_{T}\frac1T\sum_{k\le T}\E\,V(A_k,H)\;\ge\;0
+\end{equation}
+is an upper bound on what any policy that stores units, forecasts arrivals or is trained by reinforcement learning
+can gain per period over the myopic policy. Pathwise, for every realised sequence and every policy, including one
+that knows the future, $\sum_{k\le T}g^\top x_k\le T\,V\big(\tfrac1T\sum_{k\le T}A_k,\,H\big)$.
+\end{proposition}
+
+The proposition turns a design question into a measurement. The sample version of $\Gamma$, the model run on the
+average flow minus the model replayed period by period, is computable from the history. It is an exact hindsight
+bound for the observed sequence, and it estimates $\Gamma$ with a downward bias on short histories, since
+$\E\,V(\text{sample mean},H)\le V(\text{mean},H)$. If it is small relative to $V$, no buffer, forecast or learned
+policy can add much, and the myopic rule is enough. If it is large, the candidates are, in increasing order of
+complexity, a buffer with a base-stock rule, a rolling-horizon version of \eqref{eq:P} fed with forecasts, a
+stochastic programme on forecast scenarios, and a policy trained by reinforcement learning on a simulator; each is
+judged by the share of $\Gamma$ it recovers. The bound is not tight in general, since a finite buffer cannot smooth
+arbitrarily long droughts, and it takes the margins as known: it does not bound the value of learning the yields.
+
+\subsection{Forecasting arrivals}\label{sec:forecast}
+
+Weekly counts of scrapped units per type are short, low-count, intermittent series. They have, however, a known
+driver. A unit is scrapped when a unit received for repair is found beyond economic repair. With $E_{ik}$ the units
+of type $i$ that reached a decision in period $k$ and $\sigma_i$ the scrap rate,
+\begin{equation}\label{eq:structural}
+A_{ik}\mid E_{ik},\sigma_i\sim\mathrm{Binomial}(E_{ik},\sigma_i),\qquad\sigma_i\sim\mathrm{Beta}(\alpha_i,\beta_i).
+\end{equation}
+The prior $(\alpha_i,\beta_i)$ of a type is estimated from the \emph{other} types, by weighted moments from which
+the expected binomial sampling variance is removed, so that sparse types borrow strength and the data of a type are
+not used twice. The inflow $E_{ik}$ is a denser series, driven by the installed base, and is forecast separately;
+the predictive distribution of next period's arrivals is Beta--binomial given a forecast of its inflow.
+
+The structural model is compared with the historical mean, the methods of \citet{croston1972},
+\citet{syntetos2005} and \citet{teunter2011}, and a pooled Gamma--Poisson model. Zero-shot foundation models can be
+plugged in through an adapter on a machine that holds their weights; none was run for this paper. The protocol is a
+rolling origin with expanding window, all methods being scored on the same (type, period) pairs. Point accuracy is
+the root mean squared error relative to that of the historical mean; the absolute error is not used, because it is
+minimised by the median, which is zero as soon as more than half of the periods are empty. Probabilistic accuracy
+is the pinball loss on a grid of quantiles and the coverage of the 80\% interval.

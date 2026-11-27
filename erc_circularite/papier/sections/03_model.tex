@@ -1,0 +1,76 @@
+\section{Setting and disposition model}\label{sec:model}
+
+\subsection{Units, components, dispositions}
+
+The model is written for abstract unit types, components, dispositions, access levels and resources, so that the
+repair centre is one data instance and a production line another (Section~\ref{sec:discussion}). Each symbol has one
+meaning throughout; periods are indexed by $k$, and the letter $t$ is kept for operator times.
+
+Let $\cI$ be the set of types of scrapped unit and $\cJ_i$ the components of a unit of type $i$, with $n_{ij}\ge 1$
+copies of component $j$ per unit. Each component receives a \emph{disposition} $d\in\cD$, where $0\in\cD$ means
+``leave it in the unit''. A unit can be opened to an \emph{access level} $\ell\in\cL=\{0,1,\dots,L\}$, where $0$
+means not opened; disposition $d$ requires level $\ell_d$, with $\ell_0=0$. A \emph{plan} for a unit of type $i$ is a
+choice $s=(s_j)_{j\in\cJ_i}\in\cS_i=\cD^{\cJ_i}$ of one disposition per component; $s^0$ leaves every component.
+
+The data of one period are: the number $N_i\ge 0$ of scrapped units of type $i$; the time $a_{i\ell}\ge 0$ to open a
+unit of type $i$ to level $\ell$, with $a_{i0}=0$; the operator time $t_{jd}\ge 0$ per copy of $j$ under $d$, with
+$t_{j0}=0$; the net value $\rho_{ijd}$ per copy before labour, with $\rho_{ij0}=0$; the cost $w_i\ge0$ of an operator
+hour on type $i$; the hours $H\ge0$ available; and the fixed cost $K\ge 0$ of the line for the period. We write
+$N^{c}_j=\sum_{i:\,j\in\cJ_i}N_i\,n_{ij}$ for the copies of component $j$ in the scrapped units of the period, all
+types together.
+
+A plan $s$ induces an access level, a labour content and a margin per unit:
+\begin{equation}\label{eq:plan}
+\ell(s)=\max_{j\in\cJ_i}\ell_{s_j},\qquad h_{is}=a_{i\,\ell(s)}+\sum_{j}n_{ij}\,t_{js_j},\qquad
+g_{is}=\sum_{j}n_{ij}\,\rho_{ijs_j}-w_i\,h_{is}.
+\end{equation}
+The plan $s^0$ has $h_{is^0}=g_{is^0}=0$: the status quo is the reference and is worth zero.
+
+\subsection{The instance of the repair centre}
+
+There are three dispositions: reuse ($\R$, which needs a careful opening, level 2), sorted recycling ($\Sd$, for
+which a rough opening suffices, level 1) and leave ($0$). Let $q_{ij}$ be the probability that an extracted copy is
+reusable, $v_j$ the value of a reused copy, $\Lambda_j$ the value of the procurement lead time it avoids,
+$\bar v_j=v_j+\Lambda_j$, $\kappa_j$ the transport cost, $m_j$ the mass of a copy, $p_j$ the price paid by the
+recycler for its material class, and $\tau$ the cost per kilogram of the current bulk treatment (negative if the
+current contractor pays). Then
+\begin{equation}\label{eq:values}
+\rho_{ij\R}=q_{ij}\,\bar v_j+(1-q_{ij})\,m_jp_j+\tau m_j-\kappa_j,\qquad \rho_{ij\Sd}=m_j\,(p_j+\tau),
+\qquad t_{j\R}=t^{\mathrm{ext}}_j+t^{\mathrm{test}}_j,\qquad t_{j\Sd}=t^{\mathrm{sort}}_j .
+\end{equation}
+A copy that fails its test is sold by the kilogram, and every copy taken out of the unit avoids the bulk treatment.
+
+\paragraph{Missing data are part of the model.} The class of a component fixes its price. When $p_j$ is unknown
+and $m_j$ known, sorting $j$ is not available, a failed copy returns to the bulk stream, and
+$\rho_{ij\R}=q_{ij}(\bar v_j+\tau m_j)-\kappa_j$. When $m_j$ is unknown, sorting is not available and
+$\rho_{ij\R}=q_{ij}\bar v_j-\kappa_j$. We write $\out_j$ for the state ``the class of $j$ is not established''.
+An unknown is never replaced by zero or by an average: the option that needs it disappears, and the terms left out
+are reported. This convention is what makes the value of a missing fact well defined in Section~\ref{sec:knowledge}.
+
+\subsection{The disposition problem}
+
+Let $x_{is}\ge 0$ be the number of units of type $i$ processed with plan $s$. The disposition problem is
+\begin{equation}\tag{P}\label{eq:P}
+V(N,H)\;=\;\max_{x\ge 0}\ \sum_{i\in\cI}\sum_{s\in\cS_i}g_{is}\,x_{is}
+\quad\text{s.t.}\quad \sum_{s\in\cS_i}x_{is}=N_i\ \ \forall i\in\cI,\qquad
+\sum_{i\in\cI}\sum_{s\in\cS_i}h_{is}\,x_{is}\le H .
+\end{equation}
+The line is installed if $V(N,H)>K$, and the gain over the status quo is $V(N,H)-K$. Problem \eqref{eq:P} is always
+feasible ($x_{is^0}=N_i$) and bounded. It is the linear relaxation of a multiple-choice knapsack problem: each type
+is a class, each plan an item, the labour budget the knapsack. The relaxation is the natural model because $N_i$
+counts many identical units; Remark~\ref{rem:integrality} bounds what integrality costs. The number of plans,
+$|\cD|^{|\cJ_i|}$, is the difficulty: a unit of twenty components has more than three billion.
+
+\begin{assumption}[Nested access]\label{as:nested}
+$0=a_{i0}\le a_{i1}\le\dots\le a_{iL}$ for every $i$: opening a unit further never takes less time.
+\end{assumption}
+\begin{assumption}[Linearity]\label{as:linear}
+Times and values are proportional to the number of units: no learning effect, no minimum lot.
+\end{assumption}
+\begin{assumption}[Independence across components]\label{as:indep}
+The state of a component does not depend on the state of the others in the same unit; a type-level factor absorbs
+the average effect of the unit having been scrapped.
+\end{assumption}
+Assumption~\ref{as:nested} is used only in Proposition~\ref{prop:pricing}, and is not needed for the two-level
+instance (Remark~\ref{rem:twolevel}). Assumption~\ref{as:indep} is the weakest of the three; we return to it in
+Section~\ref{sec:discussion}.

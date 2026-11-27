@@ -1,0 +1,170 @@
+\section{Proofs}\label{app:proofs}
+
+\subsection*{Proposition~\ref{prop:pricing}}
+Write $G_i(\ell)$ for the term in braces in \eqref{eq:pricing}. ($\le$) Let $s$ be any plan and $\ell=\ell(s)$.
+Every $s_j$ satisfies $\ell_{s_j}\le\ell$, so $n_{ij}(\rho_{ijs_j}-\omega_it_{js_j})$ is at most the inner maximum,
+and $g_{is}-\mu h_{is}=-\omega_ia_{i\ell}+\sum_jn_{ij}(\rho_{ijs_j}-\omega_it_{js_j})\le G_i(\ell)$. ($\ge$) Fix
+$\ell$ and let $s^\ell$ pick, for each $j$, a maximiser of the inner problem. Then $\ell(s^\ell)\le\ell$, hence
+$a_{i\,\ell(s^\ell)}\le a_{i\ell}$ by Assumption~\ref{as:nested}, and since $\omega_i\ge0$,
+$g_{is^\ell}-\mu h_{is^\ell}\ge G_i(\ell)$. The count of operations is that of the double maximum. \qed
+
+\subsection*{Remark~\ref{rem:twolevel}}
+Partition the plans by induced access level. Level 0 contains only $s^0$, of reduced margin 0. A plan of level 1
+sorts a nonempty set of components and reuses none; its reduced margin is $-\omega_ia_{i1}$ plus the sum of
+$\Psi^{\Sd}_j$ over the sorted components, maximised by sorting those with $\Psi^{\Sd}_j\ge0$; if there is none,
+every plan of this level is worth less than 0 and the term can be dropped. A plan of level 2 reuses a nonempty set.
+Ignoring that requirement, each component takes $\max(\Psi^{\R}_j,\Psi^{\Sd}_j,0)$; if at least one component
+attains this maximum with reuse the requirement holds at no cost, and otherwise the cheapest way to satisfy it is
+to switch to reuse the component for which the loss $\max(\Psi^{\Sd}_j,0)-\Psi^{\R}_j>0$ is least. The maximum of
+the three cases is $\varphi_i(\mu)$; the opening times enter only through the level actually induced, so no
+ordering between them is used. \qed
+
+\subsection*{Proposition~\ref{prop:dual}}
+Dualise the capacity constraint with multiplier $\mu\ge0$. The remaining problem separates by type and its value is
+$N_i\varphi_i(\mu)$, since all of $N_i$ goes to a best plan. Strong duality holds because \eqref{eq:P} is a
+feasible bounded linear programme. The optimal value of a maximisation linear programme is concave and piecewise
+linear in its right-hand side; positive homogeneity follows from scaling $x$. Monotonicity in $H$ is the
+relaxation of a constraint; monotonicity in $N_i$ holds because additional units can be assigned $s^0$ at no cost.
+For any $H'$, weak duality gives
+$V(N,H')\le\mu^\ast H'+\sum_iN_i\varphi_i(\mu^\ast)=V(N,H)+\mu^\ast(H'-H)$; applied to $H'>H$ and $H'<H$ this
+places $\mu^\ast$ between the two one-sided derivatives of $V$ in $H$. If the budget is not exhausted at an
+optimum, complementary slackness gives $\mu^\ast=0$. \qed
+
+\subsection*{Proposition~\ref{prop:split} and Corollary~\ref{cor:frontier}}
+Types with $N_i=0$ have all their variables equal to zero; delete them, and let $\cI^+=\{i:N_i>0\}$. Add a slack to
+each of the $M$ coupling constraints. The programme has $|\cI^+|+M$ equality constraints, so an optimal basic
+solution, which exists because the programme is feasible and bounded, has at most $|\cI^+|+M$ positive variables.
+Each type of $\cI^+$ needs at least one positive plan variable, which leaves at most $M$ further positive
+variables, hence at most $M$ types with a second plan. For the second claim, with $M=1$, let $(\zeta,\mu^\ast)$ be
+optimal dual variables: dual feasibility reads $\zeta_i\ge g_{is}-\mu^\ast h_{is}$ for all $s$, and complementary
+slackness gives equality whenever $x_{is}>0$. A plan in use therefore maximises $g_{is}-\mu^\ast h_{is}$ over
+$\cS_i$: the line of slope $\mu^\ast$ through $(h_{is},g_{is})$ supports the point set from above, and two plans of
+the same type in use lie on the same supporting line. For the corollary, a weighted linear outcome only changes
+the coefficients $g$; $M$ lower bounds on linear outcomes are $M$ further coupling constraints, $M+1$ with the
+labour budget. \qed
+
+\subsection*{Remark~\ref{rem:integrality}}
+Let the split type use plans $s$ and $s'$ with $h_{is}\le h_{is'}$ in quantities that sum to the integer $N_i$.
+Rounding the quantity of $s'$ down and that of $s$ up by the same fraction does not increase the hours and changes
+the objective by less than $|g_{is'}-g_{is}|$. \qed
+
+\subsection*{Proposition~\ref{prop:threshold}}
+Per copy and with indices dropped, the reduced values are
+$\psi^{\R}=q\bar v+(1-q)mp+\tau m-\kappa-\omega t_{\R}$, $\psi^{\Sd}=m(p+\tau)-\omega t_{\Sd}$ and $\psi^0=0$.
+$\psi^{\R}\ge\psi^{\Sd}$ rearranges to $q(\bar v-mp)\ge\kappa+\omega(t_{\R}-t_{\Sd})$, and $\psi^{\R}\ge0$ to
+$q(\bar v-mp)\ge\kappa+\omega t_{\R}-m(p+\tau)$. Both hold if and only if $q(\bar v-mp)$ is at least the larger
+right-hand side, which is $\kappa+\omega t_{\R}-\min\{\omega t_{\Sd},m(p+\tau)\}$; divide by $\bar v-mp>0$. The
+slope of the numerator in $\omega$ is $t_{\R}-t_{\Sd}\ge0$ where the minimum is $\omega t_{\Sd}$, and
+$t_{\R}\ge0$ elsewhere. \qed
+
+\subsection*{Proposition~\ref{prop:fluid}}
+Fix $T$ and let $\bar x=\frac1T\sum_{k\le T}x_k$. With an empty initial stock, units processed by $T$ were received
+by $T$, so $\sum_s\bar x_{is}\le\frac1T\sum_{k\le T}A_{ik}$ for every $i$; each period uses at most $H$ hours, so
+$\sum_{i,s}h_{is}\bar x_{is}\le H$. This holds whatever the policy knows, including future arrivals. Completing
+$\bar x$ with the plan $s^0$, which costs no hours and earns nothing, gives a feasible point of \eqref{eq:P} with
+data $(\frac1T\sum_{k\le T}A_k,H)$ and the same objective: this is the pathwise claim. Taking expectations and
+using the concavity of $V$ in $N$ (Proposition~\ref{prop:dual}) with Jensen's inequality gives
+$\frac1T\E\sum_kg^\top x_k\le V(\bar A^T,H)$ with $\bar A^T=\frac1T\sum_{k\le T}\E A_k$, and \eqref{eq:fluid}
+follows by continuity of $V$, which is finite, concave and piecewise linear on $N\ge0$. The claim on the myopic
+policy is Jensen's inequality for $N\mapsto V(N,H)$, applied to the empirical distribution over periods and to the
+expectation. \qed
+
+\subsection*{Proposition~\ref{prop:evpi}}
+For a fixed feasible $x$ the objective $g(\theta)^\top x$ is affine in $\theta$, and $V$ is the pointwise maximum of
+these affine functions over a feasible set that does not depend on $\theta$, hence convex. Let $x^\ast$ be optimal
+at $\bar\theta$. Then $V(\bar\theta)=g(\bar\theta)^\top x^\ast=\E_F[g(\theta)^\top x^\ast]\le\E_F[V(\theta)]$, with
+equality if and only if $g(\theta)^\top x^\ast=V(\theta)$ almost surely. For the bound, let the slopes of $V$ lie
+in $[\underline\lambda,\overline\lambda]$ with $\overline\lambda-\underline\lambda=\Delta$, and put
+$\lambda^\circ=(\underline\lambda+\overline\lambda)/2$. The function $U(\theta)=V(\theta)-\lambda^\circ\theta$ is
+convex with slopes in $[-\Delta/2,\Delta/2]$, hence $|U(\theta)-U(\bar\theta)|\le\tfrac12\Delta|\theta-\bar\theta|$;
+and $\E_F[V(\theta)]-V(\bar\theta)=\E_F[U(\theta)-U(\bar\theta)]$ because $\E_F[\theta-\bar\theta]=0$. The constant
+is attained by $V(\theta)=\Delta\pos{\theta-\bar\theta}$, for which $\EVPI=\Delta\,\E_F\pos{\theta-\bar\theta}=\tfrac12\Delta\,\E_F|\theta-\bar\theta|$. For a price,
+the slope of the margin of any feasible $x$ is $m_j$ times the number of copies of $j$ sold by the kilogram, which
+lies in $[0,N^{c}_jm_j]$ since $j$ may belong to several types. For a yield, it is $\lambda_{ij}$ times the number
+of copies of $j$ reused in type $i$, which lies between $0$ and $N_in_{ij}\lambda_{ij}$. \qed
+
+\subsection*{Proposition~\ref{prop:class}}
+Fix a price $p$ and let $x$ be optimal for it. Replace, in every plan, the disposition $\Sd$ of $j$ by $0$. The
+access level of a plan does not rise: it stays 2 if another component is reused, stays 1 if another is sorted, and
+otherwise falls to 0, where the opening time is zero. Hours do not increase, so the new solution is feasible for
+the problem without a price. Per unit of type $i$, a plan that sorted $j$ loses $n_{ij}m_j(p+\tau)$ minus the
+labour saved; a plan that reused $j$ loses $n_{ij}(1-q_{ij})m_j(p+\tau)$, the difference between the two
+expressions of $\rho_{ij\R}$ in Section~\ref{sec:model}; other plans lose nothing. Each loss is at most
+$n_{ij}m_j\pos{p+\tau}$, and at most $N_i$ units of type $i$ are processed, so
+$V(p)-V(\out_j)\le N^{c}_jm_j\pos{p+\tau}$. Take the expectation over the class; for the value $\out$ there is no
+sorted outlet and both sides are zero. Conversely, when $p+\tau\ge0$ every plan is worth at least as much with the
+price as without, so $V(p)\ge V(\out_j)$. \qed
+
+\subsection*{Lemma~\ref{lem:budget}}
+By induction on the paid actions. Initially $S_j=0\le\bar e_j$. A paid action $a$ is performed only if the stake is
+known and $e_j(\pi)\ge S_j+\phi_a$ for the belief $\pi$ held at that moment; after it, the new cumulative cost is
+$S_j+\phi_a\le e_j(\pi)\le\bar e_j$, because $\pi$ is a probability vector and $v\ge0$. An action that fails for a
+technical reason is not charged, and $S_j$ is read from the journal, so the invariant holds across runs. If
+$\bar e_j<\min_a\phi_a$ or the stake is unknown, the test fails for every action. \qed
+
+\subsection*{Proposition~\ref{prop:screen}}
+Under Assumption~\ref{as:noerror}, whatever the procedure decides, the realised value is at most
+$\max\{V(p(C_j)),V(\out_j)\}$, so $G\le\pos{V(p(C_j))-V(\out_j)}\le M_jv(C_j)$, by the first inequality of
+Proposition~\ref{prop:class} and its extension to the other streams (the right-hand side is nonnegative, and both
+sides vanish for the value $\out$). Taking the expectation under $\pi$ gives $\E_\pi[G]\le e_j(\pi)$. (i) and (ii)
+follow: if $\E_\pi[G]-\E_\pi[\Phi]>0$ then $\E_\pi[\Phi]<e_j(\pi)$, and for a single action $\Phi=\phi_a$. (iii)
+The belief after an observation is the posterior of the model of Section~\ref{sec:belief}; under that model's
+predictive distribution the expected posterior equals the prior, $\E[\pi_{t+1}(c)\mid\pi_t]=\pi_t(c)$, and $e_j$ is
+linear in $\pi$. \qed
+
+\subsection*{Lemma~\ref{lem:accept}}
+If the true class is $\hat c$ nothing is lost. If it is $c\ne\hat c$, the loss is at most $M_jv(c)$ by
+Assumption~\ref{as:loss}. The expected loss is therefore at most
+$M_j\sum_{c\ne\hat c}\pi(c)v(c)\le(1-\pi(\hat c))M_j\max_cv(c)=R_j$. A review reveals the class at cost
+$\phi_{\mathrm{rev}}$ and loses nothing else, so accepting is cheaper in expectation whenever
+$R_j<\phi_{\mathrm{rev}}$. Under calibration the probability that an accepted class is wrong is
+$1-\pi(\hat c)\le1-\theta$. The implementation restricts the maximum in $R_j$ to classes of probability at least
+$0.01$, which changes the bound by at most $0.01\,n\,\bar e_j$. \qed
+
+\subsection*{Proposition~\ref{prop:fusion}}
+If $C_j=c$, the probability of the $K$ assertions is $r^{k_c}q^{K-k_c}$, which with a uniform prior gives a
+posterior proportional to $(r/q)^{k_c}$; the three cases follow from the sign of $\ln(r/q)$, since $r>q$ if and
+only if $r>1/n$. Let $c^\ast$ be the true class and $c'\ne c^\ast$. Then $D=k_{c^\ast}-k_{c'}=\sum_{i\le K}X_i$
+with independent $X_i$ equal to $+1$, $-1$, $0$ with probabilities $r$, $q$, $1-r-q$. If $r>q$, for every
+$\lambda\ge0$,
+\[
+\Pr(D\le0)\le\E\big[e^{-\lambda D}\big]=\big(re^{-\lambda}+qe^{\lambda}+1-r-q\big)^K ,
+\]
+and the choice $e^{\lambda}=\sqrt{r/q}\ge1$ gives $\big(1-r-q+2\sqrt{rq}\big)^K=\varrho^K$ (when $q=0$ the event
+has probability zero for $K\ge1$, and $\varrho=0$). If $r<q$, the same computation with $-D$ bounds $\Pr(D\ge0)$ by
+$\varrho^K$. The most probable class differs from $c^\ast$, or ties with another, only if $D\le0$ (respectively
+$D\ge0$) for some $c'$; the union over the $n-1$ classes gives \eqref{eq:rate}, and solving
+$(n-1)\varrho^K\le\delta$ gives the number of assertions. Since $\sum_K(n-1)\varrho^K<\infty$, by the
+Borel--Cantelli lemma $\hat c_K=c^\ast$ for all large $K$ almost surely; and by the strong law of large numbers
+$|D|\to\infty$ with the sign of $r-q$ for each $c'$, so the posterior ratio $(r/q)^{D}\to\infty$ and the posterior
+probability of $c^\ast$ tends to one. \qed
+
+\subsection*{Proposition~\ref{prop:strata}}
+Under simple random sampling without replacement of $k_s$ pieces among the $n_s$ of stratum $s$, of which
+$n_sr_s$ are right, $y_s$ is hypergeometric with mean $k_sr_s$. (i) $\E[\hat r]=\sum_sn_sr_s/n=r$. (ii)
+$\E[(y_{\mathsf A}+y_{\mathsf Q})/k]-r=r_{\mathsf A}(k_{\mathsf A}/k-n_{\mathsf A}/n)+r_{\mathsf Q}(k_{\mathsf Q}/k-n_{\mathsf Q}/n)$,
+and $k_{\mathsf Q}/k-n_{\mathsf Q}/n=-(k_{\mathsf A}/k-n_{\mathsf A}/n)$. The sign follows: the queue is
+over-represented when $k_{\mathsf A}/k<n_{\mathsf A}/n$. (iii) The pieces of stratum $s$ not validated number
+$n_s-k_s$, of which $n_sr_s-y_s$ are right; their expected accuracy is $(n_sr_s-k_sr_s)/(n_s-k_s)=r_s=\E[y_s/k_s]$.
+Weighting by $n_s-k_s$ on both sides gives the claim. \qed
+
+\subsection*{Lemma~\ref{lem:grounding}}
+(i) The pilot's answer is parsed as one object naming a tool; a name outside the list returns an error message
+without executing anything, arguments outside those declared for the tool are dropped, and the tools are
+functions of the system with no access to a shell or to the network other than through the acquisition chain of
+Section~\ref{sec:knowledge}. (ii) After the last model call, a program extracts the numerals of the note and of
+the evidence and computes the set of numerals of the note, other than integers below ten, that match no numeral of
+the evidence; the warning at the head of the note lists exactly this set, and is absent if and only if the set is
+empty. (iii) Unavailability of the model, an unreadable answer twice in a row, or exhaustion of the turns ends the
+pilot with no finding, in which case the fixed plan runs the remaining tools and the template note is used; the
+same happens if the writer fails. \qed
+
+\subsection*{Lemma~\ref{lem:heldout}}
+The returned instruction is a function of the batch and selection sets and of the models' answers on them. The test
+parts are independent of these sets and identically distributed, so, given what the search saw, the paired
+differences of scores on the $n_T$ test parts are independent, lie in $[-1,1]$ and have mean $\Delta$. The
+one-sided inequality of \citet{hoeffding1963} gives
+$\Pr(\hat\Delta-\Delta\ge\epsilon)\le\exp(-2n_T\epsilon^2/2^2)$. If $\Delta<-\epsilon$, adoption requires
+$\hat\Delta\ge0$, hence $\hat\Delta-\Delta>\epsilon$. The search loop starts an iteration only if the calls made
+plus those the iteration can make stay within $B$, each (instruction, example) pair is evaluated once, and the
+test evaluates two instructions on $n_T$ parts. \qed

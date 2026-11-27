@@ -1,0 +1,135 @@
+\section{Case study: a repair centre for medical equipment}\label{sec:case}
+
+\bandeau
+
+\subsection{Site and data}
+
+The repair centre receives field-replaceable units of medical imaging systems. \apres{one paragraph on the site:
+families of equipment, yearly volumes of repaired and scrapped units, the bulk contract and what it costs, the
+people who use the system, and since when.} The system reads the centre's operational extractions as they are
+exported: repair and scrap records, parts consumption, weighing of the waste bins, a file of early failures of
+installed parts, and the bill of materials. Parameters that no extraction contains (operator times, values of
+reused parts, recycler prices) are entered in a workbook as ranges with their provenance; estimates are labelled as
+such, and a parameter left empty stays unknown. Unit types and components are not named in this paper.
+\noteechelle
+
+The line model covers \CasTypes{} unit types, of which \CasIncomplets{} could not be evaluated for lack of
+parameters and are reported as such rather than counted as zero. The pipeline ended with \CasAnomalies{} failed
+computations. \apres{the verification of the estimated input flow against the weighed mass: number of weeks
+compared, share within the stated margin, and what was corrected.}
+
+\subsection{The decision}
+
+Table~\ref{tab:case-decision} gives the indicators on which the decision to install the line rests, at the centre of
+the parameter ranges, and the distribution of the annual result when the parameters are drawn from their ranges.
+The optimal plan splits \CasPartages{} unit type between two plans, in line with Proposition~\ref{prop:split}.
+\apres{which unit types are opened and which are left, which components are reused and which are sorted, and
+whether the plan matches what the technicians expected; who validated the valuation of reused parts.}
+
+\begin{table}[H]
+\centering\small
+\caption{Case study: decision indicators. \ifnum\DonneesDemo=1\relax\textbf{Demonstration data, not
+results.}\fi}\label{tab:case-decision}
+\begin{tabular}{lr}
+\toprule
+Indicator & Value \\
+\midrule
+Variable margin of the line (per year) & \CasMarge \\
+Fixed costs of the line, annualised & \CasFixes \\
+Annual result against the current contract, $V-K$ & \CasResultat \\
+Current cost of bulk treatment (per year) & \CasCoutActuel \\
+Operator hours used / available (per year) & \CasHeures{} / \CasCapacite \\
+Value of one more operator hour, $\mu^\ast$ & \CasMu \\
+Units processed (per year) & \CasUnites \\
+Break-even volume (units per year) & \CasSeuil \\
+Payback (years) & \CasRetour \\
+Mass diverted from the bulk stream / mass scrapped (kg per year) & \CasDetournee{} / \CasMasse{} (\CasPartDetournee) \\
+\midrule
+Probability that the line is profitable (parameter ranges) & \CasProba \\
+Annual result: 5th percentile / median / 95th percentile & \CasPcinq{} / \CasMediane{} / \CasPnonantecinq \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:case-hours} varies the operator hours. It displays Proposition~\ref{prop:dual} on the site's data:
+the margin is concave in the hours, and the value of an additional hour falls by steps until the hours cease to
+bind. \apres{the staffing decision this table supported.}
+
+\begin{table}[H]
+\centering\small
+\caption{Case study: sensitivity to operator hours. \ifnum\DonneesDemo=1\relax\textbf{Demonstration
+data.}\fi}\label{tab:case-hours}
+\begin{tabular}{rrrrr}
+\toprule
+Hours per year & Variable margin & Annual result & Occupancy & Value of one more hour \\
+\midrule
+\corps{t_cas_heures}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Is a dynamic policy worth building?}
+
+Replayed week by week on the \CasPeriodes{} weeks of history, with the fixed cost paid every week and no stock, the
+line earns \CasMyope{} per year, against \CasFluide{} for the model on the average flow. The variability gap of
+Proposition~\ref{prop:fluid} is therefore \CasGamma{} per year, \CasGammaRel{} of the fluid value;
+\CasPertes{} weeks end at a loss. \apres{the conclusion drawn: whether the gap justifies a buffer of scrapped
+units, and what was decided.}
+
+\subsection{Yields}
+
+The posterior on yields was scored prequentially on \CasLots{} teardown batches (\CasCopies{} copies tested).
+Table~\ref{tab:case-yields} compares it with the prior alone and with the raw observed frequency. \apres{which
+priors the audit corrected most, in which direction, and whether the three biases named in
+Section~\ref{sec:learning} showed.}
+
+\begin{table}[H]
+\centering\small
+\caption{Case study: prequential scores of the yield estimate (lower is better, except coverage, whose target is
+90\%). \ifnum\DonneesDemo=1\relax\textbf{Demonstration data.}\fi}\label{tab:case-yields}
+\begin{tabular}{lrrrr}
+\toprule
+Estimate & Brier score & Log loss & Absolute error & Coverage of the 90\% interval \\
+\midrule
+\corps{t_cas_rendements}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Arrivals}
+
+Table~\ref{tab:case-forecast} compares the forecasting methods of Section~\ref{sec:forecast} by rolling origin on
+the weekly series of scrapped units. \apres{the reading of the table; whether the structural model, which uses
+the inflow, beats the univariate methods; and the result of any zero-shot foundation model run on the same
+series.}
+
+\begin{table}[H]
+\centering\small
+\caption{Case study: forecasts of weekly scrapped units, rolling origin, all methods scored on the same
+forecasts. Root mean squared error relative to the historical mean; pinball loss averaged over quantiles; coverage
+of the 80\% interval. \ifnum\DonneesDemo=1\relax\textbf{Demonstration data.}\fi}\label{tab:case-forecast}
+\begin{tabular}{lrrrr}
+\toprule
+Method & Forecasts & Relative RMSE & Pinball loss & Coverage (80\%) \\
+\midrule
+\corps{t_cas_previsions}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Composition of components}
+
+The bill of materials of the modelled units lists \CasCompoPieces{} components. After the run, \CasCompoValidees{}
+have a class validated by a human, \CasCompoAcceptees{} a class accepted without review and \CasCompoFile{} wait
+in the review queue. The chain made \CasCompoAppels{} calls to the language model in this run, at a cost of
+\CasCompoCout; \CasCompoSansAppel{} components were handled without any paid acquisition.
+\apres{the model used and where it ran; the measured reliability of each source type after the audit; the number of
+reviews done and the time they took; the result of the instruction search on the validated parts (held-out
+accuracy before and after, with its test); and one or two examples, anonymised, of components whose class changed
+a decision.}
+
+\subsection{What the agents produced}
+
+\apres{the decision note written by the agents on the site's data: how many tool calls the pilot made, how many
+numbers the grounding check flagged, the reviewer's reservations, how the note compares with the one a project
+engineer wrote, and what the manager did with it.}

@@ -1,0 +1,92 @@
+\section{Introduction}\label{sec:intro}
+
+A repair centre for medical imaging equipment receives field-replaceable units from hospitals: power supplies,
+amplifiers, control boards, detector modules. Most are repaired and returned to service. The others are found beyond
+economic repair and are \emph{scrapped}. At the site that motivated this work, scrapped units leave whole, through a
+bulk waste contract that produces no revenue. Yet a scrapped unit is rarely a worthless one. It failed for one cause,
+and the components that did not cause the failure are often sound: they can be extracted, tested and \emph{reused}
+in later repairs, where they replace parts that are costly and slow to procure. What cannot be reused can be
+\emph{sorted} by material and sold by the kilogram to specialised recyclers, who pay for printed circuit boards,
+copper or aluminium many times what a mixed stream is worth. The alternative to the bulk contract is therefore a small
+teardown line: open the unit, take out what is worth taking, test it, sort the rest.
+
+Whether to install such a line, and how to run it, looks like a textbook disposition problem. It is not, and the
+reason is the subject of this paper. A disposition model needs, for every component of every unit type, the
+probability that it is still good, the time to extract and test it, its value if reused, its mass, and the price a
+recycler pays for its material class. At the start of the project almost none of these were known.
+\begin{itemize}
+\item \emph{Yields are unknown.} Nobody has torn down scrapped units, so nobody knows which share of their components
+  would pass a test. Consumption records of repairs give a prior, biased in directions that can be named but not
+  quantified without teardown data.
+\item \emph{Arrivals are irregular.} Scrapped units arrive a few per week per type, with many empty weeks, while
+  operator hours are booked in advance.
+\item \emph{Compositions are missing.} The bill of materials gives a company part number and a free-text description.
+  The material class of a component, which fixes its recycling price and its regulatory route, is recorded nowhere.
+  It can be found: by a rule on the description, by analogy with a known part, in a manufacturer's material
+  declaration, by reading a data sheet. Each of these has a cost and can be wrong, and there are thousands of parts.
+\item \emph{The data are private.} Part numbers and descriptions of in-house designs cannot leave the company, which
+  excludes sending them to a hosted language model, the tool that would otherwise read descriptions and data sheets
+  at scale.
+\end{itemize}
+
+The system we describe treats these difficulties as one problem with three layers. The \emph{disposition} layer
+decides, for each unit type, whether to open it and what to do with each component, under a labour budget. The
+\emph{learning} layer estimates yields and arrivals while decisions are being taken. The \emph{knowledge} layer
+decides which missing facts are worth acquiring, by which means, and when to stop. The layers are coupled by a single
+quantity. The dual price of labour computed by the disposition layer prices every unit and every component; the same
+optimisation model, evaluated with and without a fact, gives the value of knowing it; and that value is the budget
+the knowledge layer may spend to acquire it. The result is a system in which a language model is called on a
+component only when the answer can pay for the call, and a human is asked only where the stake exceeds the cost of
+asking.
+
+\paragraph{Contributions.} The paper makes four contributions.
+
+\emph{(1) Structure of the disposition problem.} The problem is the linear relaxation of a multiple-choice knapsack
+over unit types, with one item per plan (a disposition for each component) and a set-up that depends on how far the
+unit is opened. We show that, at a given labour price, the best plan of a unit is found by pricing its components
+independently for each access level (Proposition~\ref{prop:pricing}), which removes the enumeration of plans and makes
+units of a thousand components as easy as units of five. The optimal labour price coordinates all decisions
+(Propositions~\ref{prop:dual} and~\ref{prop:split}), and gives the operator a threshold on the observed good rate of
+a component above which it is worth extracting and testing (Proposition~\ref{prop:threshold}). With irregular
+arrivals, the gap between the model on the average flow and the model replayed period by period is an upper bound on
+what \emph{any} policy that stores units, forecasts arrivals or is trained by reinforcement learning can gain over
+the myopic policy (Proposition~\ref{prop:fluid}). The bound is computable from the history, so the question ``should
+we build a dynamic policy?'' is answered by a number before anything is built.
+
+\emph{(2) A budgeted knowledge layer.} We define the value of establishing the material class of a component as the
+difference between two optimal values of the disposition model, and bound it by a quantity computable from the
+bill of materials alone (Proposition~\ref{prop:class}). The acquisition chain spends on a component only within that
+bound. We prove that the chain never spends on a component more than its class can be worth
+(Lemma~\ref{lem:budget}), that an acquisition excluded by the screen on a component not yet paid for has negative
+expected net value (Proposition~\ref{prop:screen}), that acceptance without review is the cheaper decision whenever the value at risk
+is below the cost of a review (Lemma~\ref{lem:accept}), that the fusion of sources identifies the true class at an
+exponential rate whenever a source's reliability differs from chance (Proposition~\ref{prop:fusion}), and that
+reliabilities estimated from human validations are unbiased only if the validations are stratified by the reason the
+component was validated (Proposition~\ref{prop:strata}). In this layer a language model is a source with a learned
+reliability, never ground truth.
+
+\emph{(3) Agents on a self-hosted open model.} The whole system is driven by three agents (a pilot, a writer, a
+reviewer) that run on an open-weight language model hosted on the data owner's machine. They can only call a closed
+list of the system's own functions; every number of the decision note they write is checked by a program against
+the computed results (Lemma~\ref{lem:grounding}); without a model, a fixed plan produces the same note from a
+template. The instruction given to the model for reading part descriptions is itself improved from the human
+validations by reflective prompt evolution, with a call budget and a held-out test
+(Lemma~\ref{lem:heldout}). No weight is trained and no record leaves the site.
+
+\emph{(4) An open, tested implementation and its application.} All of the above is implemented in a single
+package with a test suite that checks, among other things, the optimum against an exact linear-programming solver,
+every proposition on random instances, and the confidentiality of outgoing queries.
+Section~\ref{sec:experiments} measures the algorithms on synthetic instances, and Section~\ref{sec:case} reports
+the application to the repair centre.
+
+\paragraph{Status of the evidence.} We separate three kinds of statement. Mathematical results are proved in
+Appendix~\ref{app:proofs} and checked numerically. Measurements of the algorithms use synthetic instances and say
+nothing about the site. Statements about the site come from its data. \ifnum\DonneesDemo=1\relax In this draft the
+case study runs on the fictional demonstration data shipped with the software, and every sentence that depends on
+field results is marked as still to be written.\fi{} We make no claim that is not of one of these three kinds.
+
+\paragraph{Organisation.} Section~\ref{sec:literature} reviews the literature. Section~\ref{sec:model} states the
+disposition model and Section~\ref{sec:structure} its structure. Section~\ref{sec:learning} treats unknown yields and
+irregular arrivals, Section~\ref{sec:knowledge} the acquisition of missing compositions, and Section~\ref{sec:system}
+the agents and the deployment. Sections~\ref{sec:experiments} and~\ref{sec:case} give the computational study and
+the case study. Section~\ref{sec:discussion} discusses managerial insights, limits and the transfer to production.

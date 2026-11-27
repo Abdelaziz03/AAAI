@@ -1,0 +1,119 @@
+\section{Discussion}\label{sec:discussion}
+
+\subsection{Managerial insights}
+
+The insights below follow from the model and do not depend on the numbers of one site.
+
+\emph{One price coordinates the line.} The value of an operator hour is the only number that the bench, the planner
+and the manager need to share. The bench uses it through the yield threshold of
+Proposition~\ref{prop:threshold}; the planner through the plan of each type; the manager as the worth of an
+additional hour of staffing. When hours are plentiful the price is zero and every component is judged on its own
+merits; as hours tighten, the same components face a higher bar.
+
+\emph{Measure the gap before building a dynamic policy.} Irregular arrivals invite buffers, forecasts and learned
+policies. Proposition~\ref{prop:fluid} gives, from the history alone, the most any of them could add. A site should
+compute this number first. If it is small, the myopic weekly plan is enough and the engineering effort is better
+spent elsewhere.
+
+\emph{Greedy rules do not learn what they do not try.} A pessimistic prior on a yield is self-confirming under a
+rule that follows the mean. Either teardown audits are planned as a deliberate investment, or the decision rule
+must randomise in proportion to its uncertainty, as posterior sampling does.
+
+\emph{Spend on knowledge in proportion to what it can change.} Most components of a bill of materials are too light
+or too rare for their composition to matter; a few matter a great deal. The stake of
+Definition~\ref{def:stake} separates them using only the mass, the volume and the price list, before any model is
+called or any person asked. In our experiments the binding resource was the human reviewer, not the language
+model: the purpose of the budget is less to save model calls than to decide who deserves a person's attention.
+
+\emph{Treat a language model as a source whose reliability you measure.} The system never accepts a class because a
+model said so. It accepts it when the evidence, weighted by reliabilities learned from human validations, makes an
+error cheaper than a review. This requires auditing a random sample of what was accepted
+(Proposition~\ref{prop:strata}): without the audit, the only validations are of contested components, and every
+source looks worse than it is.
+
+\emph{Privacy is an architectural property.} Because outward queries are built before any model call and the model
+runs on the owner's hardware, confidentiality does not depend on the model's behaviour or on a provider's terms.
+The cost is a smaller model than hosted services offer; the design compensates by asking the model only narrow,
+checkable questions and by never trusting the answer.
+
+\subsection{Limitations}
+
+\emph{Evidence.} \ifnum\DonneesDemo=1\relax The case study of this draft runs on fictional data. \fi The
+mathematical results are independent of the data; every statement about the site depends on parameters whose
+ranges were set by people and on a pilot whose realised margin must be compared with the predicted one.
+
+\emph{Model.} The implementation covers three dispositions and two access levels;
+Proposition~\ref{prop:pricing} holds for any finite sets, but the general routine is not coded.
+Assumption~\ref{as:indep} is doubtful: a unit scrapped for one cause often has correlated damage, and a model with
+unit-level condition classes, in the spirit of quality grading \citep{ferguson2009}, would relax it at the price of
+more parameters to learn. Demand for reused parts is assumed to absorb the supply; a cap on the copies returned to
+service adds one constraint per saturated component and, by Proposition~\ref{prop:split}, one possible split type
+each. The decision maker is risk-neutral; a chance constraint or a conditional value-at-risk on the simulated
+distribution of the result would serve one who must not lose money on the line.
+
+\emph{Learning.} We claim no regret guarantee for the posterior-sampling scheme. The dynamic model with inventory
+is stated but not solved; the fluid bound is the benchmark against which approximate policies would be measured.
+No time-series foundation model was run.
+
+\emph{Knowledge layer.} Independence between sources holds only as far as provenance is traced; reliabilities are
+per source type, not per site or per model version; two source types can share a cause of error. The stratified
+estimate is unbiased only if the audit is random and the queue is reviewed in full.
+Assumption~\ref{as:loss} ignores contamination penalties. Composition is a single class per component; mass
+fractions over several materials call for a Dirichlet belief and a price that is a weighted sum, which leaves
+Proposition~\ref{prop:evpi} unchanged. The chain follows a fixed order of actions rather than ranking them by value
+per unit cost. Text matching for analogy is a bag of words.
+
+\emph{Agents.} The grounding check guarantees that the numbers of the note exist in the results, not that the
+prose around them is right. The instruction search and the agents were developed against stand-in models;
+\apres{their behaviour with the model actually deployed, including failure rates of structured output and the
+effect of the instruction search.}
+
+\subsection{From the repair centre to production}
+
+The same structure appears in production. A nonconforming assembly at a production stage is a scrapped unit; its
+sub-assemblies can be reworked, harvested for new builds, sorted by material, or scrapped as they are.
+Table~\ref{tab:production} gives the correspondence. What changes is absorbed by the framework: more dispositions
+and deeper bills of materials leave Proposition~\ref{prop:pricing} linear in the number of components; a
+component whose class requires a licensed route has a restricted set of dispositions, which removes plans and
+leaves \eqref{eq:P} unchanged in form, and is one more reason to know the composition before deciding; with $M$
+coupling resources, Proposition~\ref{prop:split} gives at most $M$ split types and the dual has one price per
+resource; arrivals are the output of a stage times its nonconformity rate, which is the structural model
+\eqref{eq:structural}. None of this has been validated on production data.
+
+\begin{table}[H]
+\centering\small
+\caption{Correspondence between the repair centre and a production line.}\label{tab:production}
+\begin{tabular}{p{0.2\textwidth}p{0.34\textwidth}p{0.36\textwidth}}
+\toprule
+Abstract object & Repair centre & Production \\
+\midrule
+Unit type $i$ & type of scrapped unit & nonconforming assembly at a given stage \\
+Arrivals $A_{ik}$ & scrapped units per week & output of the stage times its defect rate \\
+Inflow $E_{ik}$ & units reaching a repair decision & units produced at the stage \\
+Component $j$ & part of the unit & sub-assembly or material fraction \\
+Dispositions $\cD$ & reuse, sorted recycling, leave & rework, harvest, sorted recycling, scrap as is \\
+Access levels & rough or careful opening & disassembly depth, possibly irreversible \\
+Yield $q_{ij}$ & share of extracted parts passing test & share of harvested sub-assemblies that requalify \\
+Resource $H$ & operator hours outside the workload & rework stations, test benches \\
+Class $C_j$ & recycler price and waste route & recovery route, handling of regulated materials \\
+Fixed cost $K$ & teardown and test line & rework cell \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Conclusion}
+
+Disposition of scrapped units is usually presented as an optimisation problem with known data. In the application
+that motivated this paper the data were the problem. The system described here couples a disposition model whose
+structure makes it cheap to solve and easy to explain, a learning scheme that corrects the priors it starts from,
+and a knowledge layer that buys missing facts only when they can pay for themselves and that measures how far each
+of its sources can be trusted. A language model has a place in such a system: hosted on the owner's machine,
+confined to narrow questions and a closed list of tools, treated as a fallible source, and checked by programs
+where it writes numbers and by people where it matters. The pieces are simple. What we believe is of general use is
+the way they are tied together by one quantity, the value that a fact or an hour has for the decision at hand.
+
+\paragraph{Disclosure.} The software, the proofs and this draft were prepared with the assistance of a generative
+language-model system, under the direction of the authors. The propositions and their proofs were checked by
+independent automated reviews and by numerical tests, which is not peer review; the authors are responsible for
+verifying every statement, proof and reference before submission. \apres{acknowledgements, and the statement on
+data availability agreed with the organisation.}

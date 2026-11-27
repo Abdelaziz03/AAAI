@@ -1,0 +1,116 @@
+% From Scrap to Value -- the document itself. Do not compile this file: compile one of its two wrappers.
+%   manuscrit.tex        reads genere/  (demonstration data; the folder and its PDF are versioned)
+%   manuscrit_site.tex   reads site/    (your data; never versioned, never packaged)
+% Both folders are written by:  python -m erc.papier   (nothing in them is typed by hand; see LISEZ-MOI.md)
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{booktabs,tabularx,array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage[round,authoryear]{natbib}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
+
+\input{\genere/macros}
+
+% ---- statements
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% ---- notation
+\newcommand{\cI}{\mathcal{I}}
+\newcommand{\cJ}{\mathcal{J}}
+\newcommand{\cD}{\mathcal{D}}
+\newcommand{\cL}{\mathcal{L}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\cC}{\mathcal{C}}
+\newcommand{\bC}{\bar{\mathcal{C}}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\R}{\mathsf{R}}
+\newcommand{\Sd}{\mathsf{S}}
+\newcommand{\out}{\varnothing}
+\newcommand{\pos}[1]{\left(#1\right)^{+}}
+\DeclareMathOperator{\EVPI}{EVPI}
+\DeclareMathOperator{\Bfun}{B}
+
+% ---- body of a generated table (the primitive \input is expandable, which a tabular needs before \bottomrule)
+\makeatletter
+\newcommand{\corps}[1]{\@@input \genere/#1.tex }
+\makeatother
+
+% ---- what remains to be written once the site data have been run
+\newcommand{\apres}[1]{\textcolor{red!60!black}{\textbf{[To write after the run on site data:} #1\textbf{]}}}
+\newcommand{\bandeau}{\ifnum\DonneesDemo=1\relax
+  \begin{center}\fbox{\parbox{0.92\textwidth}{\small\textbf{Demonstration data.} Every case-study number in this
+  draft (Section~\ref{sec:case}, and the sentences of the abstract and introduction that quote it) was produced from
+  \emph{fictional} data shipped with the software. They show what the system computes; they are not results. Running
+  \texttt{python -m erc.papier} on the site's data replaces them all and removes this box.}}\end{center}\fi}
+\newcommand{\noteechelle}{\ifnum\EchelleMasquee=1\relax Monetary amounts of the case study are multiplied by an
+  undisclosed constant. \fi}
+
+\title{\textbf{From Scrap to Value: Pricing Labour, Learning Yields, and Buying Knowledge\\ for the Disposition of
+Scrapped Service Units}}
+\author{[Author names withheld in this draft]\\ {\small [Affiliation]}}
+\date{Draft of \today}
+
+\begin{document}
+\maketitle
+\bandeau
+
+\begin{abstract}
+\noindent A repair centre for medical equipment scraps the field-replaceable units it cannot repair. They leave whole,
+through a bulk waste contract, although they contain components that could be reused in repairs or sorted for
+specialised recyclers. Deciding what to do with them is hard for a reason that optimisation alone does not address:
+most of the facts the decision needs are missing. The share of components that are still good is unknown, the flow of
+scrapped units is irregular, and the material composition of components, which sets recycling prices, is recorded
+nowhere. We present a decision-support system that treats the three difficulties together. Disposition is a linear
+multiple-choice knapsack over unit types; we show that one number, the value of an operator hour, prices every unit
+without enumerating its plans, yields a bench-level threshold rule for reuse, and bounds, from data alone, what
+buffering, forecasting or reinforcement learning could add. Unknown yields are learned by posterior sampling. Missing
+compositions are acquired by a chain of sources of learned reliability (rules, analogy, documents, and a language
+model hosted on the owner's machine) in which every paid step must be covered by an upper bound on what the answer
+can be worth; we prove the bound, the budget invariant, and the consistency of the fusion rule. Agents running on the
+same self-hosted open model drive the system end to end and write a decision note whose numbers are checked against
+computed results. In the case study, \CasTypes{} unit types are modelled; the system estimates an annual result of
+\CasResultat{} against the current contract, a value of an additional operator hour of \CasMu, and a cost of flow
+variability of \CasGammaRel{} of the fluid value. \noteechelle
+\end{abstract}
+
+\noindent\textbf{Keywords:} product recovery; disposition; multiple-choice knapsack; Lagrangian duality; value of
+information; Thompson sampling; fluid bound; large language models; agents; circular economy; service parts.
+
+\onehalfspacing
+
+\input{sections/01_introduction}
+\input{sections/02_literature}
+\input{sections/03_model}
+\input{sections/04_structure}
+\input{sections/05_learning}
+\input{sections/06_knowledge}
+\input{sections/07_system}
+\input{sections/08_experiments}
+\input{sections/09_case}
+\input{sections/10_discussion}
+
+\singlespacing
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\input{sections/A_proofs}
+\input{sections/B_reproducibility}
+
+\end{document}

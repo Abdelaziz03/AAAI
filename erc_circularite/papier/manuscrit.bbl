@@ -1,0 +1,257 @@
+\begin{thebibliography}{39}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Agrawal et~al.(2025)]{agrawal2025gepa}
+Lakshya~A. Agrawal et~al.
+\newblock {GEPA}: Reflective prompt evolution can outperform reinforcement
+  learning.
+\newblock arXiv:2507.19457, 2025.
+\newblock author list and details to verify.
+
+\bibitem[Ansari et~al.(2024)]{ansari2024chronos}
+Abdul~Fatir Ansari et~al.
+\newblock Chronos: Learning the language of time series.
+\newblock \emph{Transactions on Machine Learning Research}, 2024.
+\newblock author list to complete.
+
+\bibitem[Badanidiyuru et~al.(2018)Badanidiyuru, Kleinberg, and
+  Slivkins]{badanidiyuru2018bandits}
+Ashwinkumar Badanidiyuru, Robert Kleinberg, and Aleksandrs Slivkins.
+\newblock Bandits with knapsacks.
+\newblock \emph{Journal of the ACM}, 65\penalty0 (3):\penalty0 1--55, 2018.
+
+\bibitem[Cohen et~al.(2024)Cohen, Khwaja, Wang, Masson, Ram{\'e}, Doubli, and
+  Abou-Amal]{cohen2024toto}
+Ben Cohen, Emaad Khwaja, Kan Wang, Charles Masson, Elise Ram{\'e}, Youssef
+  Doubli, and Othmane Abou-Amal.
+\newblock Toto: Time series optimized transformer for observability.
+\newblock arXiv:2407.07874, 2024.
+
+\bibitem[Cohen et~al.(2025)]{cohen2025time}
+Ben Cohen et~al.
+\newblock This time is different: An observability perspective on time series
+  foundation models.
+\newblock arXiv:2505.14766, 2025.
+\newblock author list to complete.
+
+\bibitem[Croston(1972)]{croston1972}
+J.~D. Croston.
+\newblock Forecasting and stock control for intermittent demands.
+\newblock \emph{Operational Research Quarterly}, 23\penalty0 (3):\penalty0
+  289--303, 1972.
+\newblock volume and pages to verify.
+
+\bibitem[Das et~al.(2024)Das, Kong, Sen, and Zhou]{das2024timesfm}
+Abhimanyu Das, Weihao Kong, Rajat Sen, and Yichen Zhou.
+\newblock A decoder-only foundation model for time-series forecasting.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine
+  Learning}, volume 235 of \emph{PMLR}, pages 10148--10167, 2024.
+
+\bibitem[Dawid and Skene(1979)]{dawid1979}
+A.~P. Dawid and A.~M. Skene.
+\newblock Maximum likelihood estimation of observer error-rates using the {EM}
+  algorithm.
+\newblock \emph{Applied Statistics}, 28\penalty0 (1):\penalty0 20--28, 1979.
+
+\bibitem[Elmachtoub and Grigas(2022)]{elmachtoub2022}
+Adam~N. Elmachtoub and Paul Grigas.
+\newblock Smart ``predict, then optimize''.
+\newblock \emph{Management Science}, 68\penalty0 (1):\penalty0 9--26, 2022.
+
+\bibitem[Everett(1963)]{everett1963}
+Hugh Everett.
+\newblock Generalized {L}agrange multiplier method for solving problems of
+  optimum allocation of resources.
+\newblock \emph{Operations Research}, 11\penalty0 (3):\penalty0 399--417, 1963.
+
+\bibitem[Ferguson et~al.(2009)Ferguson, Guide, Koca, and Souza]{ferguson2009}
+Mark Ferguson, V.~Daniel~R. Guide, Jr., Eylem Koca, and Gilvan~C. Souza.
+\newblock The value of quality grading in remanufacturing.
+\newblock \emph{Production and Operations Management}, 18\penalty0
+  (3):\penalty0 300--314, 2009.
+
+\bibitem[Ferguson et~al.(2011)Ferguson, Fleischmann, and Souza]{ferguson2011}
+Mark~E. Ferguson, Moritz Fleischmann, and Gilvan~C. Souza.
+\newblock A profit-maximizing approach to disposition decisions for product
+  returns.
+\newblock \emph{Decision Sciences}, 42\penalty0 (3):\penalty0 773--798, 2011.
+
+\bibitem[Ferreira et~al.(2018)Ferreira, Simchi-Levi, and Wang]{ferreira2018}
+Kris~Johnson Ferreira, David Simchi-Levi, and He~Wang.
+\newblock Online network revenue management using {T}hompson sampling.
+\newblock \emph{Operations Research}, 66\penalty0 (6):\penalty0 1586--1602,
+  2018.
+
+\bibitem[Ferrer and Ketzenberg(2004)]{ferrer2004}
+Geraldo Ferrer and Michael~E. Ketzenberg.
+\newblock Value of information in remanufacturing complex products.
+\newblock \emph{IIE Transactions}, 36\penalty0 (3):\penalty0 265--277, 2004.
+
+\bibitem[Fleischmann et~al.(1997)Fleischmann, Bloemhof-Ruwaard, Dekker, van~der
+  Laan, van Nunen, and Van~Wassenhove]{fleischmann1997}
+Moritz Fleischmann, Jacqueline~M. Bloemhof-Ruwaard, Rommert Dekker, Erwin
+  van~der Laan, Jo~A. E.~E. van Nunen, and Luk~N. Van~Wassenhove.
+\newblock Quantitative models for reverse logistics: A review.
+\newblock \emph{European Journal of Operational Research}, 103\penalty0
+  (1):\penalty0 1--17, 1997.
+
+\bibitem[Fleischmann et~al.(2003)Fleischmann, van Nunen, and
+  Gr{\"a}ve]{fleischmann2003}
+Moritz Fleischmann, Jo~A. E.~E. van Nunen, and Ben Gr{\"a}ve.
+\newblock Integrating closed-loop supply chains and spare-parts management at
+  {IBM}.
+\newblock \emph{Interfaces}, 33\penalty0 (6):\penalty0 44--56, 2003.
+
+\bibitem[Frazier et~al.(2008)Frazier, Powell, and Dayanik]{frazier2008}
+Peter~I. Frazier, Warren~B. Powell, and Savas Dayanik.
+\newblock A knowledge-gradient policy for sequential information collection.
+\newblock \emph{SIAM Journal on Control and Optimization}, 47\penalty0
+  (5):\penalty0 2410--2439, 2008.
+
+\bibitem[Gallego and van Ryzin(1994)]{gallego1994}
+Guillermo Gallego and Garrett van Ryzin.
+\newblock Optimal dynamic pricing of inventories with stochastic demand over
+  finite horizons.
+\newblock \emph{Management Science}, 40\penalty0 (8):\penalty0 999--1020, 1994.
+\newblock details to verify.
+
+\bibitem[Guide and Van~Wassenhove(2009)]{guide2009}
+V.~Daniel~R. Guide, Jr. and Luk~N. Van~Wassenhove.
+\newblock {OR} forum---the evolution of closed-loop supply chain research.
+\newblock \emph{Operations Research}, 57\penalty0 (1):\penalty0 10--18, 2009.
+
+\bibitem[Hoeffding(1963)]{hoeffding1963}
+Wassily Hoeffding.
+\newblock Probability inequalities for sums of bounded random variables.
+\newblock \emph{Journal of the American Statistical Association}, 58\penalty0
+  (301):\penalty0 13--30, 1963.
+\newblock details to verify.
+
+\bibitem[Horvitz and Thompson(1952)]{horvitz1952}
+D.~G. Horvitz and D.~J. Thompson.
+\newblock A generalization of sampling without replacement from a finite
+  universe.
+\newblock \emph{Journal of the American Statistical Association}, 47\penalty0
+  (260):\penalty0 663--685, 1952.
+\newblock details to verify.
+
+\bibitem[Howard(1966)]{howard1966}
+Ronald~A. Howard.
+\newblock Information value theory.
+\newblock \emph{IEEE Transactions on Systems Science and Cybernetics},
+  2\penalty0 (1):\penalty0 22--26, 1966.
+\newblock last page to verify.
+
+\bibitem[Inderfurth and Langella(2006)]{inderfurth2006}
+Karl Inderfurth and Ian~M. Langella.
+\newblock Heuristics for solving disassemble-to-order problems with stochastic
+  yields.
+\newblock \emph{OR Spectrum}, 28\penalty0 (1):\penalty0 73--99, 2006.
+
+\bibitem[Ketzenberg et~al.(2006)Ketzenberg, van~der Laan, and
+  Teunter]{ketzenberg2006}
+Michael~E. Ketzenberg, Erwin van~der Laan, and Ruud~H. Teunter.
+\newblock Value of information in closed loop supply chains.
+\newblock \emph{Production and Operations Management}, 15\penalty0
+  (3):\penalty0 393--406, 2006.
+
+\bibitem[Krikke et~al.(1998)Krikke, van Harten, and Schuur]{krikke1998}
+H.~R. Krikke, A.~van Harten, and P.~C. Schuur.
+\newblock On a medium term product recovery and disposal strategy for durable
+  assembly products.
+\newblock \emph{International Journal of Production Research}, 36\penalty0
+  (1):\penalty0 111--139, 1998.
+\newblock last page given as 139 or 140 depending on the record.
+
+\bibitem[Madansky(1960)]{madansky1960}
+Albert Madansky.
+\newblock Inequalities for stochastic linear programming problems.
+\newblock \emph{Management Science}, 6\penalty0 (2):\penalty0 197--204, 1960.
+\newblock details to verify.
+
+\bibitem[Meacham et~al.(1999)Meacham, Uzsoy, and Venkatadri]{meacham1999}
+A.~Meacham, R.~Uzsoy, and U.~Venkatadri.
+\newblock Optimal disassembly configurations for single and multiple products.
+\newblock \emph{Journal of Manufacturing Systems}, 18\penalty0 (5):\penalty0
+  311--322, 1999.
+\newblock volume and pages to verify.
+
+\bibitem[{Mistral AI}(2026)]{mistral2026timestral}
+{Mistral AI}.
+\newblock Timestral.
+\newblock arXiv:2610.37585, 2026.
+\newblock author list of the preprint to complete.
+
+\bibitem[Reveliotis(2007)]{reveliotis2007}
+Spyros~A. Reveliotis.
+\newblock Uncertainty management in optimal disassembly planning through
+  learning-based strategies.
+\newblock \emph{IIE Transactions}, 39\penalty0 (6):\penalty0 645--658, 2007.
+
+\bibitem[Russo and Van~Roy(2014)]{russo2014}
+Daniel Russo and Benjamin Van~Roy.
+\newblock Learning to optimize via posterior sampling.
+\newblock \emph{Mathematics of Operations Research}, 39\penalty0 (4):\penalty0
+  1221--1243, 2014.
+
+\bibitem[Sinha and Zoltners(1979)]{sinha1979}
+Prabhakant Sinha and Andris~A. Zoltners.
+\newblock The multiple-choice knapsack problem.
+\newblock \emph{Operations Research}, 27\penalty0 (3):\penalty0 503--515, 1979.
+
+\bibitem[Syntetos and Boylan(2005)]{syntetos2005}
+Aris~A. Syntetos and John~E. Boylan.
+\newblock The accuracy of intermittent demand estimates.
+\newblock \emph{International Journal of Forecasting}, 21\penalty0
+  (2):\penalty0 303--314, 2005.
+
+\bibitem[Teunter(2006)]{teunter2006}
+Ruud~H. Teunter.
+\newblock Determining optimal disassembly and recovery strategies.
+\newblock \emph{Omega}, 34\penalty0 (6):\penalty0 533--537, 2006.
+
+\bibitem[Teunter et~al.(2011)Teunter, Syntetos, and Babai]{teunter2011}
+Ruud~H. Teunter, Aris~A. Syntetos, and M.~Zied Babai.
+\newblock Intermittent demand: Linking forecasting to inventory obsolescence.
+\newblock \emph{European Journal of Operational Research}, 214\penalty0
+  (3):\penalty0 606--615, 2011.
+
+\bibitem[Thierry et~al.(1995)Thierry, Salomon, van Nunen, and
+  Van~Wassenhove]{thierry1995}
+Martijn Thierry, Marc Salomon, Jo~van Nunen, and Luk Van~Wassenhove.
+\newblock Strategic issues in product recovery management.
+\newblock \emph{California Management Review}, 37\penalty0 (2):\penalty0
+  114--135, 1995.
+
+\bibitem[Thompson(1933)]{thompson1933}
+William~R. Thompson.
+\newblock On the likelihood that one unknown probability exceeds another in
+  view of the evidence of two samples.
+\newblock \emph{Biometrika}, 25\penalty0 (3/4):\penalty0 285--294, 1933.
+\newblock details to verify.
+
+\bibitem[Wang and Chen(2018)]{wang2018}
+Siwei Wang and Wei Chen.
+\newblock Thompson sampling for combinatorial semi-bandits.
+\newblock In \emph{Proceedings of the 35th International Conference on Machine
+  Learning}, volume~80 of \emph{PMLR}, pages 5114--5122, 2018.
+
+\bibitem[Woo et~al.(2024)Woo, Liu, Kumar, Xiong, Savarese, and Sahoo]{woo2024}
+Gerald Woo, Chenghao Liu, Akshat Kumar, Caiming Xiong, Silvio Savarese, and
+  Doyen Sahoo.
+\newblock Unified training of universal time series forecasting transformers.
+\newblock In \emph{Proceedings of the 41st International Conference on Machine
+  Learning}, volume 235 of \emph{PMLR}, pages 53140--53164, 2024.
+
+\bibitem[Zemel(1980)]{zemel1980}
+Eitan Zemel.
+\newblock The linear multiple choice knapsack problem.
+\newblock \emph{Operations Research}, 28\penalty0 (6):\penalty0 1412--1423,
+  1980.
+\newblock details to verify.
+
+\end{thebibliography}

@@ -1,0 +1,238 @@
+\section{Knowledge acquisition: what is worth knowing}\label{sec:knowledge}
+
+\subsection{The missing fact and the means to obtain it}
+
+The recycling price $p_j$, the regulatory route and the content in critical raw materials all depend on the
+\emph{material class} of component $j$, which the bill of materials does not give. The class can be obtained by
+means of very different cost and reliability: a rule on the description; analogy with a part already validated; an
+earlier classification; a reading of the internal description by a language model; a manufacturer's material
+declaration or a data sheet retrieved from the web; a reading of such a document by a language model; a check of
+that reading; a human expert. With thousands of components, most of them light or rare, the question is not how to
+classify a component but which components deserve which effort.
+
+Let $\cC$ be the material classes of the recycler's reference list and $\bC=\cC\cup\{\out\}$, where $\out$ stands
+for ``a class outside the list''; let $n=|\bC|$. Let $C_j\in\bC$ be the unknown class of component $j$, $p(c)$ the
+price of class $c\in\cC$, and
+\[
+v(c)=\pos{p(c)+\tau}\ \ (c\in\cC),\qquad v(\out)=0,
+\]
+the most a kilogram of class $c$ can earn over the bulk stream. Quantities in this section are per year, the period
+over which an established class is taken to stay valid; $M_j$ is the annual mass of the copies of $j$ in the streams
+the decision covers.
+
+\subsection{A belief over the class, with sources of learned reliability}\label{sec:belief}
+
+The belief $\pi_j$ over $\bC$ starts uniform. A piece of evidence is a triple (source type $u$, class $c$, sign) of
+one of two kinds. An \emph{assertion} names a class among all: a source of reliability $r$ names the true class with
+probability $r$ and otherwise one of the $n-1$ others, uniformly. A \emph{verdict} answers yes or no to the question
+``is it $c$?'': a source of reliability $r$ answers correctly with probability $r$, whatever the true class. Pieces
+of the same source type share one unknown reliability $r_u\sim\mathrm{Beta}(a_u,b_u)$; given the truth and the
+reliabilities, pieces of independent origin are independent. For a candidate class $c$, let $s_u(c)$ and $f_u(c)$
+be the numbers of pieces of type $u$ that would be right and wrong if $C_j=c$, and $e_u(c)$ the number of wrong
+assertions among them. Integrating over the reliabilities,
+\begin{equation}\label{eq:fusion}
+\Pr(C_j=c\mid\text{evidence})\;\propto\;\prod_{u}\frac{\Bfun\big(a_u+s_u(c),\,b_u+f_u(c)\big)}{\Bfun(a_u,b_u)}\,
+(n-1)^{-e_u(c)},
+\end{equation}
+where $\Bfun$ is the Beta function. With one piece per source type the factor is the mean reliability when the piece
+is right and its complement when it is wrong; with several pieces of one type it is less confident than the product
+of means, because pieces that share an unknown reliability are not independent. For assertions this is the
+observation model of \citet{dawid1979} with one accuracy per source type and uniform errors.
+
+Four design decisions follow from treating every automatic source as fallible.
+\begin{itemize}
+\item \emph{A language model is a source, never ground truth.} Its readings and verdicts enter \eqref{eq:fusion} with
+  their own reliability. Ground truth is a human validation.
+\item \emph{Trust is earned.} With the declared priors, a document read by a model and checked by the same model
+  does not reach the acceptance threshold; it does once validations have shown that this kind of reading is right
+  often enough.
+\item \emph{Independence is enforced by provenance.} Ten web pages reproducing one data sheet are one piece of
+  evidence. A model that re-reads its own reading adds no source: a ``yes'' turns the reading into a confirmed
+  reading, a ``no'' withdraws it. Two readers of the same text that agree count once, as the more reliable of the
+  two.
+\item \emph{Unknown stays unknown.} A component whose class is not established has no price: in \eqref{eq:P} it is
+  in the state $\out_j$, where sorting is unavailable. It is never valued at an average price.
+\end{itemize}
+
+\subsection{The value of a fact}
+
+Two cases must be kept apart. For a parameter on which the decision maker can act at its mean (a yield, a value,
+the price of an established class known with error), the reference is the decision taken at the mean. For the class
+of a component there is no decision at the mean class: without a class the component cannot be sorted.
+
+\begin{proposition}[Value of information on a parameter]\label{prop:evpi}
+For fixed $(N,H)$, $V$ is a convex function of the vector of values $(\rho_{ijd})$, hence of every parameter
+$\theta$ that enters these values affinely. If $\theta$ has distribution $F$ and mean $\bar\theta$, the expected
+value of perfect information $\EVPI=\E_F[V(\theta)]-V(\bar\theta)$ is nonnegative, and it is zero if and only if a
+solution optimal at $\bar\theta$ is optimal for $F$-almost every $\theta$. If the slopes of $V$ in $\theta$ lie in
+an interval of length $\Delta$, then
+\begin{equation}\label{eq:evpi}
+\EVPI\;\le\;\tfrac12\,\Delta\;\E_F|\theta-\bar\theta|,
+\end{equation}
+and the constant $\tfrac12$ cannot be improved. In particular
+$\EVPI\le\tfrac12\,N^{c}_jm_j\,\E_F|p_j-\bar p_j|$ for the price of component $j$, and
+$\EVPI\le\tfrac12\,N_in_{ij}\,|\lambda_{ij}|\,\E_F|q_{ij}-\bar q_{ij}|$ for a yield, where $\lambda_{ij}$ is the
+coefficient of $q_{ij}$ in $\rho_{ij\R}$.
+\end{proposition}
+
+\begin{proposition}[Value of establishing a class]\label{prop:class}
+In the instance of Section~\ref{sec:model}, let the class of component $j$ be unknown with belief $\pi$. Let
+$V(\out_j)$ be the value of \eqref{eq:P} when $j$ has no price and $V(p)$ its value when the price of $j$ is $p$.
+For every price $p$, $V(p)-V(\out_j)\le N^{c}_jm_j\pos{p+\tau}$, and therefore
+\begin{equation}\label{eq:class}
+\E_\pi\big[V(p(C_j))\big]-V(\out_j)\;\le\;N^{c}_j\,m_j\ \E_\pi\big[v(C_j)\big].
+\end{equation}
+The left-hand side is nonnegative when $p(c)+\tau\ge0$ for every class of positive probability.
+\end{proposition}
+
+The left-hand side of \eqref{eq:class} can be negative when a possible class costs more to recycle than the bulk
+stream: establishing the class then reveals an obligation, not an opportunity, and the decision to establish it is
+not an economic one. The bound extends unchanged to copies of $j$ that leave the site by another stream (defective
+copies replaced in repairs), since sorting a copy earns at most $m_jv(C_j)$; this gives the annual mass $M_j$.
+
+\subsection{The acquisition chain and its budget}
+
+\begin{definition}[Stake]\label{def:stake}
+The \emph{stake} of component $j$ under belief $\pi$ is $e_j(\pi)=M_j\sum_{c\in\bC}\pi(c)\,v(c)$, and its
+\emph{ceiling} is $\bar e_j=M_j\max_{c\in\cC}v(c)$. The stake is unknown when $M_j$ is unknown or when a class of
+non-negligible probability has no price.
+\end{definition}
+
+By Proposition~\ref{prop:class}, the stake bounds from above what establishing the class of $j$ can earn in a year.
+The chain uses it as a budget. Let $S_j$ be the cumulative cost of the paid acquisitions already made for $j$, over
+all runs; it is kept in a journal. Each paid action $a$ has a cost $\phi_a>0$.
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{\textbf{Algorithm 1 (acquisition chain for component $j$).}
+\begin{enumerate}\setlength{\itemsep}{0pt}
+\item Record the free evidence: rule on the description, analogy with a validated part, earlier classification.
+  Update $\pi$. If a human validation exists, stop.
+\item For each paid action $a$, in the order: reading of the internal description by the private model; document
+  retrieval; reading of each retrieved document by a model; verdict of a model on the retained class (attempted
+  only if a ``yes'' would bring the class to acceptance):
+  \emph{if the class is not accepted, the action applies, and $e_j(\pi)\ge S_j+\phi_a$, perform $a$, set
+  $S_j\leftarrow S_j+\phi_a$ and update $\pi$.} An action already paid for is not repeated; an action that fails
+  for a technical reason is recorded, not charged, and retried at the next run.
+\item \emph{Accept} the most probable class $\hat c\ne\out$ without review if $\pi(\hat c)\ge\theta$ and the value at
+  risk $R_j=(1-\pi(\hat c))\,M_j\max_{c}v(c)$ is below the cost $\phi_{\mathrm{rev}}$ of a review. Otherwise send
+  the component to the human queue, ranked by stake, if $e_j(\pi)\ge\phi_{\mathrm{rev}}$; else leave it.
+\end{enumerate}
+Accepted classes are audited by random sampling; queue decisions and audit decisions return to the knowledge base as
+validations, tagged with their reason.}}
+\end{center}
+
+\begin{lemma}[Budget invariant]\label{lem:budget}
+For every component $j$ and at every time, $S_j\le\bar e_j$. Consequently the total spending on a bill of materials
+is at most $\sum_j\bar e_j$; a component with $\bar e_j<\min_a\phi_a$ triggers no paid action, in particular no call
+to a language model; and neither does a component whose stake is unknown.
+\end{lemma}
+
+The lemma is elementary, and it is the property that makes the layer safe to run unattended on a bill of materials
+of any size: spending is bounded by value, component by component, whatever the sources answer.
+
+\begin{assumption}[No gain from error]\label{as:noerror}
+Whatever the class under which component $j$ is handled, if its true class is $c$ the realised value of the
+programme is at most $\max\{V(p(c)),V(\out_j)\}$.
+\end{assumption}
+
+\begin{proposition}[The screen is sound]\label{prop:screen}
+Under Assumption~\ref{as:noerror}, consider any acquisition procedure for component $j$ started at belief $\pi$: an
+adaptive sequence of actions with total cost $\Phi$, followed by a decision on the class. Let $G$ be its gain over
+leaving the class unestablished. Then $\E_\pi[G]\le e_j(\pi)$. Consequently:
+\begin{enumerate}\setlength{\itemsep}{0pt}
+\item[(i)] a procedure with $\E_\pi[\Phi]>e_j(\pi)$ has negative expected net value;
+\item[(ii)] on a component for which nothing has been spent, the test $e_j(\pi)\ge\phi_a$ excludes no action whose
+  expected net value is positive;
+\item[(iii)] under the evidence model of Section~\ref{sec:belief}, the stake $e_j(\pi_t)$ along the chain is a
+  martingale: no action is justified by the expectation that it will raise the stake.
+\end{enumerate}
+\end{proposition}
+
+Once something has been spent, the test of Algorithm~1 charges past spending against the stake. It is then stricter
+than (ii): it is a budget rule, which can forgo an action whose marginal value exceeds its cost, in exchange for
+Lemma~\ref{lem:budget}. We accept this conservatism because the stake is itself an upper bound, not the value. The
+chain follows a fixed cheapest-first order; ranking actions by expected value per unit cost is not implemented.
+
+\begin{assumption}[A wrong class loses at most the right one]\label{as:loss}
+Handling component $j$ under a class other than its true class $c$ loses, relative to handling it under $c$, at most
+$M_jv(c)$ per year; and a human review reveals the true class at cost $\phi_{\mathrm{rev}}$.
+\end{assumption}
+
+\begin{lemma}[Acceptance]\label{lem:accept}
+Under Assumption~\ref{as:loss}, accepting $\hat c$ under belief $\pi$ has an expected loss of at most
+$M_j\sum_{c\ne\hat c}\pi(c)v(c)\le R_j$. Hence when $R_j<\phi_{\mathrm{rev}}$, accepting costs less in expectation
+than reviewing. If moreover beliefs are calibrated, the expected share of wrong classes among accepted components
+is at most $1-\theta$.
+\end{lemma}
+
+The two conditions of the acceptance rule do different work. The value at risk is the economic condition. The
+probability threshold is not: without it, light components would be accepted on thin evidence, and since accepted
+components are those the audit samples to learn the reliability of sources, the threshold protects the measurement.
+Assumption~\ref{as:loss} ignores the penalty a recycler may charge for a contaminated stream, which would enter as a
+larger value at risk.
+
+\subsection{Why the fusion converges, and how fast}
+
+\begin{proposition}[Identification from a source of known reliability]\label{prop:fusion}
+Let $K$ independent assertions come from a source of known reliability $r$, with $n\ge2$ possible classes and a
+uniform prior. Let $q=(1-r)/(n-1)$ and $k_c$ the number of assertions naming $c$. The posterior is proportional to
+$(r/q)^{k_c}$: the most probable class is the most named when $r>1/n$ and the least named when $r<1/n$; when
+$r=1/n$ the posterior equals the prior whatever $K$. For $r\ne1/n$, the most probable class $\hat c_K$ satisfies
+\begin{equation}\label{eq:rate}
+\Pr\big(\hat c_K\ne C_j\big)\;\le\;(n-1)\,\varrho^{K},\qquad\varrho=1-\big(\sqrt r-\sqrt q\,\big)^2<1,
+\end{equation}
+where a tie counts as an error. Hence $K\ge\ln((n-1)/\delta)/\ln(1/\varrho)$ assertions suffice for an error
+probability of at most $\delta$, and the posterior probability of the true class tends to one almost surely.
+\end{proposition}
+
+Two readings matter in practice. First, what makes a source useful is not that it is right but that its reliability
+is \emph{known and different from chance}: a source that is wrong more often than chance identifies the class as
+surely as one that is right. This is why the layer invests in measuring reliabilities. Second, the rate depends on
+$(\sqrt r-\sqrt q)^2$, so a few sources of high reliability are worth many mediocre ones: with \SynFusionClasses{} classes, a source
+of reliability $0.9$ needs \SynFusionKhaut{} independent assertions for an error bound of 2\%, and a source of
+reliability $0.6$ needs \SynFusionKbas.
+The implemented rule \eqref{eq:fusion} integrates over an unknown reliability and reduces to the rule of the
+proposition as validations accumulate.
+
+\subsection{Measuring reliabilities from validations that are not a random sample}
+
+Each $r_u$ starts from a weak declared prior, equivalent to four observations. A human validation of a component
+shows which of its pieces of evidence were right. But validated components are not a random sample: those sent to
+review are the ones on which the sources disagree, where at least one is wrong.
+
+\begin{proposition}[Stratified estimation]\label{prop:strata}
+Let the pieces of evidence of a source type be partitioned into a stratum $\mathsf A$ (on components accepted
+without review) and a stratum $\mathsf Q$ (on components in the review queue), of sizes $n_{\mathsf A},n_{\mathsf Q}$
+and accuracies $r_{\mathsf A},r_{\mathsf Q}$; let $n=n_{\mathsf A}+n_{\mathsf Q}$ and
+$r=(n_{\mathsf A}r_{\mathsf A}+n_{\mathsf Q}r_{\mathsf Q})/n$. Suppose $k_{\mathsf A}$ pieces of $\mathsf A$ and
+$k_{\mathsf Q}$ pieces of $\mathsf Q$ are validated, drawn by simple random sampling without replacement in each
+stratum, of which $y_{\mathsf A}$ and $y_{\mathsf Q}$ are right; let $k=k_{\mathsf A}+k_{\mathsf Q}$.
+\begin{enumerate}\setlength{\itemsep}{0pt}
+\item[(i)] The stratified estimator $\hat r=(n_{\mathsf A}\,y_{\mathsf A}/k_{\mathsf A}+n_{\mathsf Q}\,y_{\mathsf Q}/k_{\mathsf Q})/n$
+  is unbiased for $r$.
+\item[(ii)] The pooled estimator $(y_{\mathsf A}+y_{\mathsf Q})/k$ has bias
+  $(r_{\mathsf A}-r_{\mathsf Q})\,(k_{\mathsf A}/k-n_{\mathsf A}/n)$, which is negative when
+  $r_{\mathsf Q}<r_{\mathsf A}$ and the queue is over-represented among validations.
+\item[(iii)] With weights $n_s-k_s$ in place of $n_s$, the estimator is unbiased for the expected accuracy of the
+  pieces \emph{not yet validated}, which is the quantity the fusion of the remaining components needs.
+\end{enumerate}
+\end{proposition}
+
+The implementation uses (iii), with each stratum mean shrunk towards the declared prior with the weight of four
+observations. Validations made without regard to what the sources say update the prior of both strata. Validations
+of components picked by the reviewer set the class but do not judge the sources: they are neither random nor
+exhaustive. The estimator is unbiased only as far as the audit is random and the queue is reviewed in full; a queue
+reviewed from the top is not a random sample of the queue.
+
+\subsection{Confidentiality}\label{sec:confidentiality}
+
+A company part number and the description of an in-house design are not public. An outward query contains only a
+manufacturer's name, a manufacturer's part number and a generic component type, and it is issued only if the
+component is not flagged as designed in-house (any unrecognised value of the flag counts as in-house), a
+manufacturer is named and is not the company itself, and the part number has the form of a manufacturer's reference
+and is not the company part number of any component of the bill of materials. Queries are built from
+bill-of-materials fields \emph{before} any model call, so that nothing a model answers, including under the
+influence of a hostile document, can enter a request. The language model is self-hosted: only a model on the local
+machine, or on a machine of the owner's network that the owner has declared, may read internal descriptions, which
+makes it the one automatic source for in-house designs. Any other server is refused unless explicitly accepted, and
+then receives public documents only.

@@ -1,0 +1,49 @@
+\section{Implementation and reproducibility}\label{app:repro}
+
+The system is one Python package with four dependencies (numerical arrays, data frames, spreadsheet reading,
+plotting). It runs offline. The language model is optional and is reached through a local chat-completions
+endpoint. Table~\ref{tab:map} maps the paper to the code and to the tests that check it.
+
+\paragraph{Commands.} \texttt{python -m erc.diagnostic} checks the installation without any network access.
+\texttt{python -m erc.agent} runs the system end to end and writes the decision note, the evidence and the journal
+of the agents; with \texttt{--sans-modele} it runs the fixed plan. \texttt{python -m erc.papier} recomputes every
+number, table body and figure of this paper from the data of the installation and writes them to a directory of
+the paper's folder, from which this document reads them; with \texttt{--compiler} it also compiles the document.
+Nothing in that directory is typed by hand. The synthetic experiments use fixed seeds; computing times
+depend on the machine. The case-study values are those of the data the command is run on
+\ifnum\DonneesDemo=1\relax (in this draft, the fictional demonstration data)\fi.
+
+\paragraph{What is checked numerically.} The optimum against an exact linear-programming solver on random
+instances; the separable pricing against enumeration; Propositions~\ref{prop:dual} to~\ref{prop:class} on random
+instances, including the tight case of \eqref{eq:evpi}; the fusion formula on hand-computed cases; the bound of
+Proposition~\ref{prop:fusion} against simulation; the bias formula of Proposition~\ref{prop:strata}; the budget
+invariant of Lemma~\ref{lem:budget} on simulated bills of materials; the grounding check of
+Lemma~\ref{lem:grounding} against a stand-in model that invents numbers; the absence of any internal identifier or
+description in outgoing queries; and the absence of leakage from a batch to its own prediction in the prequential
+scores.
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Map from the paper to the implementation.}\label{tab:map}
+\begin{tabular}{p{0.36\textwidth}p{0.24\textwidth}p{0.32\textwidth}}
+\toprule
+Paper & Module & Tests \\
+\midrule
+Values, \eqref{eq:P}, multiplier, structure (\S\ref{sec:model}--\ref{sec:structure}) & \texttt{erc/ligne.py} & \texttt{tests/test\_ligne.py} \\
+Same model in the browser tool & \texttt{erc/outil\_modele.js} & \texttt{tests/test\_outil.py} \\
+Prior, posterior, TS-LP, scores (\S\ref{sec:learning}) & \texttt{erc/rex.py} & \texttt{tests/test\_stats.py} \\
+Early failures & \texttt{erc/fiabilite.py} & \texttt{tests/test\_stats.py} \\
+Period-by-period replay, gap $\Gamma$ & \texttt{erc/ligne.py} & \texttt{tests/test\_information.py} \\
+Forecasting and its evaluation & \texttt{erc/prevision.py} & \texttt{tests/test\_prevision.py} \\
+Belief, reliabilities by strata (\S\ref{sec:belief}) & \texttt{erc/cortex.py} & \texttt{tests/test\_composition.py} \\
+Acquisition chain, budget, acceptance & \texttt{erc/composition.py} & \texttt{tests/test\_composition.py} \\
+Bounds and exact values of information & \texttt{erc/information.py} & \texttt{tests/test\_information.py} \\
+Human review and audit sample & \texttt{erc/composition\_outil.py} & \texttt{tests/test\_composition\_outil.py} \\
+Self-hosted model, trust policy & \texttt{erc/modele.py} & \texttt{tests/test\_modele.py} \\
+Instruction search & \texttt{erc/gepa.py} & \texttt{tests/test\_gepa.py} \\
+Agents, containment, grounding (\S\ref{sec:system}) & \texttt{erc/agent.py} & \texttt{tests/test\_agent.py} \\
+Offline diagnostic & \texttt{erc/diagnostic.py} & \texttt{tests/test\_diagnostic.py} \\
+Numbers of this paper & \texttt{erc/papier.py} & \texttt{tests/test\_papier.py} \\
+\bottomrule
+\end{tabular}
+\end{table}

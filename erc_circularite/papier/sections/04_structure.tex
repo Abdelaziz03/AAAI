@@ -1,0 +1,114 @@
+\section{Structure of the optimal disposition}\label{sec:structure}
+
+All proofs are in Appendix~\ref{app:proofs}.
+
+\subsection{Pricing a unit without enumerating its plans}
+
+For $\mu\ge 0$ let $\varphi_i(\mu)=\max_{s\in\cS_i}(g_{is}-\mu h_{is})$ be the best \emph{reduced margin} of a unit
+of type $i$ when an operator hour is priced at $\mu$ on top of its cost.
+
+\begin{proposition}[Pricing by access level]\label{prop:pricing}
+Under Assumption~\ref{as:nested}, for every $i$ and $\mu\ge0$, with $\omega_i=w_i+\mu$,
+\begin{equation}\label{eq:pricing}
+\varphi_i(\mu)\;=\;\max_{\ell\in\cL}\Big\{-\omega_i\,a_{i\ell}+\sum_{j\in\cJ_i}\ \max_{d:\,\ell_d\le\ell}\
+n_{ij}\big(\rho_{ijd}-\omega_i\,t_{jd}\big)\Big\}.
+\end{equation}
+The pricing problem of a type is solved in $O(|\cJ_i|\,|\cD|\,L)$ operations.
+\end{proposition}
+
+The set-up couples the components of a unit, which is why plans cannot be priced component by component in general.
+Proposition~\ref{prop:pricing} says that the coupling has only $L+1$ states: once the access level is fixed,
+components are independent. Assumption~\ref{as:nested} is needed: when a rough opening takes longer than a careful
+one, the right-hand side of \eqref{eq:pricing} can overstate $\varphi_i$.
+
+\begin{remark}[Two levels, without Assumption~\ref{as:nested}]\label{rem:twolevel}
+In the instance of Section~\ref{sec:model}, write $\Psi^{d}_j=n_{ij}(\rho_{ijd}-\omega_it_{jd})$ for
+$d\in\{\R,\Sd\}$. Then
+\[
+\varphi_i(\mu)=\max\Big\{0,\ \ -\omega_ia_{i1}+\sum_j\pos{\Psi^{\Sd}_j},\ \
+-\omega_ia_{i2}+\sum_j\max(\Psi^{\R}_j,\Psi^{\Sd}_j,0)-\min_j\pos{\max(\Psi^{\Sd}_j,0)-\Psi^{\R}_j}\Big\},
+\]
+where the second term is kept only if some $\Psi^{\Sd}_j\ge0$. The three terms are the best plans with no opening,
+with sorting only, and with at least one reuse; in the last, each component takes its best disposition, and if none
+chooses reuse it is imposed on the component for which it costs least. No ordering of $a_{i1}$ and $a_{i2}$ is
+used. This is the routine of the implementation.
+\end{remark}
+
+\subsection{The value of an hour}
+
+\begin{proposition}[Dual and value function]\label{prop:dual}
+\begin{equation}\label{eq:dual}
+V(N,H)\;=\;\min_{\mu\ge0}\Big\{\mu H+\sum_{i\in\cI}N_i\,\varphi_i(\mu)\Big\}.
+\end{equation}
+$V$ is concave, piecewise linear and positively homogeneous of degree one in $(N,H)$, and nondecreasing in each
+argument. If $\mu^\ast$ attains the minimum, then $V(N,H')\le V(N,H)+\mu^\ast(H'-H)$ for every $H'\ge0$. Any optimal
+$\mu^\ast$ lies between the value of one more operator hour and the loss from one hour less, which coincide except
+at the finitely many breakpoints of $V$; and $\mu^\ast=0$ is optimal when the labour budget is not exhausted.
+\end{proposition}
+
+The dual objective is convex and piecewise linear in $\mu$, with subgradient $H-\sum_iN_ih_{is_i(\mu)}$ at any
+selection $s_i(\mu)$ of best plans. The implementation locates $\mu^\ast$ by bisection on the sign of this
+subgradient, each evaluation costing one pricing per type by Proposition~\ref{prop:pricing}, and recovers a primal
+solution by Proposition~\ref{prop:split}.
+
+\begin{proposition}[Few split types, efficient plans]\label{prop:split}
+Problem \eqref{eq:P} has an optimal solution in which every type with $N_i>0$ uses one plan, except at most one
+type, which uses two. In any optimal solution, every plan in use attains $\varphi_i(\mu^\ast)$ for an optimal
+multiplier $\mu^\ast$; in particular it lies on the upper concave envelope of the points
+$\{(h_{is},g_{is})\}_{s\in\cS_i}$, and the two plans of a split type lie on a common edge of that envelope, of
+slope $\mu^\ast$. With $M$ coupling constraints in place of the single labour budget, a feasible programme has an
+optimal solution in which at most $M$ types use more than one plan.
+\end{proposition}
+
+For a single budget this is the classical structure of the linear multiple-choice knapsack
+\citep{sinha1979,zemel1980}; we state it for $M$ constraints because circularity targets add constraints.
+
+\begin{remark}[Integrality]\label{rem:integrality}
+With a single budget, rounding the split type down to whole units and sending the remainder to the cheaper of its
+two plans keeps the solution feasible and loses less than the margin difference of one unit. The argument holds for
+$\le$ constraints only; a lower bound on an outcome can be violated by rounding down.
+\end{remark}
+
+\paragraph{Managerial reading.} At the optimum a single number, the value of an hour $\mu^\ast$, coordinates all
+decisions: every type is processed with the plan that is best when labour is charged $w_i+\mu^\ast$, and at most
+one type is processed in two ways, because the hours run out part-way through it. The same number tells the manager
+what an additional operator hour is worth, which is the first question asked once a line exists.
+
+\subsection{A threshold rule for the bench}
+
+Consider a unit that is opened carefully anyway. The choice is then separable across components.
+
+\begin{proposition}[Yield threshold]\label{prop:threshold}
+In the instance of Section~\ref{sec:model}, let $\omega=w_i+\mu$ and assume $\bar v_j>m_jp_j$. In a unit opened to
+level 2, reuse is at least as good as both sorting and leaving component $j$ if and only if
+\begin{equation}\label{eq:threshold}
+q_{ij}\;\ge\;q^{\dagger}_{ij}(\mu)\;=\;\frac{\kappa_j+\omega\,t_{j\R}-\min\{\omega\,t_{j\Sd},\ m_j(p_j+\tau)\}}
+{\bar v_j-m_jp_j}.
+\end{equation}
+When $t_{j\R}\ge t_{j\Sd}$ the threshold is nondecreasing in $\mu$.
+\end{proposition}
+
+The rule is what an operator can apply: \emph{extract and test component $j$ when its observed good rate is above
+$q^\dagger_{ij}$}. It also says how scarcity of labour changes behaviour: the scarcer the hours, the higher the
+yield a component must show. Both hypotheses are needed: the comparison reverses when a good copy is worth less
+reused than as material, and the threshold can decrease in $\mu$ when testing is faster than sorting. The threshold
+is conditional on the unit being opened carefully; whether it is opened at all is decided by
+Proposition~\ref{prop:pricing}, where the set-up is weighed against the sum of the components' reduced values.
+
+\subsection{Circularity objectives}
+
+Three outcomes are linear in $x$ and are reported for every solution: the mass diverted from the bulk stream,
+$\sum_{i,s}b_{is}x_{is}$ with $b_{is}$ the mass taken out of a unit under plan $s$; the mass of critical raw
+materials sent to a recovery route; and the number of parts returned to service, $\sum_{i,s}e_{is}x_{is}$ with
+$e_{is}=\sum_{j:s_j=\R}n_{ij}q_{ij}$.
+
+\begin{corollary}[Frontier]\label{cor:frontier}
+Adding a weighted linear outcome to the objective keeps at most one split type. Imposing $M$ lower bounds on linear
+outcomes gives $M+1$ coupling constraints; when the programme is feasible it has an optimal solution with at most
+$M+1$ split types.
+\end{corollary}
+
+The frontier between margin and parts returned to service answers a question that a single-objective optimum
+cannot: how much margin does each additional part returned to service cost? Returning parts to service lowers the
+cost of repair and of refurbished systems; whether this improves access to imaging for hospitals with small budgets
+is an empirical question outside the model, and we make no claim about it.
