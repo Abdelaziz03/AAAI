@@ -3,6 +3,13 @@
 `manuscrit.pdf` est la version compilée, lisible tout de suite. Elle porte un bandeau « Demonstration data » tant que
 les chiffres de l'étude de cas viennent des données fictives du dossier.
 
+## Les deux brouillons de conférence
+
+`kdd/` (KDD 2027, piste Applied Data Science) et `icaps/` (ICAPS 2027) sont deux papiers courts tirés du même
+système, l'un sur la couche de connaissance, l'autre sur la planification. **Lire `CONFERENCES.md` avant tout** : il
+dit ce que chaque appel exige et pourquoi aucun des deux n'est soumissible tel quel. Ils lisent les mêmes chiffres
+(`genere/` ou `site/`) que le manuscrit.
+
 ## Modifier le texte sur Overleaf
 
 ```bash

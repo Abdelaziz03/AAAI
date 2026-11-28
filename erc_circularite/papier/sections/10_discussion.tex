@@ -57,7 +57,8 @@ No time-series foundation model was run.
 
 \emph{Knowledge layer.} Independence between sources holds only as far as provenance is traced; reliabilities are
 per source type, not per site or per model version; two source types can share a cause of error. The stratified
-estimate is unbiased only if the audit is random and the queue is reviewed in full.
+estimate is unbiased only if the audit is random among all components the chain shows to nobody and the components
+sent to review are all reviewed; it is also noisier than a pooled count.
 Assumption~\ref{as:loss} ignores contamination penalties. Composition is a single class per component; mass
 fractions over several materials call for a Dirichlet belief and a price that is a weighted sum, which leaves
 Proposition~\ref{prop:evpi} unchanged. The chain follows a fixed order of actions rather than ranking them by value

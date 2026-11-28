@@ -117,7 +117,8 @@ all runs; it is kept in a journal. Each paid action $a$ has a cost $\phi_a>0$.
   risk $R_j=(1-\pi(\hat c))\,M_j\max_{c}v(c)$ is below the cost $\phi_{\mathrm{rev}}$ of a review. Otherwise send
   the component to the human queue, ranked by stake, if $e_j(\pi)\ge\phi_{\mathrm{rev}}$; else leave it.
 \end{enumerate}
-Accepted classes are audited by random sampling; queue decisions and audit decisions return to the knowledge base as
+Components that are not sent to a person (accepted, or left) are audited by random sampling; queue decisions and audit
+decisions return to the knowledge base as
 validations, tagged with their reason.}}
 \end{center}
 
@@ -201,8 +202,9 @@ shows which of its pieces of evidence were right. But validated components are n
 review are the ones on which the sources disagree, where at least one is wrong.
 
 \begin{proposition}[Stratified estimation]\label{prop:strata}
-Let the pieces of evidence of a source type be partitioned into a stratum $\mathsf A$ (on components accepted
-without review) and a stratum $\mathsf Q$ (on components in the review queue), of sizes $n_{\mathsf A},n_{\mathsf Q}$
+Let the pieces of evidence of a source type be partitioned into a stratum $\mathsf A$, on components the chain does
+not send to a person (accepted without review, or left because their class would earn less than a review costs),
+and a stratum $\mathsf Q$, on components it sends to review, of sizes $n_{\mathsf A},n_{\mathsf Q}$
 and accuracies $r_{\mathsf A},r_{\mathsf Q}$; let $n=n_{\mathsf A}+n_{\mathsf Q}$ and
 $r=(n_{\mathsf A}r_{\mathsf A}+n_{\mathsf Q}r_{\mathsf Q})/n$. Suppose $k_{\mathsf A}$ pieces of $\mathsf A$ and
 $k_{\mathsf Q}$ pieces of $\mathsf Q$ are validated, drawn by simple random sampling without replacement in each
@@ -212,7 +214,7 @@ stratum, of which $y_{\mathsf A}$ and $y_{\mathsf Q}$ are right; let $k=k_{\math
   is unbiased for $r$.
 \item[(ii)] The pooled estimator $(y_{\mathsf A}+y_{\mathsf Q})/k$ has bias
   $(r_{\mathsf A}-r_{\mathsf Q})\,(k_{\mathsf A}/k-n_{\mathsf A}/n)$, which is negative when
-  $r_{\mathsf Q}<r_{\mathsf A}$ and the queue is over-represented among validations.
+  $r_{\mathsf Q}<r_{\mathsf A}$ and the review stratum is over-represented among validations.
 \item[(iii)] With weights $n_s-k_s$ in place of $n_s$, the estimator is unbiased for the expected accuracy of the
   pieces \emph{not yet validated}, which is the quantity the fusion of the remaining components needs.
 \end{enumerate}
@@ -221,8 +223,14 @@ stratum, of which $y_{\mathsf A}$ and $y_{\mathsf Q}$ are right; let $k=k_{\math
 The implementation uses (iii), with each stratum mean shrunk towards the declared prior with the weight of four
 observations. Validations made without regard to what the sources say update the prior of both strata. Validations
 of components picked by the reviewer set the class but do not judge the sources: they are neither random nor
-exhaustive. The estimator is unbiased only as far as the audit is random and the queue is reviewed in full; a queue
-reviewed from the top is not a random sample of the queue.
+exhaustive. The definition of the strata matters. The audit must draw among \emph{everything} the chain shows to
+nobody, including the components it leaves for want of stake: an earlier version of the system put those in the
+review stratum, where only contested, high-stake components are ever validated, and so lent the errors found there
+to all the components nobody looks at. A closed-loop simulation exposed the defect (it is corrected in the code and
+in this statement). The estimator is unbiased only as far as the audit is random and the components sent to review
+are all reviewed; a queue reviewed from the top is not a random sample of the queue. Unbiasedness also has a price
+in variance: in our simulations (not reported here) the stratified estimate removed the downward bias of the pooled
+one without improving its mean absolute error.
 
 \subsection{Confidentiality}\label{sec:confidentiality}
 

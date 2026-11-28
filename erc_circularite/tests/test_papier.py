@@ -132,7 +132,8 @@ def test_rien_de_nominatif_ne_sort(ecrit):
     for interdit in ("FRU-", "P-10", "P-30", "CARCASSE", "BET-", "PN0"):
         assert interdit not in textes
     assert r"\newcommand{\DonneesDemo}{1}" in textes            # le bandeau « démonstration » sera affiché
-    assert {f.name for f in ecrit["dossier"].glob("*.pdf")} == {"fig_prix.pdf", "fig_variabilite.pdf", "fig_regret.pdf", "fig_architecture.pdf"}
+    assert {f.name for f in ecrit["dossier"].glob("*.pdf")} == {"fig_prix.pdf", "fig_variabilite.pdf", "fig_regret.pdf", "fig_architecture.pdf",
+                                                                "fig_regret_lp.pdf", "fig_politiques.pdf"}
 
 
 def test_echelle_ne_touche_que_les_montants_de_l_etude_de_cas(cfg):
